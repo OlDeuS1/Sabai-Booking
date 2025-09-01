@@ -11,13 +11,16 @@
           </div>
         </div>
         <div class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-          <button type="button" class="bg-[#333333] relative p-2 pl-4 pr-4 rounded-sm text-white hover:bg-[#4A4949] cursor-pointer focus:outline-2 focus:outline-offset-2 focus:outline-indigo-500">
-            <span>เข้าสู่ระบบ</span>
-          </button>
-          <button type="button" class="bg-[#102B58] relative ml-8 p-2 pl-4 pr-4 rounded-sm text-white  hover:bg-[#153C7E] cursor-pointer focus:outline-2 focus:outline-offset-2 focus:outline-indigo-500">
-            <span>สมัครสมาชิก</span>
-          </button>
-
+          <router-link to="/login">
+            <button type="button" class="bg-[#333333] relative p-2 pl-4 pr-4 rounded-sm text-white hover:bg-[#4A4949] cursor-pointer focus:outline-2 focus:outline-offset-2 focus:outline-indigo-500">
+              <span>เข้าสู่ระบบ</span>
+            </button>
+          </router-link>
+          <router-link to="/register">
+            <button type="button" class="bg-[#102B58] relative ml-8 p-2 pl-4 pr-4 rounded-sm text-white  hover:bg-[#153C7E] cursor-pointer focus:outline-2 focus:outline-offset-2 focus:outline-indigo-500">
+              <span>สมัครสมาชิก</span>
+            </button>
+          </router-link>
         </div>
       </div>
     </div>
@@ -28,10 +31,4 @@
     import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
     import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/vue/24/outline'
 
-    const navigation = [
-    { name: 'Dashboard', href: '#', current: true },
-    { name: 'Team', href: '#', current: false },
-    { name: 'Projects', href: '#', current: false },
-    { name: 'Calendar', href: '#', current: false },
-    ]
 </script>
