@@ -1,75 +1,35 @@
-<template>
-  <div class="login-container">
-    <h2>Login</h2>
-    <form @submit.prevent="handleLogin">
-      <div class="form-group">
-        <label for="email">Email:</label>
-        <input type="email" id="email" v-model="email" required />
-      </div>
-      <div class="form-group">
-        <label for="password">Password:</label>
-        <input type="password" id="password" v-model="password" required />
-      </div>
-      <button type="submit">Login</button>
-    </form>
-    <p v-if="error" class="error">{{ error }}</p>
-  </div>
-</template>
-
 <script setup>
 import { ref } from 'vue';
+import ButtonSubmit from '../components/ButtonSubmit.vue';
+import FormInput from '../components/FormInput.vue';
 
 const email = ref('');
 const password = ref('');
 const error = ref('');
 
+console.log(email.value)
+
 function handleLogin() {
-  // Placeholder for login logic
   if (email.value === 'user@example.com' && password.value === 'password') {
     error.value = '';
     alert('Login successful!');
-    // Redirect or update state here
   } else {
     error.value = 'Invalid email or password.';
   }
 }
 </script>
 
-<style scoped>
-.login-container {
-  max-width: 400px;
-  margin: 50px auto;
-  padding: 2rem;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  background: #fff;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-}
-.form-group {
-  margin-bottom: 1rem;
-}
-label {
-  display: block;
-  margin-bottom: 0.5rem;
-}
-input {
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-button {
-  width: 100%;
-  padding: 0.75rem;
-  background: #42b983;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  cursor: pointer;
-}
-.error {
-  color: red;
-  margin-top: 1rem;
-}
-</style>
+<template>
+  <div class="login bg-white h-screen flex justify-center items-center text-blue-950">
+    <div class="login__form w-sm mx-auto border-gray-200 border-2 rounded-md shadow-xl px-6 py-8">
+      <h2 class="text-center mb-6 text-2xl font-bold">เข้าสู่ระบบ</h2>
+      <form class="form flex flex-col justify-center items-center" @submit.prevent="handleLogin" >
+        <FormInput inputType="email" inputName="email" inputPlaceHolder="ป้อนอีเมล" labelValue="อีเมล"  @updateModelValue="email = $event" />
+        <FormInput inputType="password" inputName="password" inputPlaceHolder="ป้อนรหัสผ่าน" labelValue="รหัสผ่าน" @updateModelValue="password = $event" />
+        <p v-if="error" class="error text-red-600 text-sm justify-self-start">{{ error }}</p>
+        <ButtonSubmit typeBtn="login"/>
+      </form>
+      <div class="text-center mt-6 text-sm text-gray-400">ยังไม่ได้เป็นสมาชิกใช่ไหม? <router-link to="/register" class="text-green-400 hover:underline">สมัครสมาชิก</router-link></div>
+    </div>
+  </div>
+</template>
