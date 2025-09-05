@@ -7,7 +7,7 @@
     <div class="grid m-16 justify-center">
         <div class="flex shadow-2xl rounded-lg">
             <img :src="ImageTest" alt="test-hotel-image" class="w-100 h-50 object-cover rounded-md">
-            <div class="p-8 pt-4 min-w-150">
+            <div class="p-8 pt-4 min-w-180">
                 <!-- ชื่อโรงแรม -->
                 <div class="font-extrabold text-[28px]">
                     <span>โรงแรมดาวมีไว้เบิ่ง 1</span>
