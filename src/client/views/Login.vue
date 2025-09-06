@@ -2,6 +2,9 @@
 import { ref } from 'vue';
 import ButtonSubmit from '../components/ButtonSubmit.vue';
 import FormInput from '../components/FormInput.vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 const email = ref('');
 const password = ref('');
@@ -32,7 +35,7 @@ async function handleLogin() {
       error.value = data.error || 'Login failed.';
     } else {
       error.value = '';
-      alert('Login successful!');
+      router.push('/');
       // TODO: save user info/token if needed
     }
   } catch (e) {
