@@ -1,9 +1,10 @@
 <script setup>
 import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/vue/24/outline'
+import { UserFilled } from '@element-plus/icons-vue'
 
 const props = defineProps({
-  userNow: {
+  userCur: {
     type: Object,
     default: null
   }
@@ -24,19 +25,50 @@ const props = defineProps({
           </div>
         </div>
         <div class="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-          <router-link to="/login" v-if="props.userNow === null">
+          <router-link to="/login" v-if="props.userCur === null">
             <button type="button" class="bg-[#333333] relative p-2 pl-4 pr-4 rounded-sm text-white hover:bg-[#4A4949] cursor-pointer focus:outline-2 focus:outline-offset-2 focus:outline-indigo-500">
               <span>เข้าสู่ระบบ</span>
             </button>
           </router-link>
-          <router-link to="/register" v-if="props.userNow === null">
+          <router-link to="/register" v-if="props.userCur === null">
             <button type="button" class="bg-[#102B58] relative ml-8 p-2 pl-4 pr-4 rounded-sm text-white  hover:bg-[#153C7E] cursor-pointer focus:outline-2 focus:outline-offset-2 focus:outline-indigo-500">
               <span>สมัครสมาชิก</span>
             </button>
           </router-link>
-          <div class="userNow text-gray-700" v-if="props.userNow !== null">{{ props.userNow.first_name }} {{ props.userNow.last_name }}</div>
+          <div class="userCur text-gray-700 flex items-center gap-3" v-if="props.userCur !== null">
+            <el-dropdown trigger="click">
+              <span class="el-dropdown-link cursor-pointer flex items-center gap-2 text-[#212121] font-medium">
+                {{ props.userCur.first_name }} {{ props.userCur.last_name }} <el-avatar :icon="UserFilled" /> <el-icon class="el-icon--right"></el-icon>
+              </span>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item><router-link to="/historyBooking">ประวัติการจอง</router-link></el-dropdown-item>
+                  <el-dropdown-item><router-link to="/logout">ออกจากระบบ</router-link></el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </div>
         </div>
       </div>
     </div>
   </Disclosure>
 </template>
+
+<style scoped>
+
+:deep(.el-avatar) {
+  background-color: #212121;
+  width: 22px;
+  height: 22px;
+}
+
+:deep(.el-avatar svg) {
+  width: 12px;
+  height: 12px;
+} 
+
+:deep(.el-dropdown-menu__item) {
+  width: 10rem;
+}
+
+</style>

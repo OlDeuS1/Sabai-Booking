@@ -29,7 +29,7 @@ const querySearchAsync = (queryString, cb) => {
     <div class="search-compo p-5 my-4 inline-flex gap-4 items-center justify-center shadow-md rounded-lg bg-white ">
         <div class="search-where flex flex-col">
             <div class="demo-block">
-                <div class="demo-title mb-2">สถานที่</div>
+                <div class="mb-2 text-[#212121] font-medium">สถานที่</div>
                 <el-autocomplete
                     v-model="where"
                     :fetch-suggestions="querySearchAsync"
@@ -45,7 +45,7 @@ const querySearchAsync = (queryString, cb) => {
             </div>
         </div>
         <div class="search-check-out flex flex-col">
-            <div class="demonstration mb-2">เช็คอิน - เช็คเอาท์</div>
+            <div class="mb-2 text-[#212121] font-medium">เช็คอิน - เช็คเอาท์</div>
             <div class="block">
                 <el-date-picker
                     v-model="checkInOutDate"
@@ -57,7 +57,7 @@ const querySearchAsync = (queryString, cb) => {
             </div>
         </div>
         <div class="search-people-room flex flex-col">
-            <label for="inputCheckOut" class="mb-2">ผู้เข้าพัก / ห้องพัก</label>
+            <div class="mb-2 text-[#212121] font-medium">ผู้เข้าพัก / ห้องพัก</div>
             <el-popover placement="bottom" :width="250" trigger="click" class="pt-2">
                 <template #reference>
                     <el-button> {{ searchRoomPeople }} </el-button>
@@ -80,35 +80,6 @@ const querySearchAsync = (queryString, cb) => {
     </div>
 </template>
 <style scoped>
-:deep(.multiselect) {
-    font-size: 16px;
-    width: 15rem;
-    height: 40px;
-    border: 1px solid #D1D5DB;
-    border-radius: 5px;
-}
-
-:deep(.multiselect__tags) {
-    height: 100%;
-    padding-bottom: 8px;
-    display: flex;
-    align-items: center;
-}
-
-:deep(.multiselect__placeholder) {
-    font-size: 16px;
-    margin-bottom: 0;
-}
-
-:deep(.multiselect__input::placeholder) {
-    color: #a3a3a3;
-}
-
-:deep(.multiselect__input), :deep(.multiselect__single) {
-    font-size: 16px;
-    margin-bottom: 0;
-    padding: 0;
-}
 
 :deep(.el-button) {
     height: 100%;

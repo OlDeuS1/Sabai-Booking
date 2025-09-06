@@ -6,3 +6,9 @@
     font-family: "Montserrat", sans-serif;
   }
 }
+
+:root {
+  --el-color-primary: #1c398e !important;
+  --el-color-secondary: #212121 !important;
+  --el-color-tertiary: #FFFFFF !important;
+}

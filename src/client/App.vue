@@ -11,16 +11,16 @@ const showNav = computed(() => {
   return route.path !== '/login' && route.path !== '/register';
 });
 
-const userNow = ref(null);
+const userCur = ref(null);
 
 const fetchUserCurrent = async () => {
   try {
     const resUsers = await axios.get('http://localhost:3000/api/users');
-    const resUserNow = await axios.get(`http://localhost:3000/api/profile`, { withCredentials: true });
-    userNow.value = Array.from(resUsers.data).filter(user => user.user_id === Number(resUserNow.data.userId))[0];
+    const resUserCur = await axios.get(`http://localhost:3000/api/profile`, { withCredentials: true });
+    userCur.value = Array.from(resUsers.data).filter(user => user.user_id === Number(resUserCur.data.userId))[0];
   } catch (error) {
     console.error('Error fetching user:', error);
-    userNow.value = null;
+    userCur.value = null;
   }
 };
 
@@ -35,8 +35,8 @@ watch(() => route.path, (newPath) => {
 </script>
 
 <template>
-  <Navbar v-show="showNav" :userNow="userNow" />
-  <router-view :userNow="userNow" />
+  <Navbar v-show="showNav" :userCur="userCur" />
+  <router-view :userCur="userCur" />
   <Footer v-show="showNav" />
 </template>
 
