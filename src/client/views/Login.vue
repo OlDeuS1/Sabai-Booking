@@ -24,7 +24,8 @@ async function handleLogin() {
     const res = await fetch('http://localhost:3000/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email.value, password: password.value })
+      body: JSON.stringify({ email: email.value, password: password.value }),
+      credentials: 'include'
     });
     const data = await res.json();
     if (!res.ok) {
