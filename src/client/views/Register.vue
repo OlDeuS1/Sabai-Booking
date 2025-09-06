@@ -13,19 +13,58 @@ const rePassword = ref('');
 const error = ref('');
 const success = ref('');
 
-function handleRegister() {
-  if (firstName.value && lastName.value && phoneNumber.value && email.value && password.value && rePassword.value) {
-    error.value = '';
-    success.value = 'Registration successful!';
-  } else {
-    success.value = '';
-    error.value = 'Please fill in all fields.';
-  }
-}
+// function handleRegister() {
+//   if (firstName.value && lastName.value && phoneNumber.value && email.value && password.value && rePassword.value) {
+//     error.value = '';
+//     success.value = 'Registration successful!';
+//   } else {
+//     success.value = '';
+//     error.value = 'Please fill in all fields.';
+//   }
+// }
 
 const dataSelect = ref(['ลูกค้าทั่วไป', 'โรงแรม'])
 const selectRole = ref(null)
 
+async function handleRegister() {
+  error.value = '';
+  success.value = '';
+  if (!firstName.value || !lastName.value || !phoneNumber.value || !email.value || !password.value || !rePassword.value || !selectRole.value) {
+    error.value = 'กรุณากรอกข้อมูลให้ครบทุกช่อง';
+    return;
+  }
+  if (password.value !== rePassword.value) {
+    error.value = 'รหัสผ่านไม่ตรงกัน';
+    return;
+  }
+  let role = selectRole.value === 'โรงแรม' ? 'hotel' : 'user';
+  try {
+    const res = await fetch('http://localhost:3000/api/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        first_name: firstName.value,
+        last_name: lastName.value,
+        phone_number: phoneNumber.value,
+        email: email.value,
+        password: password.value,
+        role
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      error.value = data.error || 'Registration failed.';
+      success.value = '';
+    } else {
+      error.value = '';
+      success.value = 'สมัครสมาชิกสำเร็จ!';
+      // TODO: redirect/login if needed
+    }
+  } catch (e) {
+    error.value = 'Network error.';
+    success.value = '';
+  }
+}
 </script>
 
 <template>

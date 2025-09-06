@@ -7,14 +7,35 @@ const email = ref('');
 const password = ref('');
 const error = ref('');
 
-console.log(email.value)
+// console.log(email.value)
 
-function handleLogin() {
-  if (email.value === 'user@example.com' && password.value === 'password') {
-    error.value = '';
-    alert('Login successful!');
-  } else {
-    error.value = 'Invalid email or password.';
+// function handleLogin() {
+//   if (email.value === 'user@example.com' && password.value === 'password') {
+//     error.value = '';
+//     alert('Login successful!');
+//   } else {
+//     error.value = 'Invalid email or password.';
+//   }
+// }
+
+async function handleLogin() {
+  error.value = '';
+  try {
+    const res = await fetch('http://localhost:3000/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email.value, password: password.value })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      error.value = data.error || 'Login failed.';
+    } else {
+      error.value = '';
+      alert('Login successful!');
+      // TODO: save user info/token if needed
+    }
+  } catch (e) {
+    error.value = 'Network error.';
   }
 }
 </script>

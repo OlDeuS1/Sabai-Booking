@@ -17,6 +17,50 @@ app.get("/api/users", (req, res) => {
   });
 });
 
+// Register API
+
+import crypto from "crypto";
+
+app.post("/api/register", (req, res) => {
+  const { first_name, last_name, email, password, phone_number, role } = req.body;
+  if (!first_name || !last_name || !email || !password) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+  db.get("SELECT * FROM users WHERE email = ?", [email], (err, user) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (user) return res.status(409).json({ error: "Email already registered" });
+    // Hash password
+    const password_hash = crypto.createHash("sha256").update(password).digest("hex");
+    db.run(
+      `INSERT INTO users (email, password_hash, first_name, last_name, phone_number, role) VALUES (?, ?, ?, ?, ?, ?)`,
+      [email, password_hash, first_name, last_name, phone_number || null, role || "user"],
+      function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+        res.status(201).json({ user_id: this.lastID, first_name, last_name, email, role: role || "user" });
+      }
+    );
+  });
+});
+
+// Login API
+
+app.post("/api/login", (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return res.status(400).json({ error: "Missing email or password" });
+  }
+  const password_hash = crypto.createHash("sha256").update(password).digest("hex");
+  db.get(
+    "SELECT user_id, first_name, last_name, email, role FROM users WHERE email = ? AND password_hash = ?",
+    [email, password_hash],
+    (err, user) => {
+      if (err) return res.status(500).json({ error: err.message });
+      if (!user) return res.status(401).json({ error: "Invalid credentials" });
+      res.json(user);
+    }
+  );
+});
+
 app.listen(3000, () =>
   console.log("🚀 Server running at http://localhost:3000")
 );
