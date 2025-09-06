@@ -3,7 +3,8 @@ import { createApp } from 'vue';
 import App from './App.vue';
 import router from './router/router';
 import 'flatpickr/dist/flatpickr.css';
-import VueCookies from 'vue-cookies'
+import ElementPlus from 'element-plus'
+import 'element-plus/dist/index.css'
 
-createApp(App).use(router).use(VueCookies).mount('#app');
+createApp(App).use(router).use(ElementPlus).mount('#app');
 
