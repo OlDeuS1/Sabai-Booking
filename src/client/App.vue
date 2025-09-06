@@ -28,7 +28,7 @@ onMounted(fetchUserCurrent);
 
 watch(() => route.path, (newPath) => {
   if (newPath !== '/login' && newPath !== '/register') {
-    fetchUser();
+    fetchUserCurrent();
   }
 });
 
