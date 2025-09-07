@@ -38,7 +38,7 @@ const props = defineProps({
           <div class="userCur text-gray-700 flex items-center gap-3" v-if="props.userCur !== null">
             <el-dropdown trigger="click">
               <span class="el-dropdown-link cursor-pointer flex items-center gap-2 text-[#212121] font-medium">
-                {{ props.userCur.first_name }} {{ props.userCur.last_name }} <el-avatar :icon="UserFilled" /> <el-icon class="el-icon--right"></el-icon>
+                {{ props.userCur.first_name }} {{ props.userCur.last_name }} <el-avatar :icon="UserFilled" />
               </span>
               <template #dropdown>
                 <el-dropdown-menu>

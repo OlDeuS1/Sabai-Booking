@@ -26,7 +26,7 @@ const querySearchAsync = (queryString, cb) => {
 
 
 <template>
-    <div class="search-compo p-5 my-4 inline-flex gap-4 items-center justify-center shadow-md rounded-lg bg-white ">
+    <div class="search-compo p-5 inline-flex gap-4 items-center justify-center shadow-md rounded-lg bg-white relative -top-15">
         <div class="search-where flex flex-col">
             <div class="demo-block">
                 <div class="mb-2 text-[#212121] font-medium">สถานที่</div>
