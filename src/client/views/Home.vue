@@ -1,6 +1,26 @@
 <script setup>
 import SearchCompo from '../components/SearchCompo.vue';
 import ListHotel from '../components/ListHotel.vue';
+import { onMounted, ref } from 'vue';
+import axios from 'axios';
+
+const hotelData = ref([]);
+const isLoading = ref([true])
+
+onMounted(async () => {
+  try {
+    const res = await axios.get('http://localhost:3000/api/hotels')
+    hotelData.value = res.data;
+    isLoading.value = false;
+  } catch(err) {
+    alert(`eror : ${err.message}`);
+  }
+})
+
+const filHotel = function(hotelData, fil){
+  return hotelData.filter(h => h.city === fil)
+}
+
 </script>
 
 <template>
@@ -14,10 +34,10 @@ import ListHotel from '../components/ListHotel.vue';
         </div>
       </div>
       <SearchCompo />
+      <ListHotel :hotels="filHotel(hotelData, 'กรุงเทพ')" v-if="!isLoading" />
+      <!-- <ListHotel />
       <ListHotel />
-      <ListHotel />
-      <ListHotel />
-      <ListHotel />
+      <ListHotel /> -->
     </div>
   </div>
 </template>

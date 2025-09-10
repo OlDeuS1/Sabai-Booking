@@ -1,6 +1,10 @@
 <script setup>
 import { ref } from 'vue'
-const sumRating = ref(4.5)
+
+const props = defineProps({
+  hotel: Object,
+})
+
 </script>
 
 <template>
@@ -11,9 +15,9 @@ const sumRating = ref(4.5)
     style="width: 100%"
     />
     <div class="hotel__detail pt-4">
-      <div class="font-bold text-[#212121]">โรงแรมดาวเบิ่งในกรุงเทพ</div>
+      <div class="font-bold text-[#212121]">{{ props.hotel.hotel_name }}</div>
       <el-rate
-        v-model="sumRating"
+        v-model="props.hotel.avg_rating"
         disabled
         show-score
         text-color="#1c398e"
