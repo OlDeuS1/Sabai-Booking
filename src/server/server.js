@@ -82,6 +82,34 @@ app.get("/api/profile", checkLogin, (req, res) => {
   res.json({ message: "คุณ login แล้ว", userId: req.cookies.userId });
 });
 
+
+// API ดึงข้อมูลโรงแรมทั้งหมด
+// API ดึงข้อมูลโรงแรมทั้งหมด พร้อมรูปภาพหลักและค่าเฉลี่ย rating
+app.get("/api/hotels", (req, res) => {
+  const sql = `
+    SELECT h.hotel_id, h.hotel_name, h.description, h.address, h.city, h.country, h.star_rating, h.contact_phone, h.contact_email,
+           h.status, h.amenities,
+           img.image_url,
+           AVG(r.rating) AS avg_rating,
+           COUNT(r.rating_id) AS review_count
+    FROM hotels h
+    LEFT JOIN hotel_images img ON img.hotel_id = h.hotel_id AND img.image_id = (
+      SELECT MIN(image_id) FROM hotel_images WHERE hotel_id = h.hotel_id
+    )
+    LEFT JOIN ratings r ON r.hotel_id = h.hotel_id
+    WHERE h.status = 'approved'
+    GROUP BY h.hotel_id
+    ORDER BY h.hotel_id DESC
+  `;
+  db.all(sql, [], (err, rows) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: err.message });
+    }
+    res.json(rows);
+  });
+});
+
 app.listen(3000, () =>
   console.log("🚀 Server running at http://localhost:3000")
 );
