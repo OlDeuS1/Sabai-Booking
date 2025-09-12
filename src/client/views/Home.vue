@@ -1,5 +1,5 @@
 <script setup>
-import SearchCompo from '../components/SearchCompo.vue';
+import SearchCompo from '../components/searchCompo.vue';
 import ListHotel from '../components/ListHotel.vue';
 import { onMounted, ref } from 'vue';
 import axios from 'axios';

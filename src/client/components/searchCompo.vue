@@ -51,7 +51,7 @@ const querySearchAsync = (queryString, cb) => {
                     v-model="checkInOutDate"
                     type="daterange"
                     range-separator="ถึง"
-                    start-placeholder="วันนี่เข้าพัก"
+                    start-placeholder="วันที่เข้าพัก"
                     end-placeholder="วันที่ออก"
                 />
             </div>
