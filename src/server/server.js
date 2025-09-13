@@ -132,3 +132,24 @@ app.get("/api/hotel/:hotelId/rooms", (req, res) => {
 app.listen(3000, () =>
   console.log("🚀 Server running at http://localhost:3000")
 );
+
+// API ดึงข้อมูลประวัติการจองของผู้ใช้
+app.get("/api/user/:userId/bookings", (req, res) => {
+  const userId = req.params.userId;
+  const sql = `
+    SELECT b.booking_id, b.check_in_date, b.check_out_date, b.num_guests, b.total_price, b.booking_status,
+           b.created_at, h.hotel_id, h.hotel_name, r.room_id, r.room_type
+    FROM bookings b
+    JOIN hotels h ON b.hotel_id = h.hotel_id
+    JOIN rooms r ON b.room_id = r.room_id
+    WHERE b.user_id = ?
+    ORDER BY b.created_at DESC
+  `;
+  db.all(sql, [userId], (err, rows) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: err.message });
+    }
+    res.json(rows);
+  });
+});
