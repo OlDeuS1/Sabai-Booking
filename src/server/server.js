@@ -89,24 +89,40 @@ app.get("/api/hotels", (req, res) => {
   const sql = `
     SELECT h.hotel_id, h.hotel_name, h.description, h.address, h.city, h.country, h.star_rating, h.contact_phone, h.contact_email,
            h.status, h.amenities,
-           img.image_url,
            AVG(r.rating) AS avg_rating,
            COUNT(r.rating_id) AS review_count
     FROM hotels h
-    LEFT JOIN hotel_images img ON img.hotel_id = h.hotel_id AND img.image_id = (
-      SELECT MIN(image_id) FROM hotel_images WHERE hotel_id = h.hotel_id
-    )
     LEFT JOIN ratings r ON r.hotel_id = h.hotel_id
     WHERE h.status = 'approved'
     GROUP BY h.hotel_id
     ORDER BY h.hotel_id DESC
   `;
-  db.all(sql, [], (err, rows) => {
+  db.all(sql, [], (err, hotels) => {
     if (err) {
       console.error(err);
       return res.status(500).json({ error: err.message });
     }
-    res.json(rows);
+    // ดึงรูปภาพทั้งหมดของแต่ละโรงแรม
+    const hotelIds = hotels.map(h => h.hotel_id);
+    if (hotelIds.length === 0) return res.json([]);
+    const imgSql = `SELECT hotel_id, image_url FROM hotel_images WHERE hotel_id IN (${hotelIds.map(() => '?').join(',')})`;
+    db.all(imgSql, hotelIds, (imgErr, images) => {
+      if (imgErr) {
+        console.error(imgErr);
+        return res.status(500).json({ error: imgErr.message });
+      }
+      // รวมรูปภาพเข้าแต่ละโรงแรม
+      const imagesByHotel = {};
+      images.forEach(img => {
+        if (!imagesByHotel[img.hotel_id]) imagesByHotel[img.hotel_id] = [];
+        imagesByHotel[img.hotel_id].push(img.image_url);
+      });
+      const hotelsWithImages = hotels.map(hotel => ({
+        ...hotel,
+        image_urls: imagesByHotel[hotel.hotel_id] || []
+      }));
+      res.json(hotelsWithImages);
+    });
   });
 });
 
