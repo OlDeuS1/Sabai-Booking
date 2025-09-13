@@ -110,33 +110,25 @@ app.get("/api/hotels", (req, res) => {
   });
 });
 
+
+// API ดึงข้อมูลห้องของแต่ละโรงแรม
+app.get("/api/hotel/:hotelId/rooms", (req, res) => {
+  const hotelId = req.params.hotelId;
+  const sql = `
+    SELECT r.room_id, r.room_type, r.price_per_night, r.max_guests, r.beds, r.quantity
+    FROM rooms r
+    WHERE r.hotel_id = ?
+    ORDER BY r.room_id ASC
+  `;
+  db.all(sql, [hotelId], (err, rows) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: err.message });
+    }
+    res.json(rows);
+  });
+});
+
 app.listen(3000, () =>
   console.log("🚀 Server running at http://localhost:3000")
 );
-
-// // API ดึงข้อมูลโรงแรมและค่าเฉลี่ย rating
-// app.get("/api/hotels/:id", (req, res) => {
-//   const hotelId = req.params.id;
-//   db.get("SELECT * FROM hotels WHERE hotel_id = ?", [hotelId], (err, hotel) => {
-//     if (err) {
-//       console.error(err);
-//       return res.status(500).json({ error: err.message });
-//     }
-//     if (!hotel) {
-//       return res.status(404).json({ error: "Hotel not found" });
-//     }
-//     db.get(
-//       "SELECT AVG(rating) as avg_rating, COUNT(*) as review_count FROM reviews WHERE hotel_id = ?",
-//       [hotelId],
-//       (err2, ratingResult) => {
-//         if (err2) {
-//           console.error(err2);
-//           return res.status(500).json({ error: err2.message });
-//         }
-//         hotel.avg_rating = ratingResult?.avg_rating || null;
-//         hotel.review_count = ratingResult?.review_count || 0;
-//         res.json(hotel);
-//       }
-//     );
-//   });
-// });
