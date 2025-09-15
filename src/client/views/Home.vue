@@ -1,24 +1,42 @@
 <script setup>
 import SearchCompo from '../components/searchCompo.vue';
 import ListHotel from '../components/ListHotel.vue';
-import { onMounted, ref } from 'vue';
-import axios from 'axios';
+import { onMounted, ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { getHotelData } from '../composables/getData';
 
+const router = useRouter();
 const hotelData = ref([]);
-const isLoading = ref([true])
+const isLoading = ref(true)
 
 onMounted(async () => {
-  try {
-    const res = await axios.get('http://localhost:3000/api/hotels')
-    hotelData.value = res.data;
-    isLoading.value = false;
-  } catch(err) {
-    alert(`eror : ${err.message}`);
-  }
-})
+  hotelData.value = await getHotelData()
+  isLoading.value = false;
+});
 
-const filHotel = function(hotelData, fil){
-  return hotelData.filter(h => h.city === fil)
+const bangkokHotels = computed(() => {
+  return hotelData.value.filter(h => h.city === 'กรุงเทพ');
+});
+
+
+const searchData = function(payload) {
+  const query = {
+      where: payload.where,
+      checkIn: payload.checkInOutDate.at(0),
+      checkOut: payload.checkInOutDate.at(1),
+      numRoom: payload.numRoom,
+      numPeople: payload.numPeople,
+    }
+
+  if (payload.checkInOutDate && payload.checkInOutDate[0] && payload.checkInOutDate[1]) {
+    query.checkIn = new Date(payload.checkInOutDate[0]).toISOString().split('T')[0];
+    query.checkOut = new Date(payload.checkInOutDate[1]).toISOString().split('T')[0];
+  }
+
+  router.push({
+    name: 'search',
+    query,
+  })
 }
 
 </script>
@@ -33,8 +51,8 @@ const filHotel = function(hotelData, fil){
           <div class="text-2xl text-gray-200 font-medium bg-[#102B58] inline-block py-3 px-5 rounded-md">บริการทุก 24 ชั่วโมง</div>
         </div>
       </div>
-      <SearchCompo />
-      <ListHotel :hotels="filHotel(hotelData, 'กรุงเทพ')" v-if="!isLoading" />
+      <SearchCompo @send-search-data="searchData" :hodelData="hotelData" v-if="!isLoading" />
+      <ListHotel v-if="!isLoading" :hotels="bangkokHotels" />
       <!-- <ListHotel />
       <ListHotel />
       <ListHotel /> -->

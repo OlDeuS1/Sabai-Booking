@@ -1,25 +1,43 @@
 <script setup>
 import { ref, computed } from 'vue';
 
-const checkInOutDate = ref([null, null]);
-const where = ref(null);
-const numPeople = ref(0);
-const numRoom = ref(0);
+const props = defineProps({
+    hodelData: {
+        type: Array,
+        default: [],
+    },
+    searchData: {
+        type: Object,
+        default: null,
+    }
+})
+const emit =  defineEmits(['sendSearchData'])
+
+const hodelData = ref([...props.hodelData])
+const searchData = ref({})
+
+const optimizeSearchData = function(){
+    searchData.value = props.searchData ? {...props.searchData} : {where: '', checkInOutDate: ['', ''], numPeople: 0, numRoom: 0}
+    searchData.value.checkInOutDate = [searchData.value.checkIn ?? '', searchData.value.checkOut ?? '']
+    searchData.value.numPeople = Number(searchData.value.numPeople)
+    searchData.value.numRoom = Number(searchData.value.numRoom)
+}
+
+optimizeSearchData()
+
 
 const handleSearch = () => {
-    console.log('Where:', where.value);
-    console.log('Check-in-out Date:', checkInOutDate.value);
-    console.log('Number of People:', numPeople.value);
-    console.log('Number of Rooms:', numRoom.value);
+    emit('sendSearchData', searchData.value);
 };
 
 const searchRoomPeople = computed(() => {
-    return  numPeople.value > 0 || numRoom.value > 0 ? `${numPeople.value} คน / ${numRoom.value} ห้อง` : 'เลือกผู้เข้าพักและห้องพัก';
+    return  searchData.value.numPeople > 0 || searchData.value.numRoom > 0 ? `${searchData.value.numPeople} คน / ${searchData.value.numRoom} ห้อง` : 'เลือกผู้เข้าพักและห้องพัก';
 });
 
 const querySearchAsync = (queryString, cb) => {
-    const results = queryString ? ['กรุงเทพ', 'เชียงใหม่', 'ภูเก็ต', 'พัทยา'].filter((d) => d.toLocaleLowerCase().includes(queryString)) : [];
-    cb(results.map((d) => ({ value: d })));
+    const results = queryString ? hodelData.value.filter((d) => d.city.toLocaleLowerCase().includes(queryString.toLocaleLowerCase())) : [];
+    const cities = [...new Set(results.map(d => d.city))]
+    cb(cities.map(c => ({ value: c })));
 };
 
 </script>
@@ -31,7 +49,7 @@ const querySearchAsync = (queryString, cb) => {
             <div class="demo-block">
                 <div class="mb-2 text-[#212121] font-medium">สถานที่</div>
                 <el-autocomplete
-                    v-model="where"
+                    v-model="searchData.where"
                     :fetch-suggestions="querySearchAsync"
                     class="w-50"
                     placeholder="คุณจะไปที่ไหน"
@@ -48,7 +66,7 @@ const querySearchAsync = (queryString, cb) => {
             <div class="mb-2 text-[#212121] font-medium">เช็คอิน - เช็คเอาท์</div>
             <div class="block">
                 <el-date-picker
-                    v-model="checkInOutDate"
+                    v-model="searchData.checkInOutDate"
                     type="daterange"
                     range-separator="ถึง"
                     start-placeholder="วันที่เข้าพัก"
@@ -65,11 +83,11 @@ const querySearchAsync = (queryString, cb) => {
                 <div class="people-room-list">
                     <div class="people-room-item flex justify-between items-center mb-4">
                         <div class="search-adult-title">ห้องพัก</div>
-                        <el-input-number v-model="numRoom" :min="0" :max="100" label="ห้องพัก" />
+                        <el-input-number v-model="searchData.numRoom" :min="0" :max="100" label="ห้องพัก" />
                     </div>
                     <div class="people-room-item flex justify-between items-center mb-4">
                         <div class="search-child-title">คน</div>
-                        <el-input-number v-model="numPeople" :min="0" :max="100" label="คน" />
+                        <el-input-number v-model="searchData.numPeople" :min="0" :max="100" label="คน" />
                     </div>
                 </div>
             </el-popover>
