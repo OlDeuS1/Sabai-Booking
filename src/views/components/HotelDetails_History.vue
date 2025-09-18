@@ -1,8 +1,8 @@
 <script setup>
-    const Calendar = `/src/client/assets/icons/calendar.png`
-    const Amount = `/src/client/assets/icons/amount-room.png`
-    const Price = `/src/client/assets/icons/price.png`
-    const ImageTest = `/src/client/assets/images/test.png`
+    const Calendar = `/src/views/assets/icons/calendar.png`
+    const Amount = `/src/views/assets/icons/amount-room.png`
+    const Price = `/src/views/assets/icons/price.png`
+    const ImageTest = `/src/views/assets/images/test.png`
 </script>
 
 <template>

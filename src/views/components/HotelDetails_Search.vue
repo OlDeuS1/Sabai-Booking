@@ -1,6 +1,6 @@
 <script setup>
-const MapPin = `/src/client/assets/icons/map-pin.png`
-const ImageTest = `/src/client/assets/images/test.png`
+const MapPin = `/src/views/assets/icons/map-pin.png`
+const ImageTest = `/src/views/assets/images/test.png`
 
 const props = defineProps({
     hotelData: {

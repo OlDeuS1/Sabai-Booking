@@ -18,7 +18,7 @@ const props = defineProps({
 
 const emit = defineEmits(['updateModelValue']);
 
-const iconValue = `/src/client/assets/icons/${props.inputName}.svg`;
+const iconValue = `/src/views/assets/icons/${props.inputName}.svg`;
 
 </script>
 

@@ -1,5 +1,5 @@
 <script setup>
-    const ImageTest = `/src/client/assets/images/test.png`
+    const ImageTest = `/src/views/assets/images/test.png`
 </script>
 
 <template>

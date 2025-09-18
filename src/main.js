@@ -1,7 +1,7 @@
 
 import { createApp } from 'vue';
-import App from './App.vue';
-import router from './router/router';
+import App from './views/App.vue';
+import router from './views/router/router';
 import 'flatpickr/dist/flatpickr.css';
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
