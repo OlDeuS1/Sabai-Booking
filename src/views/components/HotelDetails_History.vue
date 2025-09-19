@@ -42,6 +42,8 @@ const checkOutMonth = ThaiMonth[dayjs(checkOut).month()]
 const checkInYear = dayjs(checkIn).year() + 543
 const checkOutYear = dayjs(checkOut).year() + 543
 
+const rating = ref(0)
+const dialogVisible = ref(false)
 </script>
 
 <template>
@@ -72,6 +74,18 @@ const checkOutYear = dayjs(checkOut).year() + 543
                 </div>
             </div>
             <div class="flex items-end mr-4">
+                <div class="pb-2 w-auto rounded-sm font-semibold mr-3 cursor-pointer" v-if="booking.booking_status === 'confirmed'">
+                    <el-rate v-model="rating" @click="dialogVisible = true" allow-half />
+                </div>
+                <el-dialog v-model="dialogVisible" title="ยืนยันการส่งรีวิวโรงแรม" width="500" :before-close="handleClose">
+                    <span>คุณแน่ใจหรือไม่ว่าต้องการส่งรีวิวนี้? เมื่อส่งแล้วจะไม่สามารถแก้ไขได้</span>
+                    <template #footer>
+                    <div class="dialog-footer">
+                        <el-button @click="dialogVisible = false">ยกเลิก</el-button>
+                        <el-button type="primary" @click="dialogVisible = false">ยืนยัน</el-button>
+                    </div>
+                    </template>
+                </el-dialog>
                 <div class="p-2.5 text-center w-30 text-white rounded-sm font-semibold" 
                     :class="{
                         'bg-[#00D35F]': booking.booking_status === 'completed'
