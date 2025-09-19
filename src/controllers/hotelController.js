@@ -11,6 +11,16 @@ class HotelController {
     }
   }
 
+  static async getAllHotelAdminData(req, res) {
+    try {
+      const hotels = await Hotel.getAllAdminData();
+      res.json(hotels);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
   static async getHotelRooms(req, res) {
     try {
       const hotelId = req.params.hotelId;

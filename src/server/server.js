@@ -26,6 +26,7 @@ app.post('/api/users/logout', UserController.logout); // ใช้ POST แท�
 // Hotel Routes
 app.get("/api/hotels", HotelController.getAllHotels);
 app.get("/api/hotel/:hotelId/rooms", HotelController.getHotelRooms);
+app.get("/api/hotels/admin", HotelController.getAllHotelAdminData); // เพิ่มเส้นทางนี้
 
 // Start server
 app.listen(3000, () =>

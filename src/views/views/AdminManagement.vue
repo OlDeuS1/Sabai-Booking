@@ -1,5 +1,29 @@
 <script setup>
-    import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline'
+import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline'
+import { onMounted, ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { getHotelAdminData, getHotelRoomData } from '../composables/getData';
+
+const router = useRouter();
+const hotelData = ref([]);
+const isLoading = ref(true);
+const hotelsWithRooms = ref([]);
+
+onMounted(async () => {
+  hotelData.value = await getHotelAdminData();
+  
+  // Fetch room data for each hotel
+  const hotelPromises = hotelData.value.map(async (hotel) => {
+    const rooms = await getHotelRoomData(hotel.hotel_id);
+    return {
+      ...hotel,
+      rooms: rooms || []
+    };
+  });
+  
+  hotelsWithRooms.value = await Promise.all(hotelPromises);
+  isLoading.value = false;
+});
 </script>
 
 <template>
@@ -50,7 +74,7 @@
         </div>
 
         <!-- ส่วนของโรงแรม -->
-        <div class="grid justify-center text-white">
+        <div class="grid justify-center text-white" v-if="!isLoading">
             <div class="flex justify-between mt-28 mb-4 items-center">
                 <div class="text-2xl font-semibold">รายชื่อโรงแรม</div>
                 <div class="relative">
@@ -71,44 +95,29 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr class="border border-l-0 border-r-0">
-                        <td >1</td>
+                    <tr class="border border-l-0 border-r-0" v-for="(hotel, index) in hotelsWithRooms" :key="index">
+                        <td>{{ index + 1 }}</td>
                         <td class="border">
-                            <div class="text-lg mb-1">โรงแรมดาวเด่น</div> <!-- ชื่อโรงแรม -->
-                            <div class="text-sm opacity-50">ณัจกิจ ปิ่นโต</div> <!-- ชื่อผู้ให้บริการโรงแรม -->
+                            <div class="text-lg mb-1">{{ hotel.hotel_name }}</div>
+                            <div class="text-sm opacity-50">{{ hotel.owner_first_name }} {{ hotel.owner_last_name }}</div>
                         </td>
-                        <td class="border">หมู่บ้าน Golden town รัตนาธิเบศก์ บางรักใหญ่ บางบัวทอง นนทบุรี 1110</td>
+                        <td class="border">{{ hotel.address }}</td>
                         <td>
-                            <ul>
-                                <li>ห้องพัก 1 คน 1 เตียง</li>
-                                <li>ห้องพัก 2 คน 1 เตียง</li>
-                                <li>ห้องพัก 2 คน 2 เตียง</li>
-                                <li>ห้องพัก 4 คน 2 เตียง</li>
+                            <ul v-if="hotel.rooms && hotel.rooms.length > 0">
+                                <li v-for="room in hotel.rooms" :key="room.room_id">
+                                    ห้องพัก {{ room.max_guests }} คน {{ room.beds }} เตียง ({{ room.room_type }})
+                                </li>
                             </ul>
+                            <div v-else class="text-gray-400 italic">ไม่มีข้อมูลห้องพัก</div>
                         </td>
                         <td class="text-right">
-                            <button class="cursor-pointer bg-[#FF0000] text-white p-2 w-30 rounded-sm">ลบ</button>
-                        </td>
-                    </tr>
-                    
-                    <tr class="border border-l-0 border-r-0">
-                        <td >1</td>
-                        <td class="border">
-                            <div class="text-lg mb-1">โรงแรมดาวเด่น</div> <!-- ชื่อโรงแรม -->
-                            <div class="text-sm opacity-50">ณัจกิจ ปิ่นโต</div> <!-- ชื่อผู้ให้บริการโรงแรม -->
-                        </td>
-                        <td class="border">หมู่บ้าน Golden town รัตนาธิเบศก์ บางรักใหญ่ บางบัวทอง นนทบุรี 1110</td>
-                        <td>
-                            <ul>
-                                <li>ห้องพัก 1 คน 1 เตียง</li>
-                                <li>ห้องพัก 2 คน 1 เตียง</li>
-                                <li>ห้องพัก 2 คน 2 เตียง</li>
-                                <li>ห้องพัก 4 คน 2 เตียง</li>
-                            </ul>
-                        </td>
-                        <td class="text-right">
-                            <button class="cursor-pointer bg-[#00D35F] text-white p-2 w-30 rounded-sm">อนุมัติ</button>
-                            <button class="cursor-pointer bg-[#F2B900] text-white p-2 w-30 rounded-sm ml-6">ปฏิเสธ</button>
+                            <div v-if="hotel.status === 'approved'">
+                                <button class="cursor-pointer bg-[#FF0000] text-white p-2 w-30 rounded-sm">ลบ</button>
+                            </div>
+                            <div v-else-if="hotel.status === 'pending'">
+                                <button class="cursor-pointer bg-[#00D35F] text-white p-2 w-30 rounded-sm">อนุมัติ</button>
+                                <button class="cursor-pointer bg-[#F2B900] text-white p-2 w-30 rounded-sm ml-6">ปฏิเสธ</button>
+                            </div>
                         </td>
                     </tr>
                 </tbody>

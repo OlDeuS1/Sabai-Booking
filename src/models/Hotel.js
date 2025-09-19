@@ -14,7 +14,7 @@ export class Hotel {
         GROUP BY h.hotel_id
         ORDER BY h.hotel_id DESC
       `;
-      
+
       db.all(sql, [], (err, hotels) => {
         if (err) {
           reject(err);
@@ -22,13 +22,15 @@ export class Hotel {
         }
 
         // ดึงรูปภาพทั้งหมดของแต่ละโรงแรม
-        const hotelIds = hotels.map(h => h.hotel_id);
+        const hotelIds = hotels.map((h) => h.hotel_id);
         if (hotelIds.length === 0) {
           resolve([]);
           return;
         }
 
-        const imgSql = `SELECT hotel_id, image_url FROM hotel_images WHERE hotel_id IN (${hotelIds.map(() => '?').join(',')})`;
+        const imgSql = `SELECT hotel_id, image_url FROM hotel_images WHERE hotel_id IN (${hotelIds
+          .map(() => "?")
+          .join(",")})`;
         db.all(imgSql, hotelIds, (imgErr, images) => {
           if (imgErr) {
             reject(imgErr);
@@ -37,14 +39,70 @@ export class Hotel {
 
           // รวมรูปภาพเข้าแต่ละโรงแรม
           const imagesByHotel = {};
-          images.forEach(img => {
+          images.forEach((img) => {
             if (!imagesByHotel[img.hotel_id]) imagesByHotel[img.hotel_id] = [];
             imagesByHotel[img.hotel_id].push(img.image_url);
           });
 
-          const hotelsWithImages = hotels.map(hotel => ({
+          const hotelsWithImages = hotels.map((hotel) => ({
             ...hotel,
-            image_urls: imagesByHotel[hotel.hotel_id] || []
+            image_urls: imagesByHotel[hotel.hotel_id] || [],
+          }));
+
+          resolve(hotelsWithImages);
+        });
+      });
+    });
+  }
+
+  static getAllAdminData() {
+    return new Promise((resolve, reject) => {
+      const sql = `
+        SELECT h.hotel_id, h.hotel_name, h.description, h.address, h.city, h.country, h.star_rating, 
+               h.contact_phone, h.contact_email, h.status, h.amenities,
+               u.user_id as owner_id, u.first_name as owner_first_name, u.last_name as owner_last_name, 
+               u.email as owner_email, u.phone_number as owner_phone,
+               AVG(r.rating) AS avg_rating,
+               COUNT(r.rating_id) AS review_count
+        FROM hotels h
+        JOIN users u ON h.owner_id = u.user_id
+        LEFT JOIN ratings r ON r.hotel_id = h.hotel_id
+        GROUP BY h.hotel_id
+        ORDER BY h.hotel_id DESC
+      `;
+
+      db.all(sql, [], (err, hotels) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        // ดึงรูปภาพทั้งหมดของแต่ละโรงแรม
+        const hotelIds = hotels.map((h) => h.hotel_id);
+        if (hotelIds.length === 0) {
+          resolve([]);
+          return;
+        }
+
+        const imgSql = `SELECT hotel_id, image_url FROM hotel_images WHERE hotel_id IN (${hotelIds
+          .map(() => "?")
+          .join(",")})`;
+        db.all(imgSql, hotelIds, (imgErr, images) => {
+          if (imgErr) {
+            reject(imgErr);
+            return;
+          }
+
+          // รวมรูปภาพเข้าแต่ละโรงแรม
+          const imagesByHotel = {};
+          images.forEach((img) => {
+            if (!imagesByHotel[img.hotel_id]) imagesByHotel[img.hotel_id] = [];
+            imagesByHotel[img.hotel_id].push(img.image_url);
+          });
+
+          const hotelsWithImages = hotels.map((hotel) => ({
+            ...hotel,
+            image_urls: imagesByHotel[hotel.hotel_id] || [],
           }));
 
           resolve(hotelsWithImages);

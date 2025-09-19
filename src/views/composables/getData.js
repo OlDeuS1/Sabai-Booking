@@ -18,6 +18,15 @@ export const getHotelData = async function(){
   }
 }
 
+export const getHotelAdminData = async function () {
+  try {
+    const res = await axios.get("http://localhost:3000/api/hotels/admin");
+    return res.data;
+  } catch (err) {
+    alert(`eror : ${err.message}`);
+  }
+};
+
 export const getHotelRoomData = async function(hotelId){
   try {
     const res = await axios.get(`http://localhost:3000/api/hotel/${hotelId}/rooms`)
