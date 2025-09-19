@@ -74,7 +74,7 @@ const dialogVisible = ref(false)
                 </div>
             </div>
             <div class="flex items-end mr-4">
-                <div class="pb-2 w-auto rounded-sm font-semibold mr-3 cursor-pointer" v-if="booking.booking_status === 'confirmed'">
+                <div class="pb-2 w-auto rounded-sm font-semibold mr-3 cursor-pointer" v-if="booking.booking_status === 'completed'">
                     <el-rate v-model="rating" @click="dialogVisible = true" allow-half />
                 </div>
                 <el-dialog v-model="dialogVisible" title="ยืนยันการส่งรีวิวโรงแรม" width="500" :before-close="handleClose">
