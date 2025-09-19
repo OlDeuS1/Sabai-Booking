@@ -2,6 +2,8 @@
 import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/vue/24/outline'
 import { UserFilled } from '@element-plus/icons-vue'
+import axios from 'axios'
+import { useRouter } from 'vue-router'
 
 const props = defineProps({
   userCur: {
@@ -9,6 +11,18 @@ const props = defineProps({
     default: null
   }
 })
+
+const router = useRouter()
+
+const handleLogout = async () => {
+  try {
+    await axios.post('http://localhost:3000/api/users/logout', {}, { withCredentials: true })
+    // รีเฟรชหน้าเพื่อให้ App.vue โหลดข้อมูลใหม่
+    window.location.reload()
+  } catch (error) {
+    console.error('Logout error:', error)
+  }
+}
 
 </script>
 
@@ -43,7 +57,7 @@ const props = defineProps({
               <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item><router-link to="/historyBooking">ประวัติการจอง</router-link></el-dropdown-item>
-                  <el-dropdown-item><router-link to="/logout">ออกจากระบบ</router-link></el-dropdown-item>
+                  <el-dropdown-item @click="handleLogout">ออกจากระบบ</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>

@@ -72,6 +72,16 @@ class UserController {
     }
   }
 
+  static async logout(req, res) {
+    try {
+      res.clearCookie("userId");
+      res.json({ message: "ออกจากระบบเรียบร้อยแล้ว" });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
   static async getProfile(req, res) {
     try {
       res.json({ message: "คุณ login แล้ว", userId: req.cookies.userId });
