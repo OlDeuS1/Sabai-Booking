@@ -80,7 +80,7 @@ const room_option = ref('')
                 <div class="bg-white p-6 rounded-lg shadow-lg sticky top-8">
                     <div class="mb-6">
                         <div class="text-2xl font-bold text-gray-900 mb-2" v-if="rooms">
-                            {{ rooms.find(r => r.room_id == room_option)?.price_per_night || Math.min(...rooms.map(r => r.price_per_night)) }} บาท ต่อ 1 คืน
+                            {{ rooms.find(r => r.room_id == room_option)?.price_per_night || (rooms.length ? Math.min(...rooms.map(r => r.price_per_night)) : 0) }} บาท ต่อ 1 คืน
                         </div>
                     </div>
 
