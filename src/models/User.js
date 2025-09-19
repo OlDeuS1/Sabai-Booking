@@ -10,6 +10,15 @@ export class User {
     });
   }
 
+  static getNormalUsers() {
+    return new Promise((resolve, reject) => {
+      db.all("SELECT * FROM users WHERE role = 'user'", [], (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows);
+      });
+    });
+  }
+
   static findByEmail(email) {
     return new Promise((resolve, reject) => {
       db.get("SELECT * FROM users WHERE email = ?", [email], (err, row) => {
@@ -29,7 +38,10 @@ export class User {
             console.error("Error in findByEmailAndPassword:", err);
             reject(err);
           } else {
-            console.log("Database lookup result:", row ? "User found" : "User not found");
+            console.log(
+              "Database lookup result:",
+              row ? "User found" : "User not found"
+            );
             resolve(row);
           }
         }
@@ -39,7 +51,14 @@ export class User {
 
   static create(userData) {
     return new Promise((resolve, reject) => {
-      const { email, password_hash, first_name, last_name, phone_number, role } = userData;
+      const {
+        email,
+        password_hash,
+        first_name,
+        last_name,
+        phone_number,
+        role,
+      } = userData;
       db.run(
         `INSERT INTO users (email, password_hash, first_name, last_name, phone_number, role) VALUES (?, ?, ?, ?, ?, ?)`,
         [email, password_hash, first_name, last_name, phone_number, role],

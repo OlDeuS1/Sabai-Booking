@@ -44,3 +44,14 @@ export const getUserBookingHistory = async function(userId){
     alert(`eror : ${err.message}`);
   }
 }
+
+export const getNormalUsers = async function () {
+  try {
+    const res = await axios.get(
+      `http://localhost:3000/api/user/normal`
+    );
+    return res.data;
+  } catch (err) {
+    alert(`eror : ${err.message}`);
+  }
+};

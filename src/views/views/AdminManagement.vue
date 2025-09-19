@@ -2,15 +2,17 @@
 import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline'
 import { onMounted, ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { getHotelAdminData, getHotelRoomData } from '../composables/getData';
+import { getHotelAdminData, getHotelRoomData, getNormalUsers } from '../composables/getData';
 
 const router = useRouter();
 const hotelData = ref([]);
 const isLoading = ref(true);
 const hotelsWithRooms = ref([]);
+const userData = ref([])
 
 onMounted(async () => {
   hotelData.value = await getHotelAdminData();
+  userData.value = await getNormalUsers();
   
   // Fetch room data for each hotel
   const hotelPromises = hotelData.value.map(async (hotel) => {
@@ -50,21 +52,11 @@ onMounted(async () => {
                     </tr>
                 </thead>
                 <tbody>
-                    <tr class="border border-l-0 border-r-0">
-                        <td >1</td>
-                        <td class="border">ธนภัทร มลิแก้ว</td>
-                        <td class="border">66070080@kmitl.ac.th</td>
-                        <td >064-951-5415</td>
-                        <td class="text-right">
-                            <button class="cursor-pointer bg-[#102B58] text-white p-2 w-30 rounded-sm">ประวัติการจอง</button>
-                        </td>
-                    </tr>
-
-                    <tr class="border border-l-0 border-r-0">
-                        <td >1</td>
-                        <td class="border">ธนภัทร มลิแก้ว</td>
-                        <td class="border">66070080@kmitl.ac.th</td>
-                        <td >064-951-5415</td>
+                    <tr class="border border-l-0 border-r-0" v-for="(user, index) in userData" :key="index">
+                        <td>{{ index + 1 }}</td>
+                        <td class="border">{{ user.first_name }} {{ user.last_name }}</td>
+                        <td class="border">{{ user.email }}</td>
+                        <td>{{ user.phone_number }}</td>
                         <td class="text-right">
                             <button class="cursor-pointer bg-[#102B58] text-white p-2 w-30 rounded-sm">ประวัติการจอง</button>
                         </td>

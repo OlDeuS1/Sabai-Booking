@@ -22,6 +22,7 @@ app.post("/api/login", UserController.login);
 app.get("/api/profile", checkLogin, UserController.getProfile);
 app.get("/api/user/:userId/bookings", UserController.getUserBookings);
 app.post('/api/users/logout', UserController.logout); // ใช้ POST แทน
+app.get("/api/user/normal", UserController.getNormalUsers);
 
 // Hotel Routes
 app.get("/api/hotels", HotelController.getAllHotels);
