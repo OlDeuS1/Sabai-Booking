@@ -29,7 +29,7 @@ const props = defineProps({
                 </div>
                 <!-- สิ่งอำนวยความสะดวก -->
                 <div>
-                    <span v-for="a in props.hotelData.amenities">{{ String(a).replace(',', ' | ') }}</span>
+                    <span v-for="a, index in props.hotelData.amenities" :key="index">{{ String(a).replace(',', ' | ') }}</span>
                 </div>
             </div>
             <div class="flex justify-end items-end mb-4 ml-auto mr-4">

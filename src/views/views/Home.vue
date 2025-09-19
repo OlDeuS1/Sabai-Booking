@@ -18,6 +18,18 @@ const bangkokHotels = computed(() => {
   return hotelData.value.filter(h => h.city === 'กรุงเทพ');
 });
 
+const huahinHotels = computed(() => {
+  return hotelData.value.filter(h => h.city === 'หัวหิน');
+});
+
+const phuketHotels = computed(() => {
+  return hotelData.value.filter(h => h.city === 'ภูเก็ต');
+});
+
+const chiangMaiHotels = computed(() => {
+  return hotelData.value.filter(h => h.city === 'เชียงใหม่');
+});
+
 
 const searchData = function(payload) {
   const query = {
@@ -53,9 +65,9 @@ const searchData = function(payload) {
       </div>
       <SearchCompo @send-search-data="searchData" :hodelData="hotelData" v-if="!isLoading" />
       <ListHotel v-if="!isLoading" :hotels="bangkokHotels" />
-      <!-- <ListHotel />
-      <ListHotel />
-      <ListHotel /> -->
+      <ListHotel v-if="!isLoading" :hotels="huahinHotels" />
+      <ListHotel v-if="!isLoading" :hotels="phuketHotels" />
+      <ListHotel v-if="!isLoading" :hotels="chiangMaiHotels" />
     </div>
   </div>
 </template>
