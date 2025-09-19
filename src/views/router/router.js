@@ -4,6 +4,7 @@ import Login from '../views/Login.vue';
 import Register from '../views/Register.vue';
 import Search from '../views/Search.vue';
 import User from '../components/User.vue';
+import History from '../views/History.vue';
 
 const routes = [
   { path: '', component: Home},
@@ -11,6 +12,7 @@ const routes = [
   { path: '/register', component: Register },
   { path: '/search', component: Search, name: 'search'},
   { path: '/users', component: User },
+  { path: '/historyBooking', component: History },
 ];
 
 const router = createRouter({

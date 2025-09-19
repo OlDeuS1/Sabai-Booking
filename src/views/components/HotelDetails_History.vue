@@ -1,8 +1,19 @@
 <script setup>
-    const Calendar = `/src/views/assets/icons/calendar.png`
-    const Amount = `/src/views/assets/icons/amount-room.png`
-    const Price = `/src/views/assets/icons/price.png`
-    const ImageTest = `/src/views/assets/images/test.png`
+const Calendar = `/src/views/assets/icons/calendar.png`
+const Amount = `/src/views/assets/icons/amount-room.png`
+const Price = `/src/views/assets/icons/price.png`
+const ImageTest = `/src/views/assets/images/test.png`
+import { ref } from 'vue';
+
+const props = defineProps({
+    booking: {
+        type: Object,
+        required: true,
+    }
+});
+
+const booking = ref({ ...props.booking });
+
 </script>
 
 <template>
@@ -12,29 +23,37 @@
             <div class="grid p-8 pt-0 min-w-250">
                 <!-- ชื่อโรงแรม -->
                 <div class="font-bold text-[24px]">
-                    <span>โรงแรมดาวมีไว้เบิ่ง 1</span>
-                    <span> | </span>
-                    <span>กรุงเทพ</span>
+                    <span>{{ booking.hotel_name }}</span>
                 </div> 
                 <!-- วันที่จองเข้า - ออก -->
                 <div class="inline-flex gap-1.5">
                     <img :src="Calendar" alt="calendar" class="w-6 h-6">
-                    <span class="">12 สิงหาคม - 14 สิงหาคม</span>
+                    <span class="">{{ booking.check_in_date }} - {{ booking.check_out_date }}</span>
                 </div>
                 <!-- จำนวนห้องที่พัก/คืน -->
                 <div class="inline-flex gap-1.5">
-                    <img :src="Amount" alt="amount-room" class="w-6 h-6">
-                    <span class="">1 ห้อง | 2 คืน</span>
+                    <span class="">ห้อง : {{ booking.room_type }}</span>
+                </div>
+                <div class="inline-flex gap-1.5">
+                    <span class="">ผู้เข้าพัก : {{ booking.num_guests }}</span>
                 </div>
                 <!-- จำนวนเงิน -->
                 <div class="inline-flex gap-1.5">
                     <img :src="Price" alt="price" class="w-6 h-6">
-                    <span class="">4,000 บาท</span>
+                    <span class="">{{ booking.total_price }}</span>
                 </div>
             </div>
             <!-- สถานะ: สำเร็จ -->
             <div class="flex items-end mr-4">
-                <div class="bg-[#00D35F] p-2.5 text-center w-30 text-white rounded-sm font-semibold">สำเร็จ</div>
+                <div class="p-2.5 text-center w-30 text-white rounded-sm font-semibold" 
+                    :class="{
+                        'bg-[#00D35F]': booking.booking_status === 'completed'
+                        , 'bg-[#F2B900]': booking.booking_status === 'pending'
+                        , 'bg-red-500': booking.booking_status === 'cancelled'
+                        , 'bg-blue-500': booking.booking_status === 'confirmed'
+                    }">
+                    {{ booking.booking_status }}
+                </div>
             </div>
             <!-- สถานะ: กำลังรอ -->
             <!-- <div class="flex items-end mr-4">
