@@ -1,92 +1,77 @@
 <script setup>
-import RoomOption from '../components/RoomOption.vue';
-import { getHotelRoomData } from '../composables/getData';
-import { ref, onMounted } from 'vue'
+import { getHotelData, getHotelRoomData } from '../composables/getData';
+import { ref, onMounted, computed } from 'vue'
+import { useRoute } from 'vue-router'
 
-const BookingDate = ref('')
+const HotelData = ref([])
+const RoomData = ref([])
+const route = useRoute()
 
 onMounted(async () => {
-  BookingDate.value = await getHotelRoomData()
+    HotelData.value = await getHotelData()
+    RoomData.value = await getHotelRoomData(route.params.id)
 });
 
-const RoomType = ref('')
-const props = {
-    value: 'id',
-    label: 'label',
-    options: 'options',
-    disabled: 'disabled',
+const hotel = computed(() => {
+    return HotelData.value.find(h => h.hotel_id === Number(route.params.id)) || null;
+});
+
+const selectData = ref({})
+
+const custom_selectData = function () {
+    selectData.value = { checkInOutDate: ['', ''], numPeople: 0, numRoom: 0 };
+    selectData.value.checkInOutDate = [selectData.value.checkIn ?? '', selectData.value.checkOut ?? '']
+    selectData.value.numRoom = Number(selectData.value.numRoom)
+    selectData.value.numPeople = Number(selectData.value.numPeople)
 }
+custom_selectData()
 
-const options = [
-    {
-        id: 'Option1',
-        label: 'Option1',
-    },
-    {
-        id: 'Option2',
-        label: 'Option2',
-        disabled: true,
-    },
-    {
-        id: 'Option3',
-        label: 'Option3',
-    },
-    {
-        id: 'Option4',
-        label: 'Option4',
-        disabled: true,
-    },
-    {
-        id: 'Option5',
-        label: 'Option5',
-    },
-]
+const selectRoomPeople = computed(() => {
+    return selectData.value.numPeople > 0 || selectData.value.numRoom > 0 ? `${selectData.value.numPeople} คน / ${selectData.value.numRoom} ห้อง` : 'เลือกผู้เข้าพักและห้องพัก';
+});
 
-const RoomData = ref()
+const rooms = computed(() => {
+    return RoomData.value
+});
 
-const selectRoomPeople = 'เลือกผู้เข้าพักและห้องพัก'
+const room_option = ref('')
 </script>
 
 <template>
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h2 class="text-3xl font-bold text-gray-900 mb-8">โรงแรมดาวมีไวบ์บิง 5 | กรุงเทพ</h2>
+        <h2 class="text-3xl font-bold text-gray-900 mb-8" v-if="hotel">{{ hotel.hotel_name }}</h2>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2 space-y-8">
-                <div class="relative">
-                    <img src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800&h=400&fit=crop"
-                        alt="Luxury Resort View" class="w-full h-96 object-cover rounded-lg shadow-lg">
+                <div class="relative" v-if="hotel && hotel.image_urls">
+                    <img :src="hotel.image_urls[0]" alt="hotel-image-1" class="w-full h-96 object-cover rounded-lg shadow-lg">
                 </div>
 
-                <div class="grid grid-cols-2 gap-4">
-                    <img src="https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&h=200&fit=crop"
-                        alt="Pool View" class="w-full h-48 object-cover rounded-lg shadow-md">
-                    <img src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400&h=200&fit=crop"
-                        alt="Night Pool" class="w-full h-48 object-cover rounded-lg shadow-md">
+                <div class="grid grid-cols-2 gap-4" v-if="hotel && hotel.image_urls">
+                    <img :src="hotel.image_urls[1]" alt="hotel-image-2" class="w-full h-48 object-cover rounded-lg shadow-md">
+                    <img :src="hotel.image_urls[2]" alt="hotel-image-3" class="w-full h-48 object-cover rounded-lg shadow-md">
                 </div>
 
                 <div class="bg-white p-6 rounded-lg shadow-md">
                     <h3 class="text-xl font-semibold text-blue-900 mb-4">สิ่งอำนวยความสะดวก</h3>
-                    <div class="space-y-2 text-gray-700">
-                        <p>• WiFi ฟรี สำหรับผู้เข้าพักทุกท่าน</p>
-                        <p>• ที่จอดรถ เชื่อมต่อโดยตรง จองได้ไม่จำกัดเวลา 30 คัน</p>
-                        <p>• ระบบล็อก สำหรับความปลอดภัย เปิดปิดโซนล่าง 2ช เดินทาง</p>
-                        <p>• รการสิงห์ เชื่อมต่อแกตมีขียงบ่งที่ต่อมา 200+ บาท</p>
+                    <div class="space-y-2 text-gray-700" v-if="hotel">
+                        <p v-for="item in hotel.amenities.split(',').map(a => a.trim())">- {{ item }}</p>
                     </div>
                 </div>
 
-                <div class="bg-white p-6 rounded-lg shadow-md">
+                <div class="bg-white p-6 rounded-lg shadow-md" v-if="hotel">
                     <h3 class="text-xl font-semibold text-blue-900 mb-4">สถานที่ตั้ง</h3>
                     <p class="text-gray-700">
-                        93.9 กม.2 ปทมนตา ค่อนปจง เค ครมเมียส์มารำ ปจธมี ขวภนครเปรจอยขิมสุธ คคอมพา โทษ 10140
+                        {{ hotel.address }} {{ hotel.city }} {{ hotel.country }}
                     </p>
                 </div>
 
                 <div class="bg-white p-6 rounded-lg shadow-md">
                     <h3 class="text-xl font-semibold text-blue-900 mb-6">รูปแบบห้องพัก</h3>
-                    <div class="space-y-4">
-                        <room-option />
-                        <room-option />
+                    <div class="space-y-4 grid" v-if="rooms">
+                        <el-radio-group v-model="room_option" v-for="room in rooms" key="room.room_id">
+                            <el-radio :value="room.room_id" size="large" border>ห้องพัก {{ room.max_guests }} คน | {{ room.beds }} เตียง</el-radio>
+                        </el-radio-group>
                     </div>
                 </div>
             </div>
@@ -94,14 +79,17 @@ const selectRoomPeople = 'เลือกผู้เข้าพักและ
             <div class="lg:col-span-1">
                 <div class="bg-white p-6 rounded-lg shadow-lg sticky top-8">
                     <div class="mb-6">
-                        <div class="text-2xl font-bold text-gray-900 mb-2">2000 บาท ต่อ 1 คืน</div>
+                        <div class="text-2xl font-bold text-gray-900 mb-2" v-if="rooms">
+                            {{ rooms.find(r => r.room_id == room_option)?.price_per_night || Math.min(...rooms.map(r => r.price_per_night)) }} บาท ต่อ 1 คืน
+                        </div>
                     </div>
 
                     <form>
                         <div class="block mb-4">
                             <div class="mb-2">เช็คอิน - เช็คเอาท์</div>
-                            <el-date-picker v-model="BookingDate" type="daterange" start-placeholder="วันที่เข้าพัก"
-                                end-placeholder="วันที่ออก" :default-value="[new Date(), new Date()]" />
+                            <el-date-picker v-model="selectData.checkInOutDate" type="daterange"
+                                start-placeholder="วันที่เข้าพัก" end-placeholder="วันที่ออก"
+                                :default-value="[new Date(), new Date()]" />
                         </div>
 
                         <div class="block mb-4">
@@ -112,12 +100,14 @@ const selectRoomPeople = 'เลือกผู้เข้าพักและ
                                 </template>
                                 <div class="people-room-list">
                                     <div class="people-room-item flex justify-between items-center mb-4">
-                                        <div class="search-adult-title">ห้องพัก</div>
-                                        <el-input-number v-model="RoomData" :min="0" :max="100" label="ห้องพัก" />
+                                        <div class="search-child-title">คน</div>
+                                        <el-input-number v-model="selectData.numPeople" :min="0" :max="100"
+                                            label="คน" />
                                     </div>
                                     <div class="people-room-item flex justify-between items-center mb-4">
-                                        <div class="search-child-title">คน</div>
-                                        <el-input-number v-model="RoomData" :min="0" :max="100" label="คน" />
+                                        <div class="search-adult-title">ห้องพัก</div>
+                                        <el-input-number v-model="selectData.numRoom" :min="0" :max="100"
+                                            label="ห้องพัก" />
                                     </div>
                                 </div>
                             </el-popover>
