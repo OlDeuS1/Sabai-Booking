@@ -14,7 +14,7 @@ const props = defineProps({
       <router-link to=""><img class="hotel__to-icon" src="../assets/icons/arrow-circle-right-fill.svg" alt="arrow-right"></router-link>
     </div>
     <div class="hotel__list flex gap-4">
-      <HotelCard v-for="hk in props.hotels" :hotel="hk" />
+      <HotelCard v-for="hk in props.hotels" :key="hk.hotel_id" :hotel="hk" />
     </div>
   </div>
 </template>

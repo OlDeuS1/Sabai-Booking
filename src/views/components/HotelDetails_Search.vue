@@ -11,6 +11,7 @@ const props = defineProps({
 </script>
 
 <template>
+    <router-link :to="{ name: 'hotel-detail', params: { id: props.hotelData.hotel_id } }">
     <div class="grid mb-24 mt-6 w-full">
         <div class="flex shadow-2xl rounded-lg bg-white">
             <img :src="ImageTest" alt="test-hotel-image" class="w-100 h-50 object-cover rounded-md">
@@ -36,4 +37,5 @@ const props = defineProps({
             </div>
         </div>
     </div>
+    </router-link>
 </template>

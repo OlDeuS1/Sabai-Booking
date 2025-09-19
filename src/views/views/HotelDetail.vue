@@ -1,12 +1,12 @@
 <script setup>
 import RoomOption from '../components/RoomOption.vue';
 import { getHotelRoomData } from '../composables/getData';
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 
 const BookingDate = ref('')
 
 onMounted(async () => {
-  hotelData.value = await getHotelData()
+  BookingDate.value = await getHotelRoomData()
 });
 
 const RoomType = ref('')
