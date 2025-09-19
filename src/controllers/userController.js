@@ -53,21 +53,35 @@ class UserController {
     try {
       const { email, password } = req.body;
       
+      console.log('Login attempt:', { email }); // ไม่ควร log password
+      
       if (!email || !password) {
         return res.status(400).json({ error: "Missing email or password" });
       }
 
       const password_hash = crypto.createHash("sha256").update(password).digest("hex");
+      console.log('Looking for user with email and hashed password');
+      
       const user = await User.findByEmailAndPassword(email, password_hash);
       
       if (!user) {
+        console.log('User not found or password incorrect');
         return res.status(401).json({ error: "Invalid credentials" });
       }
 
-      res.cookie("userId", user.user_id, { httpOnly: true });
+      console.log('User found:', { user_id: user.user_id, role: user.role });
+      
+      // ตั้งค่า cookie ให้ถูกต้อง
+      res.cookie("userId", user.user_id, { 
+        httpOnly: true,
+        sameSite: 'Lax', // ปรับตามความเหมาะสม
+        // secure: true, // เปิดใช้เมื่อใช้ HTTPS
+        maxAge: 24 * 60 * 60 * 1000 // 1 วัน
+      });
+      
       res.json(user);
     } catch (error) {
-      console.error(error);
+      console.error('Login error:', error);
       res.status(500).json({ error: error.message });
     }
   }

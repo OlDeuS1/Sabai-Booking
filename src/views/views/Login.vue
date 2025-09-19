@@ -10,19 +10,10 @@ const email = ref('');
 const password = ref('');
 const error = ref('');
 
-// console.log(email.value)
-
-// function handleLogin() {
-//   if (email.value === 'user@example.com' && password.value === 'password') {
-//     error.value = '';
-//     alert('Login successful!');
-//   } else {
-//     error.value = 'Invalid email or password.';
-//   }
-// }
-
+// ลองเพิ่ม console.log ที่จุดสำคัญใน handleLogin เพื่อดูการทำงาน
 async function handleLogin() {
   error.value = '';
+  console.log('Attempting login with:', { email: email.value, password: password.value });
   try {
     const res = await fetch('http://localhost:3000/api/login', {
       method: 'POST',
@@ -30,15 +21,46 @@ async function handleLogin() {
       body: JSON.stringify({ email: email.value, password: password.value }),
       credentials: 'include'
     });
+    
+    console.log('Response status:', res.status);
+    
     const data = await res.json();
+    console.log('Login response data:', data);
+    
     if (!res.ok) {
       error.value = data.error || 'Login failed.';
     } else {
       error.value = '';
-      router.push('/');
-      // TODO: save user info/token if needed
+      
+      // เพิ่ม debugging เพื่อดูค่าของ data
+      console.log('Role check:', { 
+        hasData: !!data, 
+        hasRole: data && !!data.role, 
+        role: data?.role
+      });
+      
+      // ปรับให้เข้าถึง data (user) โดยตรง ไม่ผ่าน data.user
+      if (data && data.role) {
+        switch(data.role) {
+          case 'admin':
+            router.push('/admin-management');
+            break;
+          case 'hotel':
+            router.push('/hotel-management');
+            break;
+          default:
+            router.push('/');
+            break;
+        }
+      } else {
+        router.push('/');
+      }
+      
+      // เก็บข้อมูลผู้ใช้ใน localStorage
+      localStorage.setItem('user', JSON.stringify(data));
     }
   } catch (e) {
+    console.error('Login error:', e);
     error.value = 'Network error.';
   }
 }

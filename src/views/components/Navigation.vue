@@ -17,10 +17,12 @@ const router = useRouter()
 const handleLogout = async () => {
   try {
     await axios.post('http://localhost:3000/api/users/logout', {}, { withCredentials: true })
-    // รีเฟรชหน้าเพื่อให้ App.vue โหลดข้อมูลใหม่
-    window.location.reload()
+    // นำทางไปยังหน้า Home แทนการรีเฟรช
+    router.push('/')
   } catch (error) {
     console.error('Logout error:', error)
+    // แม้มีข้อผิดพลาดก็ยังนำทางไปหน้า Home
+    router.push('/')
   }
 }
 

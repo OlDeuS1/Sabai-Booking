@@ -19,17 +19,21 @@ export class User {
     });
   }
 
-  static findByEmailAndPassword(email, password_hash) {
-    return new Promise((resolve, reject) => {
-      db.get(
-        "SELECT user_id, first_name, last_name, email, role FROM users WHERE email = ? AND password_hash = ?",
-        [email, password_hash],
-        (err, row) => {
-          if (err) reject(err);
-          else resolve(row);
-        }
+  // ตรวจสอบว่าฟังก์ชันนี้ทำงานถูกต้องหรือไม่
+  static async findByEmailAndPassword(email, password_hash) {
+    try {
+      const user = await db.get(
+        `SELECT * FROM users WHERE email = ? AND password_hash = ?`,
+        [email, password_hash]
       );
-    });
+
+      console.log("Database lookup result:", user ? "User found" : "User not found");
+
+      return user;
+    } catch (error) {
+      console.error("Error in findByEmailAndPassword:", error);
+      throw error;
+    }
   }
 
   static create(userData) {
