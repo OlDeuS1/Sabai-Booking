@@ -3,7 +3,6 @@ import Home from '../views/Home.vue'
 import Login from '../views/Login.vue';
 import Register from '../views/Register.vue';
 import Search from '../views/Search.vue';
-import User from '../components/User.vue';
 import History from '../views/History.vue';
 
 const routes = [
@@ -11,7 +10,6 @@ const routes = [
   { path: '/login', component: Login },
   { path: '/register', component: Register },
   { path: '/search', component: Search, name: 'search'},
-  { path: '/users', component: User },
   { path: '/historyBooking', component: History },
 ];
 
