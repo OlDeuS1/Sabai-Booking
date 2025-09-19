@@ -17,8 +17,14 @@ const router = useRouter()
 const handleLogout = async () => {
   try {
     await axios.post('http://localhost:3000/api/users/logout', {}, { withCredentials: true })
-    // นำทางไปยังหน้า Home แทนการรีเฟรช
-    router.push('/')
+    // ตรวจสอบว่าอยู่ที่หน้า home อยู่แล้วหรือไม่
+    if (router.currentRoute.value.path === '/') {
+      // ถ้าอยู่หน้า home อยู่แล้ว ให้ refresh เพื่ออัปเดต UI
+      window.location.reload()
+    } else {
+      // ถ้าไม่ได้อยู่หน้า home ให้นำทางไปหน้า home (ซึ่งจะโหลดหน้าใหม่)
+      window.location.href = '/'  // ใช้ window.location.href แทน router.push
+    }
   } catch (error) {
     console.error('Logout error:', error)
     // แม้มีข้อผิดพลาดก็ยังนำทางไปหน้า Home
