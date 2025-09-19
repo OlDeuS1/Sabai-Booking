@@ -64,10 +64,10 @@ const searchData = function(payload) {
         </div>
       </div>
       <SearchCompo @send-search-data="searchData" :hodelData="hotelData" v-if="!isLoading" />
-      <ListHotel v-if="!isLoading" :hotels="bangkokHotels" />
-      <ListHotel v-if="!isLoading" :hotels="huahinHotels" />
-      <ListHotel v-if="!isLoading" :hotels="phuketHotels" />
-      <ListHotel v-if="!isLoading" :hotels="chiangMaiHotels" />
+      <ListHotel v-if="!isLoading && bangkokHotels.length" :hotels="bangkokHotels" />
+      <ListHotel v-if="!isLoading && huahinHotels.length" :hotels="huahinHotels" />
+      <ListHotel v-if="!isLoading && phuketHotels.length" :hotels="phuketHotels" />
+      <ListHotel v-if="!isLoading && chiangMaiHotels.length" :hotels="chiangMaiHotels" />
     </div>
   </div>
 </template>
