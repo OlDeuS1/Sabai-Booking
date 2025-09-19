@@ -64,7 +64,7 @@ const handleLogout = async () => {
               </span>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item><router-link to="/historyBooking">ประวัติการจอง</router-link></el-dropdown-item>
+                  <router-link to="/historyBooking" v-if="props.userCur.role === 'user'"><el-dropdown-item>ประวัติการจอง</el-dropdown-item></router-link>
                   <el-dropdown-item @click="handleLogout">ออกจากระบบ</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
