@@ -11,7 +11,7 @@ const props = defineProps({
   <router-link :to="{ name: 'hotel-detail', params: { id: props.hotel.hotel_id } }">
     <el-card style="max-width: 480px">
       <img
-      src="https://images.unsplash.com/photo-1455587734955-081b22074882?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+      :src="props.hotel.image_urls[0]"
       style="width: 100%"
       />
       <div class="hotel__detail pt-4">

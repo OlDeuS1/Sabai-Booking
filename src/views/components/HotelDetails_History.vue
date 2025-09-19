@@ -47,7 +47,7 @@ const checkOutYear = dayjs(checkOut).year() + 543
 <template>
     <div class="grid m-10 justify-center">
         <div class="flex shadow-2xl rounded-lg p-4">
-            <img :src="ImageTest" alt="test-hotel-image" class="w-50 h-50 object-cover rounded-md">
+            <img :src="booking.hotel_image" alt="test-hotel-image" class="w-50 h-50 object-cover rounded-md">
             <div class="grid p-8 pt-0 w-250">
                 <!-- ชื่อโรงแรม -->
                 <div class="font-bold text-[24px]">

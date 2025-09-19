@@ -14,7 +14,7 @@ const props = defineProps({
     <router-link :to="{ name: 'hotel-detail', params: { id: props.hotelData.hotel_id } }">
     <div class="grid mb-24 mt-6 w-full">
         <div class="flex shadow-2xl rounded-lg bg-white">
-            <img :src="ImageTest" alt="test-hotel-image" class="w-100 h-50 object-cover rounded-md">
+            <img :src="props.hotelData.image_urls[0]" alt="test-hotel-image" class="w-100 h-50 object-cover rounded-md">
             <div class="p-8 pt-4">
                 <!-- ชื่อโรงแรม -->
                 <div class="font-extrabold text-[28px]">
