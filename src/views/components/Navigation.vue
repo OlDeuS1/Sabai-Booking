@@ -14,6 +14,21 @@ const props = defineProps({
 
 const router = useRouter()
 
+const handleLogoClick = () => {
+  if (props.userCur) {
+    // ถ้าเป็น admin ไปหน้า admin
+    if (props.userCur.role === 'admin') {
+      router.push('/admin')
+    } else {
+      // ถ้าเป็น user หรือ hotel ไปหน้า home
+      router.push('/')
+    }
+  } else {
+    // ถ้ายังไม่ได้ login ไปหน้า home
+    router.push('/')
+  }
+}
+
 const handleLogout = async () => {
   try {
     await axios.post('http://localhost:3000/api/users/logout', {}, { withCredentials: true })
@@ -40,7 +55,7 @@ const handleLogout = async () => {
       <div class="relative flex h-16 items-center justify-between">
         <div class="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
           <div class="flex shrink-0 items-center">
-            <router-link to="/"><div class="text-2xl font-bold">SABAI BOOKING</div></router-link>
+            <div @click="handleLogoClick" class="text-2xl font-bold cursor-pointer">SABAI BOOKING</div>
           </div>
           <div class="hidden sm:ml-6 sm:block">
                 <!-- ใส่ชื่อ -->
