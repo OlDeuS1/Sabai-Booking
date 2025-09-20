@@ -6,6 +6,7 @@ import Search from '../views/Search.vue';
 import HotelDetail from '../views/HotelDetail.vue';
 import History from '../views/History.vue';
 import admin from '../views/AdminManagement.vue';
+import HistoryBooking_Admin from '../views/HistoryBooking_Admin.vue';
 
 const routes = [
   { path: '', component: Home},
@@ -14,7 +15,8 @@ const routes = [
   { path: '/search', component: Search, name: 'search'},
   { path: '/hotel/:id', component: HotelDetail, name: 'hotel-detail' },
   { path: '/historyBooking', component: History },
-  { path: '/admin-management', component: admin },
+  { path: '/admin', component: admin },
+  { path: '/admin/history-booking/:userId', component: HistoryBooking_Admin, name: 'HistoryBooking_Admin' },
 ];
 
 const router = createRouter({

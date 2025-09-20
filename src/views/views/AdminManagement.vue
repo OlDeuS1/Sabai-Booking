@@ -26,6 +26,17 @@ onMounted(async () => {
   hotelsWithRooms.value = await Promise.all(hotelPromises);
   isLoading.value = false;
 });
+
+const goToUserBookingHistory = (user) => {
+  router.push({
+    name: 'HistoryBooking_Admin',
+    params: { userId: user.user_id },
+    query: { 
+      firstName: user.first_name, 
+      lastName: user.last_name 
+    }
+  });
+};
 </script>
 
 <template>
@@ -58,7 +69,7 @@ onMounted(async () => {
                         <td class="border">{{ user.email }}</td>
                         <td>{{ user.phone_number }}</td>
                         <td class="text-right">
-                            <button class="cursor-pointer bg-[#102B58] text-white p-2 w-30 rounded-sm">ประวัติการจอง</button>
+                            <button @click="goToUserBookingHistory(user)" class="cursor-pointer bg-[#102B58] text-white p-2 w-30 rounded-sm">ประวัติการจอง</button>
                         </td>
                     </tr>
                 </tbody>
