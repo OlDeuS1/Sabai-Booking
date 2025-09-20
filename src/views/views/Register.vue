@@ -1,7 +1,10 @@
 <script setup>
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import ButtonSubmit from '../components/ButtonSubmit.vue';
 import FormInput from '../components/FormInput.vue';
+
+const router = useRouter();
 
 const firstName = ref('');
 const lastName = ref('');
@@ -47,7 +50,39 @@ async function handleRegister() {
     } else {
       error.value = '';
       success.value = 'สมัครสมาชิกสำเร็จ!';
-      // TODO: redirect/login if needed
+      
+      // Auto login after successful registration
+      try {
+        const loginRes = await fetch('http://localhost:3000/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            email: email.value,
+            password: password.value
+          })
+        });
+        
+        const loginData = await loginRes.json();
+        
+        if (loginRes.ok) {
+          success.value = 'สมัครสมาชิกและเข้าสู่ระบบสำเร็จ!';
+          // Redirect to home page after successful login
+          setTimeout(() => {
+            router.push('/');
+          }, 1500);
+        } else {
+          success.value = 'สมัครสมาชิกสำเร็จ กรุณาเข้าสู่ระบบ';
+          setTimeout(() => {
+            router.push('/login');
+          }, 1500);
+        }
+      } catch (loginError) {
+        success.value = 'สมัครสมาชิกสำเร็จ กรุณาเข้าสู่ระบบ';
+        setTimeout(() => {
+          router.push('/login');
+        }, 1500);
+      }
     }
   } catch (e) {
     error.value = 'Network error.';
