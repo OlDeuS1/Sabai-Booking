@@ -43,7 +43,7 @@ async function handleLogin() {
       if (data && data.role) {
         switch(data.role) {
           case 'admin':
-            router.push('/admin-management');
+            router.push('/admin');
             break;
           case 'hotel':
             router.push('/hotel-management');
