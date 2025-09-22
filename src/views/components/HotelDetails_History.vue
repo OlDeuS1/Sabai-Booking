@@ -89,7 +89,7 @@ const dialogVisible = ref(false)
                 <div class="p-2.5 text-center w-30 text-white rounded-sm font-semibold" 
                     :class="{
                         'bg-[#00D35F]': booking.booking_status === 'completed'
-                        , 'bg-[#F2B900]': booking.booking_status === 'pending'
+                        // , 'bg-[#F2B900]': booking.booking_status === 'pending'
                         , 'bg-red-500': booking.booking_status === 'cancelled'
                         , 'bg-blue-500': booking.booking_status === 'confirmed'
                     }">

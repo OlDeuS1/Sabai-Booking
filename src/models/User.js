@@ -79,7 +79,7 @@ export class User {
         FROM bookings b
         JOIN hotels h ON b.hotel_id = h.hotel_id
         JOIN rooms r ON b.room_id = r.room_id
-        WHERE b.user_id = ?
+        WHERE b.user_id = ? AND b.booking_status != 'pending'
         ORDER BY b.created_at DESC
       `;
       db.all(sql, [userId], (err, rows) => {
