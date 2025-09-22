@@ -24,6 +24,7 @@ onMounted(async () => {
             <div class="history__booking-list flex flex-col gap-4" v-if="bookings.length">
                 <HotelDetails_History v-for="b in bookings" :key="b.booking_id" :booking="b" />
             </div>
+            <div class="history__booking-list text-center text-gray-400 p-17" v-else>ยังไม่มีการจอง</div>
         </div>
     </div>
     

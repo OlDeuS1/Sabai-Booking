@@ -1,14 +1,17 @@
 <script setup>
 import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline'
 import { onMounted, ref, computed } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { getHotelAdminData, getHotelRoomData, getNormalUsers } from '../composables/getData';
 
+const route = useRoute();
 const router = useRouter();
 const hotelData = ref([]);
 const isLoading = ref(true);
 const hotelsWithRooms = ref([]);
 const userData = ref([])
+const searchUser = ref(route.query.user ?? '');
+const searchHotel = ref(route.query.hotel ??'');
 
 onMounted(async () => {
   hotelData.value = await getHotelAdminData();
@@ -37,6 +40,32 @@ const goToUserBookingHistory = (user) => {
     }
   });
 };
+
+const updateSearchQuery = function(){
+    const query = { ...route.query }
+
+    query.user = searchUser.value ? searchUser.value.toLowerCase() : undefined 
+    query.hotel = searchHotel.value ? searchHotel.value.toLowerCase() : undefined 
+
+    router.push({name: 'Admin', query: query})
+}
+
+const userFilter = computed(() => {
+    if(userData.value.length) {
+        if(route.query.user)
+            return userData.value.filter(u => String(u.first_name + ' ' + u.last_name).toLowerCase().includes(route.query.user.toLowerCase()))
+        return userData.value
+    }
+})
+
+const hotelFiler = computed(() => {
+    if(hotelsWithRooms.value.length) {
+        if(route.query.hotel)
+            return hotelsWithRooms.value.filter(h => String(h.hotel_name).toLowerCase().includes(route.query.hotel.toLowerCase()))
+        return hotelsWithRooms.value
+    }
+})
+
 </script>
 
 <template>
@@ -46,10 +75,12 @@ const goToUserBookingHistory = (user) => {
             <div class="flex justify-between mb-4 items-center">
                 <div class="text-2xl font-semibold">รายชื่อผู้ใช้</div>
                 <div class="relative">
-                    <input type="text" name="" id="" class="rounded-sm p-3 text-sm w-80 h-10 bg-white text-black border-none" placeholder="ค้นหาชื่อผู้ใช้">
-                    <button type="submit" class="absolute inset-y-1 right-2 flex items-center justify-center w-8 h-8 rounded-full bg-black cursor-pointer">
-                        <MagnifyingGlassIcon class="w-5 h-5 text-white"/>
-                    </button>
+                    <form @submit.prevent="updateSearchQuery">
+                        <input type="text" v-model="searchUser" name="" id="" class="rounded-sm p-3 text-sm w-80 h-10 bg-white text-black border-none" placeholder="ค้นหาชื่อผู้ใช้">
+                        <button @click.prevent="updateSearchQuery" type="submit" class="absolute inset-y-1 right-2 flex items-center justify-center w-8 h-8 rounded-full bg-black cursor-pointer">
+                            <MagnifyingGlassIcon class="w-5 h-5 text-white"/>
+                        </button>
+                    </form>
                 </div>
             </div>
             <table class="table-auto w-300">
@@ -62,8 +93,8 @@ const goToUserBookingHistory = (user) => {
                         <th></th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr class="border border-l-0 border-r-0" v-for="(user, index) in userData" :key="index">
+                <tbody v-if="userFilter?.length">
+                    <tr class="border border-l-0 border-r-0" v-for="(user, index) in userFilter" :key="index">
                         <td>{{ index + 1 }}</td>
                         <td class="border">{{ user.first_name }} {{ user.last_name }}</td>
                         <td class="border">{{ user.email }}</td>
@@ -73,6 +104,9 @@ const goToUserBookingHistory = (user) => {
                         </td>
                     </tr>
                 </tbody>
+                <tbody v-else>
+                    <tr class="border border-l-0 border-r-0 text-gray-400 text-center" colspan="6">ไม่พบข้อมูลที่ค้นหา</tr>
+                </tbody>
             </table>
         </div>
 
@@ -81,10 +115,12 @@ const goToUserBookingHistory = (user) => {
             <div class="flex justify-between mt-28 mb-4 items-center">
                 <div class="text-2xl font-semibold">รายชื่อโรงแรม</div>
                 <div class="relative">
-                    <input type="text" name="" id="" class="rounded-sm p-3 text-sm w-80 h-10 bg-white text-black border-none" placeholder="ค้นหาชื่อโรงแรม">
-                    <button type="submit" class="absolute inset-y-1 right-2 flex items-center justify-center w-8 h-8 rounded-full bg-black cursor-pointer">
-                        <MagnifyingGlassIcon class="w-5 h-5 text-white"/>
-                    </button>
+                    <form @submit.prevent="updateSearchQuery">
+                        <input type="text" v-model="searchHotel" name="" id="" class="rounded-sm p-3 text-sm w-80 h-10 bg-white text-black border-none" placeholder="ค้นหาชื่อโรงแรม">
+                        <button @click.prevent="updateSearchQuery" type="submit" class="absolute inset-y-1 right-2 flex items-center justify-center w-8 h-8 rounded-full bg-black cursor-pointer">
+                            <MagnifyingGlassIcon class="w-5 h-5 text-white"/>
+                        </button>
+                    </form>
                 </div>
             </div>
             <table class="table-auto w-300">
@@ -97,8 +133,8 @@ const goToUserBookingHistory = (user) => {
                         <th></th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr class="border border-l-0 border-r-0" v-for="(hotel, index) in hotelsWithRooms" :key="index">
+                <tbody v-if="hotelFiler?.length">
+                    <tr class="border border-l-0 border-r-0" v-for="(hotel, index) in hotelFiler" :key="index">
                         <td>{{ index + 1 }}</td>
                         <td class="border">
                             <div class="text-lg mb-1">{{ hotel.hotel_name }}</div>
@@ -123,6 +159,9 @@ const goToUserBookingHistory = (user) => {
                             </div>
                         </td>
                     </tr>
+                </tbody>
+                <tbody v-else>
+                    <tr class="border border-l-0 border-r-0 text-gray-400 text-center" colspan="6">ไม่พบข้อมูลที่ค้นหา</tr>
                 </tbody>
             </table>
         </div>
