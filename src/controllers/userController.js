@@ -112,6 +112,27 @@ class UserController {
     }
   }
 
+  static async getCurrentUser(req, res) {
+    try {
+      const userId = req.cookies.userId;
+      if (!userId) {
+        return res.status(401).json({ error: "ไม่ได้ล็อกอิน" });
+      }
+      
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ error: "ไม่พบผู้ใช้" });
+      }
+      
+      // ไม่ส่ง password_hash กลับไป
+      const { password_hash, ...userWithoutPassword } = user;
+      res.json(userWithoutPassword);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
   static async getUserBookings(req, res) {
     try {
       const userId = req.params.userId;

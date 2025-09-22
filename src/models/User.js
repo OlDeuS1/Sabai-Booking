@@ -28,6 +28,15 @@ export class User {
     });
   }
 
+  static findById(userId) {
+    return new Promise((resolve, reject) => {
+      db.get("SELECT * FROM users WHERE user_id = ?", [userId], (err, row) => {
+        if (err) reject(err);
+        else resolve(row);
+      });
+    });
+  }
+
   static findByEmailAndPassword(email, password_hash) {
     return new Promise((resolve, reject) => {
       db.get(
