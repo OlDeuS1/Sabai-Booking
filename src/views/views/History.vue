@@ -10,7 +10,7 @@ onMounted(async () => {
     curUser.value = await getUserCur();
 
     if (curUser.value) {
-        bookings.value = await getUserBookingHistory(curUser.value.userId);;
+        bookings.value = await getUserBookingHistory(curUser.value.user_id);
     }
 });
 

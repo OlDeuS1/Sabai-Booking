@@ -15,9 +15,8 @@ const userCur = ref(null);
 
 const fetchUserCurrent = async () => {
   try {
-    const resUsers = await axios.get('http://localhost:3000/api/users');
-    const resUserCur = await axios.get(`http://localhost:3000/api/profile`, { withCredentials: true });
-    userCur.value = Array.from(resUsers.data).filter(user => user.user_id === Number(resUserCur.data.userId))[0];
+    const resUserCur = await axios.get(`http://localhost:3000/api/current-user`, { withCredentials: true });
+    userCur.value = resUserCur.data;
   } catch (error) {
     console.error('Error fetching user:', error);
     userCur.value = null;

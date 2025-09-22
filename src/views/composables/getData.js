@@ -2,7 +2,7 @@ import axios from "axios";
 
 export const getUserCur = async function(){
   try {
-    const res = await axios.get('http://localhost:3000/api/profile', { withCredentials: true })
+    const res = await axios.get('http://localhost:3000/api/current-user', { withCredentials: true })
     return res.data;
   } catch(err) {
     alert(`eror : ${err.message}`);
