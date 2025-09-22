@@ -32,7 +32,11 @@ const routes = [
     name: "HistoryBooking_Admin",
     meta: { requiresAuth: true, roles: ["admin"] }, // เพิ่ม meta สำหรับป้องกัน
   },
-  { path: '/hotel-management', component: AdminHotel},
+  { path: '/hotel-management', 
+    component: AdminHotel, 
+    name: 'AdminHotel',
+    meta: { requiresAuth: true, roles: ['admin', 'hotel'] } // ต้องล็อกอิน + role=admin
+  },
 ];
 
 const router = createRouter({
