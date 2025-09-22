@@ -6,12 +6,16 @@ const props = defineProps({
     hotelData: {
         type: Object,
         default: {},
+    },
+    searchData: {
+        type: Object,
+        default: {},
     }
 })
 </script>
 
 <template>
-    <router-link :to="{ name: 'hotel-detail', params: { id: props.hotelData.hotel_id } }">
+    <router-link :to="{ name: 'hotel-detail', params: { id: props.hotelData.hotel_id }, query: searchData}">
     <div class="grid mb-24 mt-6 w-full">
         <div class="flex shadow-2xl rounded-lg bg-white">
             <img :src="props.hotelData.image_urls[0]" alt="test-hotel-image" class="w-100 h-50 object-cover rounded-md">

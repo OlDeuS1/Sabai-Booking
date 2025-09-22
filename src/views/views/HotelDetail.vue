@@ -1,11 +1,12 @@
 <script setup>
 import { getHotelData, getHotelRoomData } from '../composables/getData';
 import { ref, onMounted, computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 const HotelData = ref([])
 const RoomData = ref([])
 const route = useRoute()
+const router = useRouter()
 
 onMounted(async () => {
     HotelData.value = await getHotelData()
@@ -16,10 +17,9 @@ const hotel = computed(() => {
     return HotelData.value.find(h => h.hotel_id === Number(route.params.id)) || null;
 });
 
-const selectData = ref({})
+const selectData = ref({...route.query} ?? {})
 
 const custom_selectData = function () {
-    selectData.value = { checkInOutDate: ['', ''], numPeople: 0, numRoom: 0 };
     selectData.value.checkInOutDate = [selectData.value.checkIn ?? '', selectData.value.checkOut ?? '']
     selectData.value.numRoom = Number(selectData.value.numRoom)
     selectData.value.numPeople = Number(selectData.value.numPeople)
@@ -35,6 +35,32 @@ const rooms = computed(() => {
 });
 
 const room_option = ref('')
+const processBooking = function(){
+    if(selectData.value.checkInOutDate[0] === '' || selectData.value.checkInOutDate[1] === '') {
+        alert('please, select your checkin and checkout')
+        return;
+    }
+    if(!selectData.value.numRoom) {
+        alert('please, enter your num room')
+        return;
+    } 
+    if(!selectData.value.numPeople) {
+        alert('please, enter your num people')
+        return;
+    }
+
+    if(!room_option.value){
+        alert('please, select your room type')
+        return;
+    }
+
+    selectData.value.room_id = room_option.value
+    selectData.value.checkIn = new Date(selectData.value.checkInOutDate[0]).toISOString().split('T')[0];
+    selectData.value.checkOut = new Date(selectData.value.checkInOutDate[1]).toISOString().split('T')[0];
+    selectData.value.checkInOutDate = undefined;
+
+    router.push({ name: 'payment', params: { booking_id: route.params.id } })
+}
 </script>
 
 <template>
@@ -113,8 +139,8 @@ const room_option = ref('')
                             </el-popover>
                         </div>
 
-                        <button type="submit"
-                            class="w-full bg-green-500 text-white py-3 rounded-md font-semibold hover:bg-green-600 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                        <button type="submit" @click.prevent="processBooking"
+                            class="w-full bg-green-500 cursor-pointer text-white py-3 rounded-md font-semibold hover:bg-green-600 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
                             จองห้องพัก
                         </button>
                     </form>

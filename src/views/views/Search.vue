@@ -78,6 +78,7 @@ const searchHotel = function(payload) {
           v-for="h in hotelSearch" 
           :key="h.hotel_id" 
           :hotelData="h"
+          :searchData="searchData"
           />
       </div>
       <div class="hotel__search w-full text-center text-gray-400 py-15" v-else>

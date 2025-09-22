@@ -8,7 +8,7 @@ const props = defineProps({
 </script>
 
 <template>
-  <router-link :to="{ name: 'hotel-detail', params: { id: props.hotel.hotel_id } }">
+  <router-link :to="{ name: 'hotel-detail', params: { id: props.hotel.hotel_id }, query: {where: props.hotel.city, numRoom: 1, numPeople: 1} }">
     <el-card style="max-width: 480px">
       <img
       :src="props.hotel.image_urls[0]"
