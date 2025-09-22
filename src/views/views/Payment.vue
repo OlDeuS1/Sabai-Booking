@@ -1,11 +1,14 @@
 <script setup>
+import { usePreviousRoute } from '../composables/usePrevRoute';
+
+const { previousRoute } = usePreviousRoute()
 
 </script>
 
 <template>
   <div class="payment">
         <div class="payment-container max-w-7xl mx-auto px-[32px] py-[8px] flex flex-col h-screen sticky top-0 left-0">
-            <h1 class="text-4xl font-semibold text-left mt-12 mb-10">ยืนยันและชำระเงิน</h1>
+            <h1 class="text-4xl font-semibold text-left mt-12 mb-10"><router-link :to="previousRoute">&LeftArrow;&nbsp;</router-link>ยืนยันและชำระเงิน</h1>
             <div class="payment__content flex justify-center items-center gap-20">
               <div class="payment__qrcode text-[5rem]">QR CODE</div>
               <div class="payment__detail">

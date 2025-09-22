@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import { usePreviousRoute } from '../composables/usePrevRoute';
 import Home from '../views/Home.vue'
 import Login from '../views/Login.vue';
 import Register from '../views/Register.vue';
@@ -39,8 +40,11 @@ const router = createRouter({
   routes,
 });
 
+const { setPreviousRoute } = usePreviousRoute()
+
 // Navigation Guard สำหรับตรวจสอบสิทธิ์การเข้าถึง
 router.beforeEach(async (to, from, next) => {
+  setPreviousRoute(from.fullPath)
   // ตรวจสอบว่าเส้นทางต้องการการยืนยันตัวตนหรือไม่
   if (to.matched.some(record => record.meta.requiresAuth)) {
     try {
