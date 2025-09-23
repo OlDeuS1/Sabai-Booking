@@ -1,5 +1,5 @@
 <script setup>
-import { getHotelData, getHotelRoomData } from '../composables/getData';
+import { getHotelData, getHotelRoomData, createBooking } from '../composables/getData';
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -35,7 +35,7 @@ const rooms = computed(() => {
 });
 
 const room_option = ref('')
-const processBooking = function(){
+const processBooking = async function(){
     if(selectData.value.checkInOutDate[0] === '' || selectData.value.checkInOutDate[1] === '') {
         alert('please, select your checkin and checkout')
         return;
@@ -54,12 +54,36 @@ const processBooking = function(){
         return;
     }
 
-    selectData.value.room_id = room_option.value
-    selectData.value.checkIn = new Date(selectData.value.checkInOutDate[0]).toISOString().split('T')[0];
-    selectData.value.checkOut = new Date(selectData.value.checkInOutDate[1]).toISOString().split('T')[0];
-    selectData.value.checkInOutDate = undefined;
+    try {
+        // เตรียมข้อมูลสำหรับสร้างการจอง
+        const bookingData = {
+            room_id: room_option.value,
+            hotel_id: route.params.id,
+            check_in_date: new Date(selectData.value.checkInOutDate[0]).toISOString().split('T')[0],
+            check_out_date: new Date(selectData.value.checkInOutDate[1]).toISOString().split('T')[0],
+            num_guests: selectData.value.numPeople,
+            num_rooms: selectData.value.numRoom
+        };
 
-    router.push({ name: 'payment', params: { booking_id: route.params.id } })
+        // สร้างการจองใหม่
+        const response = await createBooking(bookingData);
+        
+        if (response.success) {
+            // ส่งไปหน้า payment พร้อม booking_id ที่สร้างใหม่
+            router.push({ 
+                name: 'payment', 
+                params: { booking_id: response.booking.booking_id }
+            });
+        }
+    } catch (error) {
+        console.error('Error creating booking:', error);
+        if (error.response && error.response.status === 401) {
+            alert('กรุณาเข้าสู่ระบบก่อนทำการจอง');
+            router.push('/login');
+        } else {
+            alert('เกิดข้อผิดพลาดในการสร้างการจอง กรุณาลองใหม่อีกครั้ง');
+        }
+    }
 }
 </script>
 

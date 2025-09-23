@@ -3,6 +3,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import UserController from "../controllers/userController.js";
 import HotelController from "../controllers/hotelController.js";
+import BookingController from "../controllers/bookingController.js";
 import { checkLogin } from "../middleware/auth.js";
 
 const app = express();
@@ -29,6 +30,11 @@ app.get("/api/user/normal", UserController.getNormalUsers);
 app.get("/api/hotels", HotelController.getAllHotels);
 app.get("/api/hotel/:hotelId/rooms", HotelController.getHotelRooms);
 app.get("/api/hotels/admin", HotelController.getAllHotelAdminData); // เพิ่มเส้นทางนี้
+
+// Booking Routes
+app.post("/api/bookings", BookingController.createBooking);
+app.get("/api/booking/:bookingId", BookingController.getBookingById);
+app.put("/api/booking/:bookingId/status", BookingController.updateBookingStatus);
 
 // Start server
 app.listen(3000, () =>

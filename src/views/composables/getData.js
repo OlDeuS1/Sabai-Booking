@@ -55,3 +55,15 @@ export const getNormalUsers = async function () {
     alert(`eror : ${err.message}`);
   }
 };
+
+export const createBooking = async function(bookingData) {
+  try {
+    const res = await axios.post('http://localhost:3000/api/bookings', bookingData, { 
+      withCredentials: true 
+    });
+    return res.data;
+  } catch (err) {
+    console.error('Error creating booking:', err);
+    throw err;
+  }
+};
