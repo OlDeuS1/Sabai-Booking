@@ -2,7 +2,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { usePreviousRoute } from '../composables/usePrevRoute'
-import { getBookingById, updateBookingStatus } from '../composables/getData'
+import { getBookingById, updateBookingStatus, createPayment } from '../composables/getData'
 import generatePayload from 'promptpay-qr'
 import QRCode from 'qrcode'
 
@@ -78,6 +78,12 @@ const confirmPayment = async () => {
   try {
     const bookingId = route.params.booking_id
     
+    // สร้าง payment record
+    await createPayment({
+      booking_id: bookingId,
+      payment_method: 'PromptPay'
+    })
+    
     // อัปเดตสถานะการจองเป็น confirmed
     await updateBookingStatus(bookingId, 'confirmed')
     
@@ -90,7 +96,13 @@ const confirmPayment = async () => {
     }, 2000)
   } catch (error) {
     console.error('Error confirming payment:', error)
-    alert('เกิดข้อผิดพลาดในการยืนยันการชำระเงิน กรุณาลองใหม่อีกครั้ง')
+    
+    // จัดการข้อผิดพลาดเฉพาะกรณี
+    if (error.response && error.response.status === 409) {
+      alert('มีการชำระเงินสำหรับการจองนี้แล้ว')
+    } else {
+      alert('เกิดข้อผิดพลาดในการยืนยันการชำระเงิน กรุณาลองใหม่อีกครั้ง')
+    }
   }
 }
 

@@ -92,3 +92,15 @@ export const updateBookingStatus = async function(bookingId, status) {
     throw err;
   }
 };
+
+export const createPayment = async function(paymentData) {
+  try {
+    const res = await axios.post('http://localhost:3000/api/payments', paymentData, { 
+      withCredentials: true 
+    });
+    return res.data;
+  } catch (err) {
+    console.error('Error creating payment:', err);
+    throw err;
+  }
+};

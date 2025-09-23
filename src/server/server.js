@@ -4,6 +4,7 @@ import cors from "cors";
 import UserController from "../controllers/userController.js";
 import HotelController from "../controllers/hotelController.js";
 import BookingController from "../controllers/bookingController.js";
+import PaymentController from "../controllers/paymentController.js";
 import { checkLogin } from "../middleware/auth.js";
 
 const app = express();
@@ -35,6 +36,12 @@ app.get("/api/hotels/admin", HotelController.getAllHotelAdminData); // เพิ
 app.post("/api/bookings", BookingController.createBooking);
 app.get("/api/booking/:bookingId", BookingController.getBookingById);
 app.put("/api/booking/:bookingId/status", BookingController.updateBookingStatus);
+
+// Payment Routes
+app.post("/api/payments", PaymentController.createPayment);
+app.get("/api/payment/booking/:bookingId", PaymentController.getPaymentByBookingId);
+app.get("/api/payments", PaymentController.getAllPayments);
+app.put("/api/payment/:paymentId/status", PaymentController.updatePaymentStatus);
 
 // Start server
 app.listen(3000, () =>
