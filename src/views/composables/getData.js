@@ -67,3 +67,28 @@ export const createBooking = async function(bookingData) {
     throw err;
   }
 };
+
+export const getBookingById = async function(bookingId) {
+  try {
+    const res = await axios.get(`http://localhost:3000/api/booking/${bookingId}`, { 
+      withCredentials: true 
+    });
+    return res.data;
+  } catch (err) {
+    console.error('Error getting booking:', err);
+    throw err;
+  }
+};
+
+export const updateBookingStatus = async function(bookingId, status) {
+  try {
+    const res = await axios.put(`http://localhost:3000/api/booking/${bookingId}/status`, 
+      { status }, 
+      { withCredentials: true }
+    );
+    return res.data;
+  } catch (err) {
+    console.error('Error updating booking status:', err);
+    throw err;
+  }
+};
