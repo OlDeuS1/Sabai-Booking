@@ -46,11 +46,13 @@ export class Booking {
   static findById(bookingId) {
     return new Promise((resolve, reject) => {
       const sql = `
-        SELECT b.*, h.hotel_name, r.room_type, r.price_per_night,
+        SELECT b.*, h.hotel_name, h.contact_phone, r.room_type, r.price_per_night,
+               u.phone_number as owner_phone,
                (SELECT image_url FROM hotel_images WHERE hotel_id = b.hotel_id LIMIT 1) AS hotel_image
         FROM bookings b
         JOIN hotels h ON b.hotel_id = h.hotel_id
         JOIN rooms r ON b.room_id = r.room_id
+        JOIN users u ON h.owner_id = u.user_id
         WHERE b.booking_id = ?
       `;
       

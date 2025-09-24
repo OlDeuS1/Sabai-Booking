@@ -16,7 +16,7 @@ const isLoading = ref(true)
 const error = ref('')
 
 // PromptPay ข้อมูล
-const promptPayPhone = '0875513773' // เปลี่ยนเป็นเบอร์โทรของโรงแรม
+const promptPayPhone = ref('') // จะดึงจากข้อมูลเจ้าของโรงแรม
 const qrCodeImage = ref('')
 const isPaymentConfirmed = ref(false)
 
@@ -52,6 +52,9 @@ const fetchBookingData = async () => {
 
     const booking = await getBookingById(bookingId)
     bookingData.value = booking
+    
+    // ตั้งค่าเบอร์ PromptPay จากเจ้าของโรงแรม
+    promptPayPhone.value = booking.owner_phone || booking.contact_phone || '0875513773' // fallback เบอร์
   } catch (err) {
     console.error('Error fetching booking:', err)
     error.value = 'ไม่สามารถโหลดข้อมูลการจองได้'
@@ -63,9 +66,9 @@ const fetchBookingData = async () => {
 // สร้าง QR Code
 const generateQRCode = async () => {
   try {
-    if (!bookingData.value) return
+    if (!bookingData.value || !promptPayPhone.value) return
     
-    const payload = generatePayload(promptPayPhone, { amount: bookingData.value.total_price })
+    const payload = generatePayload(promptPayPhone.value, { amount: bookingData.value.total_price })
     const qrCodeDataURL = await QRCode.toDataURL(payload)
     qrCodeImage.value = qrCodeDataURL
   } catch (error) {
@@ -143,7 +146,8 @@ onMounted(async () => {
                   <span class="text-gray-500">กำลังสร้าง QR Code...</span>
                 </div>
                 <p class="text-sm text-gray-600 mt-2 text-center">
-                  สแกนด้วยแอป Banking หรือ PromptPay
+                  สแกนด้วยแอป Banking หรือ PromptPay<br>
+                  <span class="text-xs text-gray-500">ชำระเงินไปที่: {{ promptPayPhone }}</span>
                 </p>
               </div>
               <div class="payment__detail">
