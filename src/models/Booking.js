@@ -14,14 +14,17 @@ export class Booking {
         booking_status = 'pending'
       } = bookingData;
 
+      // กำหนดเวลาหมดอายุ (15 นาทีจากตอนสร้าง booking)
+      const expires_at = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+
       const sql = `
-        INSERT INTO bookings (user_id, room_id, hotel_id, check_in_date, check_out_date, num_guests, total_price, booking_status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO bookings (user_id, room_id, hotel_id, check_in_date, check_out_date, num_guests, total_price, booking_status, expires_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
 
       db.run(
         sql,
-        [user_id, room_id, hotel_id, check_in_date, check_out_date, num_guests, total_price, booking_status],
+        [user_id, room_id, hotel_id, check_in_date, check_out_date, num_guests, total_price, booking_status, expires_at],
         function (err) {
           if (err) {
             reject(err);
@@ -35,7 +38,8 @@ export class Booking {
               check_out_date,
               num_guests,
               total_price,
-              booking_status
+              booking_status,
+              expires_at
             });
           }
         }
@@ -87,5 +91,52 @@ export class Booking {
     const nights = Math.ceil(timeDiff / (1000 * 3600 * 24));
     
     return pricePerNight * nights * numRooms;
+  }
+
+  // ฟังก์ชันยกเลิกการจองที่หมดอายุ
+  static cancelExpiredBookings() {
+    return new Promise((resolve, reject) => {
+      const currentTime = new Date().toISOString();
+      const sql = `
+        UPDATE bookings 
+        SET booking_status = 'cancelled' 
+        WHERE booking_status = 'pending' 
+        AND expires_at < ? 
+        AND expires_at IS NOT NULL
+      `;
+
+      db.run(sql, [currentTime], function (err) {
+        if (err) {
+          reject(err);
+        } else {
+          // แสดงข้อความเฉพาะเมื่อมีการยกเลิกจริงๆ
+          if (this.changes > 0) {
+            console.log(`Auto-cancelled ${this.changes} expired bookings`);
+          }
+          resolve(this.changes);
+        }
+      });
+    });
+  }
+
+  // ฟังก์ชันดึงข้อมูล booking ที่กำลังจะหมดอายุ
+  static getPendingBookingsWithExpiry() {
+    return new Promise((resolve, reject) => {
+      const sql = `
+        SELECT booking_id, expires_at, booking_status
+        FROM bookings 
+        WHERE booking_status = 'pending' 
+        AND expires_at IS NOT NULL
+        ORDER BY expires_at ASC
+      `;
+
+      db.all(sql, [], (err, rows) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(rows);
+        }
+      });
+    });
   }
 }

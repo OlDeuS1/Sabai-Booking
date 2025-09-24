@@ -6,6 +6,7 @@ import HotelController from "../controllers/hotelController.js";
 import BookingController from "../controllers/bookingController.js";
 import PaymentController from "../controllers/paymentController.js";
 import { checkLogin } from "../middleware/auth.js";
+import { Booking } from "../models/Booking.js";
 
 const app = express();
 
@@ -36,6 +37,15 @@ app.get("/api/hotels/admin", HotelController.getAllHotelAdminData); // เพิ
 app.post("/api/bookings", BookingController.createBooking);
 app.get("/api/booking/:bookingId", BookingController.getBookingById);
 app.put("/api/booking/:bookingId/status", BookingController.updateBookingStatus);
+app.post("/api/bookings/cancel-expired", async (req, res) => {
+  try {
+    const cancelledCount = await Booking.cancelExpiredBookings();
+    res.json({ message: `Cancelled ${cancelledCount} expired bookings` });
+  } catch (error) {
+    console.error('Error cancelling expired bookings:', error);
+    res.status(500).json({ error: 'Failed to cancel expired bookings' });
+  }
+});
 
 // Payment Routes
 app.post("/api/payments", PaymentController.createPayment);
@@ -43,7 +53,18 @@ app.get("/api/payment/booking/:bookingId", PaymentController.getPaymentByBooking
 app.get("/api/payments", PaymentController.getAllPayments);
 app.put("/api/payment/:paymentId/status", PaymentController.updatePaymentStatus);
 
+// Auto-cancel expired bookings every minute
+setInterval(async () => {
+  try {
+    await Booking.cancelExpiredBookings();
+  } catch (error) {
+    console.error('Error auto-cancelling expired bookings:', error);
+  }
+}, 60000); // ตรวจสอบทุก 1 นาที
+
 // Start server
-app.listen(3000, () =>
-  console.log("🚀 Server running at http://localhost:3000")
-);
+app.listen(3000, () => {
+  console.log("🚀 Server running at http://localhost:3000");
+  // ตรวจสอบการจองที่หมดอายุเมื่อเริ่มเซิร์ฟเวอร์
+  Booking.cancelExpiredBookings().catch(console.error);
+});
