@@ -4,6 +4,7 @@ const Amount = `/src/views/assets/icons/amount-room.png`
 const Price = `/src/views/assets/icons/price.png`
 const ImageTest = `/src/views/assets/images/test.png`
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import dayjs from 'dayjs';
 
 const props = defineProps({
@@ -44,6 +45,12 @@ const checkOutYear = dayjs(checkOut).year() + 543
 
 const rating = ref(0)
 const dialogVisible = ref(false)
+const router = useRouter()
+
+// ฟังก์ชันไปหน้าชำระเงิน
+const goToPayment = () => {
+    router.push(`/payment/${booking.value.booking_id}`)
+}
 </script>
 
 <template>
@@ -73,10 +80,19 @@ const dialogVisible = ref(false)
                     <span class="">{{ booking.total_price }}</span>
                 </div>
             </div>
-            <div class="flex items-end mr-4">
-                <div class="pb-2 w-auto rounded-sm font-semibold mr-3 cursor-pointer" v-if="booking.booking_status === 'completed'">
+            <div class="flex items-end mr-4 gap-3">
+                <!-- ปุ่มรีวิวสำหรับ booking ที่เสร็จสิ้นแล้ว -->
+                <div class="pb-2 w-auto rounded-sm font-semibold cursor-pointer" v-if="booking.booking_status === 'completed'">
                     <el-rate v-model="rating" @click="dialogVisible = true" allow-half />
                 </div>
+                
+                <!-- ปุ่มชำระเงินสำหรับ booking ที่ยังเป็น pending -->
+                <div v-if="booking.booking_status === 'pending'" class="pb-2">
+                    <el-button style="padding: 1rem;" type="warning" @click="goToPayment" size="small">
+                        ชำระเงิน
+                    </el-button>
+                </div>
+
                 <el-dialog v-model="dialogVisible" title="ยืนยันการส่งรีวิวโรงแรม" width="500" :before-close="handleClose">
                     <span>คุณแน่ใจหรือไม่ว่าต้องการส่งรีวิวนี้? เมื่อส่งแล้วจะไม่สามารถแก้ไขได้</span>
                     <template #footer>
@@ -86,12 +102,14 @@ const dialogVisible = ref(false)
                     </div>
                     </template>
                 </el-dialog>
+                
+                <!-- Status badge -->
                 <div class="p-2.5 text-center w-30 text-white rounded-sm font-semibold" 
                     :class="{
-                        'bg-[#00D35F]': booking.booking_status === 'completed'
-                        // , 'bg-[#F2B900]': booking.booking_status === 'pending'
-                        , 'bg-red-500': booking.booking_status === 'cancelled'
-                        , 'bg-blue-500': booking.booking_status === 'confirmed'
+                        'bg-[#00D35F]': booking.booking_status === 'completed',
+                        'bg-[#F2B900]': booking.booking_status === 'pending',
+                        'bg-red-500': booking.booking_status === 'cancelled',
+                        'bg-blue-500': booking.booking_status === 'confirmed'
                     }">
                     {{ booking.booking_status }}
                 </div>
