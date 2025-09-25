@@ -139,4 +139,51 @@ export class Booking {
       });
     });
   }
+
+  // ฟังก์ชันอัพเดท booking ที่หมดวันที่ checkout เป็น completed
+  static completeExpiredCheckouts() {
+    return new Promise((resolve, reject) => {
+      const currentDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+      const sql = `
+        UPDATE bookings 
+        SET booking_status = 'completed' 
+        WHERE booking_status = 'confirmed' 
+        AND check_out_date < ?
+      `;
+
+      db.run(sql, [currentDate], function (err) {
+        if (err) {
+          reject(err);
+        } else {
+          // แสดงข้อความเฉพาะเมื่อมีการอัพเดทจริงๆ
+          if (this.changes > 0) {
+            console.log(`Auto-completed ${this.changes} bookings after checkout date`);
+          }
+          resolve(this.changes);
+        }
+      });
+    });
+  }
+
+  // ฟังก์ชันดึงข้อมูล booking ที่ควรจะ completed
+  static getExpiredCheckouts() {
+    return new Promise((resolve, reject) => {
+      const currentDate = new Date().toISOString().split('T')[0];
+      const sql = `
+        SELECT booking_id, check_out_date, booking_status
+        FROM bookings 
+        WHERE booking_status = 'confirmed' 
+        AND check_out_date < ?
+        ORDER BY check_out_date ASC
+      `;
+
+      db.all(sql, [currentDate], (err, rows) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(rows);
+        }
+      });
+    });
+  }
 }

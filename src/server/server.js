@@ -47,6 +47,15 @@ app.post("/api/bookings/cancel-expired", async (req, res) => {
     res.status(500).json({ error: 'Failed to cancel expired bookings' });
   }
 });
+app.post("/api/bookings/complete-checkouts", async (req, res) => {
+  try {
+    const completedCount = await Booking.completeExpiredCheckouts();
+    res.json({ message: `Completed ${completedCount} bookings after checkout` });
+  } catch (error) {
+    console.error('Error completing expired checkouts:', error);
+    res.status(500).json({ error: 'Failed to complete expired checkouts' });
+  }
+});
 
 // Payment Routes
 app.post("/api/payments", PaymentController.createPayment);
@@ -61,18 +70,23 @@ app.get("/api/ratings/hotel/:hotelId", RatingController.getRatingsByHotelId);
 app.get("/api/hotel/:hotelId/average-rating", RatingController.getHotelAverageRating);
 app.get("/api/ratings", RatingController.getAllRatings);
 
-// Auto-cancel expired bookings every minute
+// Auto-cancel expired bookings และ auto-complete checkout ทุกนาที
 setInterval(async () => {
   try {
+    // ยกเลิกการจองที่หมดอายุการชำระเงิน
     await Booking.cancelExpiredBookings();
+    
+    // อัพเดทการจองที่หมดวันที่ checkout เป็น completed
+    await Booking.completeExpiredCheckouts();
   } catch (error) {
-    console.error('Error auto-cancelling expired bookings:', error);
+    console.error('Error in auto-update bookings:', error);
   }
 }, 60000); // ตรวจสอบทุก 1 นาที
 
 // Start server
 app.listen(3000, () => {
   console.log("🚀 Server running at http://localhost:3000");
-  // ตรวจสอบการจองที่หมดอายุเมื่อเริ่มเซิร์ฟเวอร์
+  // ตรวจสอบการจองที่หมดอายุและการจองที่ควร completed เมื่อเริ่มเซิร์ฟเวอร์
   Booking.cancelExpiredBookings().catch(console.error);
+  Booking.completeExpiredCheckouts().catch(console.error);
 });
