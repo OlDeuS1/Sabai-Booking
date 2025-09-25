@@ -5,6 +5,7 @@ import UserController from "../controllers/userController.js";
 import HotelController from "../controllers/hotelController.js";
 import BookingController from "../controllers/bookingController.js";
 import PaymentController from "../controllers/paymentController.js";
+import RatingController from "../controllers/ratingController.js";
 import { checkLogin } from "../middleware/auth.js";
 import { Booking } from "../models/Booking.js";
 
@@ -52,6 +53,13 @@ app.post("/api/payments", PaymentController.createPayment);
 app.get("/api/payment/booking/:bookingId", PaymentController.getPaymentByBookingId);
 app.get("/api/payments", PaymentController.getAllPayments);
 app.put("/api/payment/:paymentId/status", PaymentController.updatePaymentStatus);
+
+// Rating Routes
+app.post("/api/ratings", RatingController.createRating);
+app.get("/api/rating/booking/:bookingId", RatingController.getRatingByBookingId);
+app.get("/api/ratings/hotel/:hotelId", RatingController.getRatingsByHotelId);
+app.get("/api/hotel/:hotelId/average-rating", RatingController.getHotelAverageRating);
+app.get("/api/ratings", RatingController.getAllRatings);
 
 // Auto-cancel expired bookings every minute
 setInterval(async () => {

@@ -5,6 +5,8 @@ const Price = `/src/views/assets/icons/price.png`
 const ImageTest = `/src/views/assets/images/test.png`
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { createRating, getRatingByBookingId } from '../composables/getData.js';
+import { ElMessage } from 'element-plus';
 import dayjs from 'dayjs';
 
 const props = defineProps({
@@ -47,6 +49,8 @@ const rating = ref(0)
 const dialogVisible = ref(false)
 const router = useRouter()
 const currentTime = ref(new Date())
+const isSubmittingRating = ref(false)
+const hasExistingRating = ref(false)
 let timeInterval = null
 
 // คำนวณเวลาที่เหลือสำหรับการชำระเงิน
@@ -79,11 +83,99 @@ const goToPayment = () => {
     router.push(`/payment/${booking.value.booking_id}`)
 }
 
+// ฟังก์ชันส่ง rating โดยตรงเมื่อกดดาว
+const submitRatingDirect = async (ratingValue) => {
+    if (hasExistingRating.value) {
+        return; // ถ้าให้คะแนนแล้วไม่ให้กดได้
+    }
+
+    if (ratingValue === 0) {
+        return; // ไม่ส่งถ้าเป็น 0
+    }
+
+    isSubmittingRating.value = true;
+
+    try {
+        await createRating({
+            booking_id: booking.value.booking_id,
+            hotel_id: booking.value.hotel_id,
+            rating: ratingValue
+        });
+
+        ElMessage.success('ส่งรีวิวสำเร็จ!');
+        hasExistingRating.value = true;
+    } catch (error) {
+        console.error('Error submitting rating:', error);
+        if (error.response?.status === 409) {
+            ElMessage.error('คุณได้ให้คะแนนการจองนี้แล้ว');
+            hasExistingRating.value = true;
+        } else {
+            ElMessage.error('เกิดข้อผิดพลาดในการส่งรีวิว');
+            rating.value = 0; // รีเซ็ต rating กลับเป็น 0 ถ้าส่งไม่สำเร็จ
+        }
+    } finally {
+        isSubmittingRating.value = false;
+    }
+}
+
+// ฟังก์ชันส่ง rating (สำหรับ dialog - ไม่ใช้แล้ว)
+const submitRating = async () => {
+    if (dialogRating.value === 0) {
+        ElMessage.warning('กรุณาให้คะแนนก่อนส่ง');
+        return;
+    }
+
+    isSubmittingRating.value = true;
+
+    try {
+        await createRating({
+            booking_id: booking.value.booking_id,
+            hotel_id: booking.value.hotel_id,
+            rating: dialogRating.value
+        });
+
+        ElMessage.success('ส่งรีวิวสำเร็จ!');
+        rating.value = dialogRating.value; // เซ็ต rating หลังส่งสำเร็จ
+        hasExistingRating.value = true;
+        dialogVisible.value = false;
+    } catch (error) {
+        console.error('Error submitting rating:', error);
+        if (error.response?.status === 409) {
+            ElMessage.error('คุณได้ให้คะแนนการจองนี้แล้ว');
+            hasExistingRating.value = true;
+        } else {
+            ElMessage.error('เกิดข้อผิดพลาดในการส่งรีวิว');
+        }
+    } finally {
+        isSubmittingRating.value = false;
+    }
+}
+
+
+
+// ตรวจสอบว่ามี rating อยู่แล้วหรือไม่
+const checkExistingRating = async () => {
+    if (booking.value.booking_status === 'completed') {
+        try {
+            const existingRating = await getRatingByBookingId(booking.value.booking_id);
+            if (existingRating) {
+                hasExistingRating.value = true;
+                rating.value = existingRating.rating;
+            }
+        } catch (error) {
+            console.error('Error checking existing rating:', error);
+        }
+    }
+}
+
 // อัพเดทเวลาทุกวินาที
 onMounted(() => {
     timeInterval = setInterval(() => {
         currentTime.value = new Date()
     }, 1000)
+    
+    // ตรวจสอบ rating ที่มีอยู่แล้ว
+    checkExistingRating()
 })
 
 onUnmounted(() => {
@@ -122,8 +214,23 @@ onUnmounted(() => {
             </div>
             <div class="flex items-end mr-4 gap-3">
                 <!-- ปุ่มรีวิวสำหรับ booking ที่เสร็จสิ้นแล้ว -->
-                <div class="pb-2 w-auto rounded-sm font-semibold cursor-pointer" v-if="booking.booking_status === 'completed'">
-                    <el-rate v-model="rating" @click="dialogVisible = true" allow-half />
+                <div class="pb-2 w-auto rounded-sm font-semibold" v-if="booking.booking_status === 'completed'">
+                    <div class="text-center mb-2">
+                        <div v-if="hasExistingRating" class="text-sm text-gray-600 mb-1">คะแนนของคุณ</div>
+                        <div v-else-if="isSubmittingRating" class="text-sm text-orange-600 mb-1">กำลังบันทึก...</div>
+                        <div v-else class="text-sm text-blue-600 mb-1">กดดาวเพื่อให้คะแนน</div>
+                    </div>
+                    <el-rate 
+                        v-model="rating"
+                        @change="submitRatingDirect"
+                        :disabled="hasExistingRating || isSubmittingRating"
+                        :colors="['#F7BA2A', '#F7BA2A', '#F7BA2A']"
+                        allow-half
+                        :show-score="false"
+                    />
+                    <div v-if="hasExistingRating" class="text-xs text-green-600 text-center mt-1">
+                        ✓ ให้คะแนนแล้ว
+                    </div>
                 </div>
                 
                 <!-- ปุ่มชำระเงินและเวลาที่เหลือสำหรับ booking ที่ยังเป็น pending -->
@@ -148,15 +255,7 @@ onUnmounted(() => {
                     </el-button>
                 </div>
 
-                <el-dialog v-model="dialogVisible" title="ยืนยันการส่งรีวิวโรงแรม" width="500" :before-close="handleClose">
-                    <span>คุณแน่ใจหรือไม่ว่าต้องการส่งรีวิวนี้? เมื่อส่งแล้วจะไม่สามารถแก้ไขได้</span>
-                    <template #footer>
-                    <div class="dialog-footer">
-                        <el-button @click="dialogVisible = false">ยกเลิก</el-button>
-                        <el-button type="primary" @click="dialogVisible = false">ยืนยัน</el-button>
-                    </div>
-                    </template>
-                </el-dialog>
+
                 
                 <!-- Status badge -->
                 <div class="p-2.5 text-center w-30 text-white rounded-sm font-semibold" 

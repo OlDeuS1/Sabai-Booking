@@ -104,3 +104,55 @@ export const createPayment = async function(paymentData) {
     throw err;
   }
 };
+
+// Rating API functions
+export const createRating = async function(ratingData) {
+  try {
+    const res = await axios.post('http://localhost:3000/api/ratings', ratingData, { 
+      withCredentials: true 
+    });
+    return res.data;
+  } catch (err) {
+    console.error('Error creating rating:', err);
+    throw err;
+  }
+};
+
+export const getRatingByBookingId = async function(bookingId) {
+  try {
+    const res = await axios.get(`http://localhost:3000/api/rating/booking/${bookingId}`, { 
+      withCredentials: true 
+    });
+    return res.data;
+  } catch (err) {
+    if (err.response && err.response.status === 404) {
+      return null; // ยังไม่มี rating
+    }
+    console.error('Error getting rating:', err);
+    throw err;
+  }
+};
+
+export const getHotelRatings = async function(hotelId) {
+  try {
+    const res = await axios.get(`http://localhost:3000/api/ratings/hotel/${hotelId}`, { 
+      withCredentials: true 
+    });
+    return res.data;
+  } catch (err) {
+    console.error('Error getting hotel ratings:', err);
+    throw err;
+  }
+};
+
+export const getHotelAverageRating = async function(hotelId) {
+  try {
+    const res = await axios.get(`http://localhost:3000/api/hotel/${hotelId}/average-rating`, { 
+      withCredentials: true 
+    });
+    return res.data;
+  } catch (err) {
+    console.error('Error getting average rating:', err);
+    throw err;
+  }
+};
