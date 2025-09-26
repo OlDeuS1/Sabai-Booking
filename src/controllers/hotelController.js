@@ -31,6 +31,46 @@ class HotelController {
       res.status(500).json({ error: error.message });
     }
   }
+
+  // อัพเดทสถานะโรงแรม
+  static async updateHotelStatus(req, res) {
+    try {
+      const hotelId = req.params.hotelId;
+      const { status } = req.body;
+
+      // ตรวจสอบสถานะที่ส่งมา
+      if (!['approved', 'rejected', 'pending', 'deleted'].includes(status)) {
+        return res.status(400).json({ error: 'Invalid status' });
+      }
+
+      const result = await Hotel.updateStatus(hotelId, status);
+      if (result) {
+        res.json({ message: `Hotel status updated to ${status}` });
+      } else {
+        res.status(404).json({ error: 'Hotel not found' });
+      }
+    } catch (error) {
+      console.error('Error updating hotel status:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  // ลบโรงแรม
+  static async deleteHotel(req, res) {
+    try {
+      const hotelId = req.params.hotelId;
+      
+      const result = await Hotel.delete(hotelId);
+      if (result) {
+        res.json({ message: 'Hotel deleted successfully' });
+      } else {
+        res.status(404).json({ error: 'Hotel not found' });
+      }
+    } catch (error) {
+      console.error('Error deleting hotel:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
 }
 
 export default HotelController;

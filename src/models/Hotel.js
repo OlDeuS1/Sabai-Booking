@@ -67,6 +67,7 @@ export class Hotel {
         FROM hotels h
         JOIN users u ON h.owner_id = u.user_id
         LEFT JOIN ratings r ON r.hotel_id = h.hotel_id
+        WHERE h.status != 'deleted'
         GROUP BY h.hotel_id
         ORDER BY h.hotel_id DESC
       `;
@@ -122,6 +123,53 @@ export class Hotel {
       db.all(sql, [hotelId], (err, rows) => {
         if (err) reject(err);
         else resolve(rows);
+      });
+    });
+  }
+
+  // อัพเดทสถานะโรงแรม
+  static updateStatus(hotelId, status) {
+    return new Promise((resolve, reject) => {
+      const sql = `UPDATE hotels SET status = ? WHERE hotel_id = ?`;
+      db.run(sql, [status, hotelId], function (err) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(this.changes > 0);
+        }
+      });
+    });
+  }
+
+  // ลบโรงแรม
+  static delete(hotelId) {
+    return new Promise((resolve, reject) => {
+      // ลบรูปภาพของโรงแรมก่อน
+      const deleteImagesSQL = `DELETE FROM hotel_images WHERE hotel_id = ?`;
+      db.run(deleteImagesSQL, [hotelId], (err) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        // ลบห้องของโรงแรม
+        const deleteRoomsSQL = `DELETE FROM rooms WHERE hotel_id = ?`;
+        db.run(deleteRoomsSQL, [hotelId], (err) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+
+          // ลบโรงแรม
+          const deleteHotelSQL = `DELETE FROM hotels WHERE hotel_id = ?`;
+          db.run(deleteHotelSQL, [hotelId], function (err) {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(this.changes > 0);
+            }
+          });
+        });
       });
     });
   }

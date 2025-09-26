@@ -32,7 +32,9 @@ app.get("/api/user/normal", UserController.getNormalUsers);
 // Hotel Routes
 app.get("/api/hotels", HotelController.getAllHotels);
 app.get("/api/hotel/:hotelId/rooms", HotelController.getHotelRooms);
-app.get("/api/hotels/admin", HotelController.getAllHotelAdminData); // เพิ่มเส้นทางนี้
+app.get("/api/hotels/admin", HotelController.getAllHotelAdminData);
+app.put("/api/hotels/:hotelId/status", HotelController.updateHotelStatus);
+app.delete("/api/hotels/:hotelId", HotelController.deleteHotel);
 
 // Booking Routes
 app.post("/api/bookings", BookingController.createBooking);

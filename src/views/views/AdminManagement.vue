@@ -66,6 +66,100 @@ const hotelFiler = computed(() => {
     }
 })
 
+// ฟังก์ชันอนุมัติโรงแรม
+const approveHotel = async (hotel) => {
+    try {
+        const response = await fetch(`http://localhost:3000/api/hotels/${hotel.hotel_id}/status`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+                status: 'approved'
+            })
+        });
+
+        if (response.ok) {
+            // อัพเดทสถานะใน local data
+            const hotelIndex = hotelsWithRooms.value.findIndex(h => h.hotel_id === hotel.hotel_id);
+            if (hotelIndex !== -1) {
+                hotelsWithRooms.value[hotelIndex].status = 'approved';
+            }
+            alert(`อนุมัติโรงแรม "${hotel.hotel_name}" เรียบร้อยแล้ว`);
+        } else {
+            throw new Error('Failed to approve hotel');
+        }
+    } catch (error) {
+        console.error('Error approving hotel:', error);
+        alert('เกิดข้อผิดพลาดในการอนุมัติโรงแรม');
+    }
+}
+
+// ฟังก์ชันปฏิเสธโรงแรม
+const rejectHotel = async (hotel) => {
+    if (confirm(`คุณแน่ใจหรือไม่ที่จะปฏิเสธโรงแรม "${hotel.hotel_name}"?`)) {
+        try {
+            const response = await fetch(`http://localhost:3000/api/hotels/${hotel.hotel_id}/status`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    status: 'rejected'
+                })
+            });
+
+            if (response.ok) {
+                // อัพเดทสถานะใน local data
+                const hotelIndex = hotelsWithRooms.value.findIndex(h => h.hotel_id === hotel.hotel_id);
+                if (hotelIndex !== -1) {
+                    hotelsWithRooms.value[hotelIndex].status = 'rejected';
+                }
+                alert(`ปฏิเสธโรงแรม "${hotel.hotel_name}" เรียบร้อยแล้ว`);
+            } else {
+                throw new Error('Failed to reject hotel');
+            }
+        } catch (error) {
+            console.error('Error rejecting hotel:', error);
+            alert('เกิดข้อผิดพลาดในการปฏิเสธโรงแรม');
+        }
+    }
+}
+
+// ฟังก์ชันปิดใช้งานโรงแรม (Soft Delete)
+const deleteHotel = async (hotel) => {
+    if (confirm(`คุณแน่ใจหรือไม่ที่จะปิดใช้งานโรงแรม "${hotel.hotel_name}"? โรงแรมจะไม่ปรากฏในระบบ แต่ข้อมูลประวัติจะยังคงอยู่`)) {
+        try {
+            const response = await fetch(`http://localhost:3000/api/hotels/${hotel.hotel_id}/status`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    status: 'deleted'
+                })
+            });
+
+            if (response.ok) {
+                // ลบออกจาก local data (ไม่แสดงในรายการ)
+                const hotelIndex = hotelsWithRooms.value.findIndex(h => h.hotel_id === hotel.hotel_id);
+                if (hotelIndex !== -1) {
+                    hotelsWithRooms.value.splice(hotelIndex, 1);
+                }
+                alert(`ปิดใช้งานโรงแรม "${hotel.hotel_name}" เรียบร้อยแล้ว`);
+            } else {
+                throw new Error('Failed to deactivate hotel');
+            }
+        } catch (error) {
+            console.error('Error deactivating hotel:', error);
+            alert('เกิดข้อผิดพลาดในการปิดใช้งานโรงแรม');
+        }
+    }
+}
+
 </script>
 
 <template>
@@ -151,15 +245,18 @@ const hotelFiler = computed(() => {
                         </td>
                         <td class="text-right">
                             <div v-if="hotel.status === 'approved'">
-                                <button class="cursor-pointer bg-[#FF0000] text-white p-2 w-30 rounded-sm">ลบ</button>
+                                <button @click="deleteHotel(hotel)" class="cursor-pointer bg-[#FF0000] text-white p-2 w-30 rounded-sm">ลบ</button>
                             </div>
                             <div v-else-if="hotel.status === 'pending'" class="flex gap-3 justify-end">
-                                <button class="cursor-pointer bg-[#00D35F] text-white px-5 py-2 rounded-sm hover:bg-green-600 transition-colors">
+                                <button @click="approveHotel(hotel)" class="cursor-pointer bg-[#00D35F] text-white px-5 py-2 rounded-sm hover:bg-green-600 transition-colors">
                                     อนุมัติ
                                 </button>
-                                <button class="cursor-pointer bg-[#F2B900] text-white px-5 py-2 rounded-sm hover:bg-yellow-600 transition-colors">
+                                <button @click="rejectHotel(hotel)" class="cursor-pointer bg-[#F2B900] text-white px-5 py-2 rounded-sm hover:bg-yellow-600 transition-colors">
                                     ปฏิเสธ
                                 </button>
+                            </div>
+                            <div v-else-if="hotel.status === 'rejected'" class="text-red-400 font-semibold">
+                                ถูกปฏิเสธ
                             </div>
                         </td>
                     </tr>
