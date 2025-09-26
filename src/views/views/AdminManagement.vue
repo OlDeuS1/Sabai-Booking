@@ -153,9 +153,13 @@ const hotelFiler = computed(() => {
                             <div v-if="hotel.status === 'approved'">
                                 <button class="cursor-pointer bg-[#FF0000] text-white p-2 w-30 rounded-sm">ลบ</button>
                             </div>
-                            <div v-else-if="hotel.status === 'pending'">
-                                <button class="cursor-pointer bg-[#00D35F] text-white p-2 w-30 rounded-sm">อนุมัติ</button>
-                                <button class="cursor-pointer bg-[#F2B900] text-white p-2 w-30 rounded-sm ml-6">ปฏิเสธ</button>
+                            <div v-else-if="hotel.status === 'pending'" class="flex gap-3 justify-end">
+                                <button class="cursor-pointer bg-[#00D35F] text-white px-5 py-2 rounded-sm hover:bg-green-600 transition-colors">
+                                    อนุมัติ
+                                </button>
+                                <button class="cursor-pointer bg-[#F2B900] text-white px-5 py-2 rounded-sm hover:bg-yellow-600 transition-colors">
+                                    ปฏิเสธ
+                                </button>
                             </div>
                         </td>
                     </tr>
