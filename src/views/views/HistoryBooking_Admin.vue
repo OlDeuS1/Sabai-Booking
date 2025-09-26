@@ -47,6 +47,7 @@ onMounted(async () => {
                         <th>วันที่เข้าพัก</th>
                         <th>วันที่ออก</th>
                         <th>จำนวนเงิน</th>
+                        <th>สถานะ</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -63,6 +64,7 @@ onMounted(async () => {
                         <td>{{ booking.check_in_date || 'ไม่ระบุ' }}</td>
                         <td class="border">{{ booking.check_out_date || 'ไม่ระบุ' }}</td>
                         <td class="border">{{ booking.total_price ? booking.total_price.toLocaleString() : '0' }} บาท</td>
+                        <td class="border">{{ booking.booking_status || 'ไม่ระบุ' }}</td>
                     </tr>
                 </tbody>
             </table>
