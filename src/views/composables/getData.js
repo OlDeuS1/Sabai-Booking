@@ -192,3 +192,15 @@ export const createHotel = async function(hotelData) {
     throw err;
   }
 };
+
+export const deleteHotel = async function(hotelId) {
+  try {
+    const res = await axios.delete(`http://localhost:3000/api/hotels/${hotelId}`, { 
+      withCredentials: true 
+    });
+    return res.data;
+  } catch (err) {
+    console.error('Error deleting hotel:', err);
+    throw err;
+  }
+};

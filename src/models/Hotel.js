@@ -307,35 +307,17 @@ export class Hotel {
     });
   }
 
-  // ลบโรงแรม
+  // ลบโรงแรม (Soft Delete - เปลี่ยน status เป็น deleted)
   static delete(hotelId) {
     return new Promise((resolve, reject) => {
-      // ลบรูปภาพของโรงแรมก่อน
-      const deleteImagesSQL = `DELETE FROM hotel_images WHERE hotel_id = ?`;
-      db.run(deleteImagesSQL, [hotelId], (err) => {
+      // เปลี่ยน status เป็น 'deleted' แทนการลบจริง
+      const updateStatusSQL = `UPDATE hotels SET status = 'deleted' WHERE hotel_id = ?`;
+      db.run(updateStatusSQL, [hotelId], function (err) {
         if (err) {
           reject(err);
-          return;
+        } else {
+          resolve(this.changes > 0);
         }
-
-        // ลบห้องของโรงแรม
-        const deleteRoomsSQL = `DELETE FROM rooms WHERE hotel_id = ?`;
-        db.run(deleteRoomsSQL, [hotelId], (err) => {
-          if (err) {
-            reject(err);
-            return;
-          }
-
-          // ลบโรงแรม
-          const deleteHotelSQL = `DELETE FROM hotels WHERE hotel_id = ?`;
-          db.run(deleteHotelSQL, [hotelId], function (err) {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(this.changes > 0);
-            }
-          });
-        });
       });
     });
   }

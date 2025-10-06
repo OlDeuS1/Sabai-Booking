@@ -121,14 +121,14 @@ class HotelController {
     }
   }
 
-  // ลบโรงแรม
+  // ลบโรงแรม (Soft Delete)
   static async deleteHotel(req, res) {
     try {
       const hotelId = req.params.hotelId;
       
       const result = await Hotel.delete(hotelId);
       if (result) {
-        res.json({ message: 'Hotel deleted successfully' });
+        res.json({ message: 'Hotel deleted successfully (soft delete)' });
       } else {
         res.status(404).json({ error: 'Hotel not found' });
       }
