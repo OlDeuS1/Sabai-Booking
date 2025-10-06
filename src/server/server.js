@@ -40,6 +40,7 @@ app.delete("/api/hotels/:hotelId", HotelController.deleteHotel);
 // Booking Routes
 app.post("/api/bookings", BookingController.createBooking);
 app.get("/api/booking/:bookingId", BookingController.getBookingById);
+app.get("/api/hotel/:hotelId/bookings", BookingController.getHotelBookings);
 app.put("/api/booking/:bookingId/status", BookingController.updateBookingStatus);
 app.post("/api/bookings/cancel-expired", async (req, res) => {
   try {

@@ -168,3 +168,15 @@ export const getHotelAverageRating = async function(hotelId) {
     throw err;
   }
 };
+
+export const getHotelBookings = async function(hotelId) {
+  try {
+    const res = await axios.get(`http://localhost:3000/api/hotel/${hotelId}/bookings`, { 
+      withCredentials: true 
+    });
+    return res.data;
+  } catch (err) {
+    console.error('Error getting hotel bookings:', err);
+    throw err;
+  }
+};

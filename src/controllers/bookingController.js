@@ -104,6 +104,18 @@ class BookingController {
       res.status(500).json({ error: error.message });
     }
   }
+
+  static async getHotelBookings(req, res) {
+    try {
+      const hotelId = req.params.hotelId;
+      const bookings = await Booking.findByHotelId(hotelId);
+      
+      res.json(bookings);
+    } catch (error) {
+      console.error("Error getting hotel bookings:", error);
+      res.status(500).json({ error: error.message });
+    }
+  }
 }
 
 export default BookingController;

@@ -70,6 +70,29 @@ export class Booking {
     });
   }
 
+  static findByHotelId(hotelId) {
+    return new Promise((resolve, reject) => {
+      const sql = `
+        SELECT b.*, h.hotel_name, r.room_type, r.price_per_night,
+               u.first_name, u.last_name, u.email as user_email, u.phone_number as user_phone
+        FROM bookings b
+        JOIN hotels h ON b.hotel_id = h.hotel_id
+        JOIN rooms r ON b.room_id = r.room_id
+        JOIN users u ON b.user_id = u.user_id
+        WHERE b.hotel_id = ?
+        ORDER BY b.created_at DESC
+      `;
+      
+      db.all(sql, [hotelId], (err, rows) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(rows);
+        }
+      });
+    });
+  }
+
   static updateStatus(bookingId, status) {
     return new Promise((resolve, reject) => {
       const sql = `UPDATE bookings SET booking_status = ? WHERE booking_id = ?`;
