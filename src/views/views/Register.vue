@@ -69,7 +69,18 @@ async function handleRegister() {
           success.value = 'สมัครสมาชิกและเข้าสู่ระบบสำเร็จ!';
           // Redirect to home page after successful login
           setTimeout(() => {
-            router.push('/');
+            if (loginData && loginData.role) {
+              switch(loginData.role) {
+                case 'hotel':
+                  router.push('/hotel-management');
+                  break;
+                default:
+                  router.push('/');
+                  break;
+              }
+            } else {
+              router.push('/');
+            }
           }, 1500);
         } else {
           success.value = 'สมัครสมาชิกสำเร็จ กรุณาเข้าสู่ระบบ';

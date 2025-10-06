@@ -33,6 +33,7 @@ app.get("/api/user/normal", UserController.getNormalUsers);
 app.get("/api/hotels", HotelController.getAllHotels);
 app.get("/api/hotel/:hotelId/rooms", HotelController.getHotelRooms);
 app.get("/api/hotels/admin", HotelController.getAllHotelAdminData);
+app.get("/api/hotels/owner/:ownerId", HotelController.getHotelsByOwnerId);
 app.put("/api/hotels/:hotelId/status", HotelController.updateHotelStatus);
 app.delete("/api/hotels/:hotelId", HotelController.deleteHotel);
 

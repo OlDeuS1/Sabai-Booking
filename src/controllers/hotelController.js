@@ -32,6 +32,18 @@ class HotelController {
     }
   }
 
+  // ดึงโรงแรมตาม owner ID
+  static async getHotelsByOwnerId(req, res) {
+    try {
+      const ownerId = req.params.ownerId;
+      const hotels = await Hotel.getByOwnerId(ownerId);
+      res.json(hotels);
+    } catch (error) {
+      console.error('Error getting hotels by owner ID:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
   // อัพเดทสถานะโรงแรม
   static async updateHotelStatus(req, res) {
     try {

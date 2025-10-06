@@ -141,6 +141,61 @@ export class Hotel {
     });
   }
 
+  // ดึงโรงแรมตาม owner ID
+  static getByOwnerId(ownerId) {
+    return new Promise((resolve, reject) => {
+      const sql = `
+        SELECT h.hotel_id, h.hotel_name, h.description, h.address, h.city, h.country, h.star_rating, 
+               h.contact_phone, h.contact_email, h.status, h.amenities, h.owner_id,
+               AVG(r.rating) AS avg_rating,
+               COUNT(r.rating_id) AS review_count
+        FROM hotels h
+        LEFT JOIN ratings r ON r.hotel_id = h.hotel_id
+        WHERE h.owner_id = ? AND h.status != 'deleted'
+        GROUP BY h.hotel_id
+        ORDER BY h.hotel_id DESC
+      `;
+
+      db.all(sql, [ownerId], (err, hotels) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        // ดึงรูปภาพทั้งหมดของแต่ละโรงแรม
+        const hotelIds = hotels.map((h) => h.hotel_id);
+        if (hotelIds.length === 0) {
+          resolve([]);
+          return;
+        }
+
+        const imgSql = `SELECT hotel_id, image_url FROM hotel_images WHERE hotel_id IN (${hotelIds
+          .map(() => "?")
+          .join(",")})`;
+        db.all(imgSql, hotelIds, (imgErr, images) => {
+          if (imgErr) {
+            reject(imgErr);
+            return;
+          }
+
+          // รวมรูปภาพเข้าแต่ละโรงแรม
+          const imagesByHotel = {};
+          images.forEach((img) => {
+            if (!imagesByHotel[img.hotel_id]) imagesByHotel[img.hotel_id] = [];
+            imagesByHotel[img.hotel_id].push(img.image_url);
+          });
+
+          const hotelsWithImages = hotels.map((hotel) => ({
+            ...hotel,
+            image_urls: imagesByHotel[hotel.hotel_id] || [],
+          }));
+
+          resolve(hotelsWithImages);
+        });
+      });
+    });
+  }
+
   // ลบโรงแรม
   static delete(hotelId) {
     return new Promise((resolve, reject) => {

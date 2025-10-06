@@ -27,6 +27,18 @@ export const getHotelAdminData = async function () {
   }
 };
 
+export const getHotelByOwnerId = async function (ownerId) {
+  try {
+    const res = await axios.get(`http://localhost:3000/api/hotels/owner/${ownerId}`, { 
+      withCredentials: true 
+    });
+    return res.data;
+  } catch (err) {
+    console.error('Error getting hotels by owner ID:', err);
+    alert(`Error: ${err.message}`);
+  }
+};
+
 export const getHotelRoomData = async function(hotelId){
   try {
     const res = await axios.get(`http://localhost:3000/api/hotel/${hotelId}/rooms`)

@@ -11,6 +11,8 @@ import Admin from '../views/AdminManagement.vue';
 import HistoryBooking_Admin from '../views/HistoryBooking_Admin.vue';
 import axios from 'axios';
 import AdminHotel from '../views/AdminHotel.vue';
+import hotelcreate from '../views/CreateHotel_AdminHotel.vue';
+import HotelBookings from '../views/HotelBookingAction.vue';
 
 const routes = [
   { path: "", component: Home },
@@ -18,7 +20,7 @@ const routes = [
   { path: "/register", component: Register },
   { path: "/search", component: Search, name: "search" },
   { path: "/hotels/:id", component: HotelDetail, name: "hotel-detail" },
-  { path: '/payment/:booking_id', component: Payment, name: 'payment' },
+  { path: "/payment/:booking_id", component: Payment, name: "payment" },
   { path: "/historyBooking", component: History },
   {
     path: "/admin",
@@ -32,10 +34,35 @@ const routes = [
     name: "HistoryBooking_Admin",
     meta: { requiresAuth: true, roles: ["admin"] }, // เพิ่ม meta สำหรับป้องกัน
   },
-  { path: '/hotel-management', 
-    component: AdminHotel, 
-    name: 'AdminHotel',
-    meta: { requiresAuth: true, roles: ['admin', 'hotel'] } // ต้องล็อกอิน + role=admin
+  {
+    path: "/hotel-management",
+    component: AdminHotel,
+    name: "AdminHotel",
+    meta: { requiresAuth: true, roles: ["admin", "hotel"] }, // ต้องล็อกอิน + role=admin
+  },
+  {
+    path: "/hotel-management/create",
+    component: hotelcreate,
+    name: "CreateHotel",
+    meta: { requiresAuth: true, roles: ["admin", "hotel"] },
+  },
+  {
+    path: "/hotel-management/:hotelId/edit",
+    component: hotelcreate,
+    name: "EditHotel",
+    meta: { requiresAuth: true, roles: ["admin", "hotel"] },
+  },
+  {
+    path: "/hotel-management/:hotelId/bookings",
+    component: HotelBookings,
+    name: "HotelBookings",
+    meta: { requiresAuth: true, roles: ["admin", "hotel"] },
+  },
+  {
+    path: "/hotel-management/:hotelId/delete",
+    component: hotelcreate,
+    name: "DeleteHotel",
+    meta: { requiresAuth: true, roles: ["admin", "hotel"] },
   },
 ];
 
