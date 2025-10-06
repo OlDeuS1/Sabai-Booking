@@ -1,5 +1,9 @@
 <script setup>
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { createHotel } from '../composables/getData.js'
+
+const router = useRouter()
 
 const images = ref({
     main: null,
@@ -7,35 +11,49 @@ const images = ref({
     sub2: null
 })
 
+// Hotel basic info
 const hotelName = ref('')
+const description = ref('')
+const address = ref('')
+const city = ref('')
+const country = ref('ไทย')
+const contactPhone = ref('')
+const contactEmail = ref('')
+
+// Amenities
 const newAmenity = ref('')
 const amenities = ref([])
-const location = ref('')
 
+// Room types
 const newRoom = ref({
-    rooms: 0,
-    beds: 0
+    room_type: '',
+    price_per_night: 0,
+    max_guests: 1,
+    beds: 1,
+    quantity: 1
 })
 const roomTypes = ref([])
+
+// Form states
+const isSubmitting = ref(false)
 
 const mainFileInput = ref(null)
 const sub1FileInput = ref(null)
 const sub2FileInput = ref(null)
 
 const canAddRoom = computed(() => {
-    const rooms = parseInt(newRoom.value.rooms)
-    const beds = parseInt(newRoom.value.beds)
-
-    console.log(rooms, beds)
-
-    if (!rooms || !beds || rooms <= 0 || beds <= 0) {
+    const { room_type, price_per_night, max_guests, beds, quantity } = newRoom.value
+    
+    if (!room_type.trim() || price_per_night <= 0 || max_guests <= 0 || beds <= 0 || quantity <= 0) {
         return false
     }
 
+    // ตรวจสอบว่าไม่มี room type ซ้ำ
     return !roomTypes.value.some(room =>
-        room.rooms === rooms && room.beds === beds
+        room.room_type === room_type.trim() && 
+        room.beds === beds && 
+        room.max_guests === max_guests
     )
-
 })
 
 const triggerFileInput = (type) => {
@@ -73,10 +91,19 @@ const removeAmenity = (index) => {
 const addRoomType = () => {
     if (canAddRoom.value) {
         roomTypes.value.push({
-            rooms: parseInt(newRoom.value.rooms),
-            beds: parseInt(newRoom.value.beds)
+            room_type: newRoom.value.room_type.trim(),
+            price_per_night: parseFloat(newRoom.value.price_per_night),
+            max_guests: parseInt(newRoom.value.max_guests),
+            beds: parseInt(newRoom.value.beds),
+            quantity: parseInt(newRoom.value.quantity)
         })
-        newRoom.value = { rooms: 0, beds: 0}
+        newRoom.value = {
+            room_type: '',
+            price_per_night: 0,
+            max_guests: 1,
+            beds: 1,
+            quantity: 1
+        }
     }
 }
 
@@ -84,34 +111,87 @@ const removeRoomType = (index) => {
     roomTypes.value.splice(index, 1)
 }
 
-const submitForm = () => {
+const validateForm = () => {
     if (!hotelName.value.trim()) {
         alert('กรุณากรอกชื่อโรงแรม')
+        return false
+    }
+    
+    if (!address.value.trim()) {
+        alert('กรุณากรอกที่อยู่โรงแรม')
+        return false
+    }
+    
+    if (!city.value.trim()) {
+        alert('กรุณากรอกเมือง')
+        return false
+    }
+    
+    if (roomTypes.value.length === 0) {
+        alert('กรุณาเพิ่มประเภทห้องพักอย่างน้อย 1 ประเภท')
+        return false
+    }
+    
+    return true
+}
+
+const submitForm = async () => {
+    if (!validateForm()) {
         return
     }
 
-    const formData = {
-        hotelName: hotelName.value,
-        amenities: amenities.value,
-        location: location.value,
-        roomTypes: roomTypes.value,
-        images: images.value
+    if (isSubmitting.value) {
+        return
     }
 
-    console.log(formData)
+    isSubmitting.value = true
 
+    try {
+        // เตรียมข้อมูลรูปภาพ
+        const imageUrls = []
+        if (images.value.main) imageUrls.push(images.value.main)
+        if (images.value.sub1) imageUrls.push(images.value.sub1)
+        if (images.value.sub2) imageUrls.push(images.value.sub2)
+
+        const hotelData = {
+            hotel_name: hotelName.value.trim(),
+            description: description.value.trim(),
+            address: address.value.trim(),
+            city: city.value.trim(),
+            country: country.value.trim(),
+            star_rating: 3,
+            contact_phone: contactPhone.value.trim(),
+            contact_email: contactEmail.value.trim(),
+            amenities: amenities.value,
+            image_urls: imageUrls,
+            rooms: roomTypes.value
+        }
+
+        console.log('Submitting hotel data:', hotelData)
+
+        const result = await createHotel(hotelData)
+        
+        alert(`สร้างโรงแรม "${result.hotel.hotel_name}" สำเร็จ! รอการอนุมัติจากผู้ดูแลระบบ`)
+        router.push('/hotel-management')
+        
+    } catch (error) {
+        console.error('Error submitting hotel:', error)
+        alert(error.response?.data?.error || 'เกิดข้อผิดพลาดในการสร้างโรงแรม')
+    } finally {
+        isSubmitting.value = false
+    }
 }
 </script>
 
 <template>
     <div class="bg-[#102B58] p-4">
         <div class="flex items-center justify-between max-w-4xl mx-auto mb-8 mt-8">
-            <RouterLink to="/" class="flex items-center text-white">
+            <RouterLink to="/hotel-management" class="flex items-center text-white hover:text-green-400 transition-colors">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7">
                     </path>
                 </svg>
-                <span class="text-lg">กลับไปยังการจัดการโรงแรม</span>
+                <span class="text-lg ml-2">กลับไปยังการจัดการโรงแรม</span>
             </RouterLink>
             <h1 class="text-white text-2xl font-semibold">เพิ่มโรงแรม</h1>
         </div>
@@ -152,10 +232,53 @@ const submitForm = () => {
                 @change="handleImageUpload('sub2', $event)">
 
             <div class="space-y-6">
+                <!-- Hotel Name -->
                 <div>
                     <label class="block text-white mb-4 bg-[#212121] p-2 w-24 text-center rounded">ชื่อโรงแรม</label>
                     <input v-model="hotelName" type="text" placeholder="ชื่อโรงแรม"
-                        class="w-full px-3 py-2 rounded bg-white text-black focus:outline-none">
+                        class="w-full px-3 py-2 rounded bg-white text-black focus:outline-none" required>
+                </div>
+
+                <!-- Description -->
+                <div>
+                    <label class="block text-white mb-4 bg-[#212121] p-2 w-42 text-center rounded">รายละเอียดโรงแรม</label>
+                    <textarea v-model="description" placeholder="รายละเอียดเกี่ยวกับโรงแรม" rows="4"
+                        class="bg-white text-black w-full px-3 py-2 rounded resize-none focus:outline-none"></textarea>
+                </div>
+
+                <!-- Address -->
+                <div>
+                    <label class="block text-white mb-4 bg-[#212121] p-2 w-16 text-center rounded">ที่อยู่</label>
+                    <input v-model="address" type="text" placeholder="ที่อยู่โรงแรม"
+                        class="w-full px-3 py-2 rounded bg-white text-black focus:outline-none" required>
+                </div>
+
+                <!-- City and Country -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-white mb-4 bg-[#212121] p-2 w-16 text-center rounded">เมือง</label>
+                        <input v-model="city" type="text" placeholder="เมือง"
+                            class="w-full px-3 py-2 rounded bg-white text-black focus:outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-white mb-4 bg-[#212121] p-2 w-16 text-center rounded">ประเทศ</label>
+                        <input v-model="country" type="text" placeholder="ประเทศ"
+                            class="w-full px-3 py-2 rounded bg-white text-black focus:outline-none" required>
+                    </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-white mb-4 bg-[#212121] p-2 w-20 text-center rounded">เบอร์โทร</label>
+                        <input v-model="contactPhone" type="tel" placeholder="เบอร์โทรศัพท์"
+                            class="w-full px-3 py-2 rounded bg-white text-black focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-white mb-4 bg-[#212121] p-2 w-16 text-center rounded">อีเมล</label>
+                        <input v-model="contactEmail" type="email" placeholder="อีเมล"
+                            class="w-full px-3 py-2 rounded bg-white text-black focus:outline-none">
+                    </div>
                 </div>
 
                 <div>
@@ -188,48 +311,76 @@ const submitForm = () => {
                     </div>
                 </div>
 
+                <!-- Room Types -->
                 <div>
-                    <label class="block text-white mb-4 bg-[#212121] p-2 w-24 text-center rounded">สถานที่ตั้ง</label>
-                    <textarea v-model="location" placeholder="รายละเอียดสถานที่ตั้งของโรงแรม" rows="4"
-                        class="bg-white text-black w-full px-3 py-2 rounded resize-none focus:outline-none"></textarea>
-                </div>
-
-                <div>
-                    <label class="block text-white mb-4 bg-[#212121] p-2 w-32 text-center rounded">รูปแบบห้องพัก</label>
-                    <div class="flex gap-2 mb-3 bg-white items-center justify-between rounded">
-                        <div class="ml-3">
-                            <span>ห้องพัก</span>
-                            <el-input-number v-model="newRoom.rooms" :min="1" controls-position="right" size="default"
-                                class="m-2" />
-                            <span class="text-black">ห้อง</span>
-                            <span class="m-2 text-xl"> | </span>
-                            <el-input-number v-model="newRoom.beds" :min="1" controls-position="right" size="default"
-                                class="m-2" />
-                            <span class="text-black">เตียง</span>
+                    <label class="block text-white mb-4 bg-[#212121] p-2 w-32 text-center rounded">ประเภทห้องพัก</label>
+                    
+                    <!-- Room Type Form -->
+                    <div class="bg-white p-4 rounded mb-4">
+                        <div class="grid grid-cols-2 gap-4 mb-3">
+                            <div>
+                                <label class="block text-black text-sm mb-1">ประเภทห้อง</label>
+                                <input v-model="newRoom.room_type" type="text" placeholder="เช่น Standard, Deluxe, Suite"
+                                    class="w-full px-3 py-2 border rounded text-black focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-black text-sm mb-1">ราคาต่อคืน (บาท)</label>
+                                <input v-model.number="newRoom.price_per_night" type="number" min="1" placeholder="1000"
+                                    class="w-full px-3 py-2 border rounded text-black focus:outline-none">
+                            </div>
                         </div>
-                        <div>
-                            <button @click="addRoomType" :disabled="!canAddRoom"
-                                class="bg-white text-black text-xl px-2 mr-2.5 rounded border-1 disabled:bg-gray-400 disabled:cursor-not-allowed">
-                                +
-                            </button>
+                        
+                        <div class="grid grid-cols-3 gap-4 mb-3">
+                            <div>
+                                <label class="block text-black text-sm mb-1">จำนวนผู้เข้าพัก</label>
+                                <input v-model.number="newRoom.max_guests" type="number" min="1" max="10" placeholder="2"
+                                    class="w-full px-3 py-2 border rounded text-black focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-black text-sm mb-1">จำนวนเตียง</label>
+                                <input v-model.number="newRoom.beds" type="number" min="1" max="5" placeholder="1"
+                                    class="w-full px-3 py-2 border rounded text-black focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-black text-sm mb-1">จำนวนห้อง</label>
+                                <input v-model.number="newRoom.quantity" type="number" min="1" placeholder="10"
+                                    class="w-full px-3 py-2 border rounded text-black focus:outline-none">
+                            </div>
                         </div>
+                        
+                        <button @click="addRoomType" :disabled="!canAddRoom"
+                            class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                            เพิ่มประเภทห้อง
+                        </button>
                     </div>
 
-                    <div class="space-y-2">
+                    <!-- Room Types List -->
+                    <div class="space-y-2" v-if="roomTypes.length > 0">
                         <div v-for="(room, index) in roomTypes" :key="index"
                             class="bg-white p-3 rounded flex items-center justify-between">
-                            <span>{{ room.rooms }} ห้อง &nbsp;|&nbsp; {{ room.beds }} เตียง</span>
+                            <div class="text-black">
+                                <span class="font-semibold">{{ room.room_type }}</span> - 
+                                {{ room.price_per_night.toLocaleString() }} บาท/คืน | 
+                                {{ room.max_guests }} คน | 
+                                {{ room.beds }} เตียง | 
+                                {{ room.quantity }} ห้อง
+                            </div>
                             <button @click="removeRoomType(index)"
                                 class="text-red-500 text-md px-2 border rounded hover:text-red-700">
-                                x
+                                ลบ
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <div class="flex justify-end pt-4">
-                    <button @click="submitForm" class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600">
-                        บันทึกข้อมูล
+                <div class="flex justify-end pt-4 gap-4">
+                    <RouterLink to="/hotel-management" 
+                        class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600 transition-colors">
+                        ยกเลิก
+                    </RouterLink>
+                    <button @click="submitForm" :disabled="isSubmitting"
+                        class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors">
+                        {{ isSubmitting ? 'กำลังบันทึก...' : 'บันทึกข้อมูล' }}
                     </button>
                 </div>
             </div>

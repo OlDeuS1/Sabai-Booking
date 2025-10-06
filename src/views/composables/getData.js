@@ -180,3 +180,15 @@ export const getHotelBookings = async function(hotelId) {
     throw err;
   }
 };
+
+export const createHotel = async function(hotelData) {
+  try {
+    const res = await axios.post('http://localhost:3000/api/hotels', hotelData, { 
+      withCredentials: true 
+    });
+    return res.data;
+  } catch (err) {
+    console.error('Error creating hotel:', err);
+    throw err;
+  }
+};

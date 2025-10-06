@@ -4,7 +4,7 @@ export class Hotel {
   static getAllWithImages() {
     return new Promise((resolve, reject) => {
       const sql = `
-        SELECT h.hotel_id, h.hotel_name, h.description, h.address, h.city, h.country, h.star_rating, h.contact_phone, h.contact_email,
+        SELECT h.hotel_id, h.hotel_name, h.description, h.address, h.city, h.country, h.contact_phone, h.contact_email,
                h.status, h.amenities,
                AVG(r.rating) AS avg_rating,
                COUNT(r.rating_id) AS review_count
@@ -58,7 +58,7 @@ export class Hotel {
   static getAllAdminData() {
     return new Promise((resolve, reject) => {
       const sql = `
-        SELECT h.hotel_id, h.hotel_name, h.description, h.address, h.city, h.country, h.star_rating, 
+        SELECT h.hotel_id, h.hotel_name, h.description, h.address, h.city, h.country, 
                h.contact_phone, h.contact_email, h.status, h.amenities,
                u.user_id as owner_id, u.first_name as owner_first_name, u.last_name as owner_last_name, 
                u.email as owner_email, u.phone_number as owner_phone,
@@ -145,7 +145,7 @@ export class Hotel {
   static getByOwnerId(ownerId) {
     return new Promise((resolve, reject) => {
       const sql = `
-        SELECT h.hotel_id, h.hotel_name, h.description, h.address, h.city, h.country, h.star_rating, 
+        SELECT h.hotel_id, h.hotel_name, h.description, h.address, h.city, h.country, 
                h.contact_phone, h.contact_email, h.status, h.amenities, h.owner_id,
                AVG(r.rating) AS avg_rating,
                COUNT(r.rating_id) AS review_count
@@ -193,6 +193,117 @@ export class Hotel {
           resolve(hotelsWithImages);
         });
       });
+    });
+  }
+
+  // สร้างโรงแรมใหม่
+  static create(hotelData) {
+    return new Promise((resolve, reject) => {
+      const {
+        owner_id,
+        hotel_name,
+        description,
+        address,
+        city,
+        country,
+        contact_phone,
+        contact_email,
+        amenities,
+        image_urls,
+        rooms
+      } = hotelData;
+
+      // สร้างโรงแรมก่อน
+      const hotelSQL = `
+        INSERT INTO hotels (owner_id, hotel_name, description, address, city, country, contact_phone, contact_email, amenities, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
+      `;
+
+      db.run(
+        hotelSQL,
+        [owner_id, hotel_name, description, address, city, country, contact_phone, contact_email, amenities],
+        function (err) {
+          if (err) {
+            reject(err);
+            return;
+          }
+
+          const hotelId = this.lastID;
+
+          // เพิ่มรูปภาพ
+          if (image_urls && image_urls.length > 0) {
+            const imagePromises = image_urls.map((imageUrl) => {
+              return new Promise((resolveImg, rejectImg) => {
+                const imgSQL = `INSERT INTO hotel_images (hotel_id, image_url) VALUES (?, ?)`;
+                db.run(imgSQL, [hotelId, imageUrl], (imgErr) => {
+                  if (imgErr) rejectImg(imgErr);
+                  else resolveImg();
+                });
+              });
+            });
+
+            Promise.all(imagePromises)
+              .then(() => {
+                // เพิ่มห้องพัก
+                if (rooms && rooms.length > 0) {
+                  const roomPromises = rooms.map((room) => {
+                    return new Promise((resolveRoom, rejectRoom) => {
+                      const roomSQL = `
+                        INSERT INTO rooms (hotel_id, room_type, price_per_night, max_guests, beds, quantity)
+                        VALUES (?, ?, ?, ?, ?, ?)
+                      `;
+                      db.run(
+                        roomSQL,
+                        [hotelId, room.room_type, room.price_per_night, room.max_guests, room.beds, room.quantity],
+                        (roomErr) => {
+                          if (roomErr) rejectRoom(roomErr);
+                          else resolveRoom();
+                        }
+                      );
+                    });
+                  });
+
+                  Promise.all(roomPromises)
+                    .then(() => {
+                      resolve({ hotel_id: hotelId, hotel_name });
+                    })
+                    .catch(reject);
+                } else {
+                  resolve({ hotel_id: hotelId, hotel_name });
+                }
+              })
+              .catch(reject);
+          } else {
+            // ไม่มีรูปภาพ แต่มีห้องพัก
+            if (rooms && rooms.length > 0) {
+              const roomPromises = rooms.map((room) => {
+                return new Promise((resolveRoom, rejectRoom) => {
+                  const roomSQL = `
+                    INSERT INTO rooms (hotel_id, room_type, price_per_night, max_guests, beds, quantity)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                  `;
+                  db.run(
+                    roomSQL,
+                    [hotelId, room.room_type, room.price_per_night, room.max_guests, room.beds, room.quantity],
+                    (roomErr) => {
+                      if (roomErr) rejectRoom(roomErr);
+                      else resolveRoom();
+                    }
+                  );
+                });
+              });
+
+              Promise.all(roomPromises)
+                .then(() => {
+                  resolve({ hotel_id: hotelId, hotel_name });
+                })
+                .catch(reject);
+            } else {
+              resolve({ hotel_id: hotelId, hotel_name });
+            }
+          }
+        }
+      );
     });
   }
 

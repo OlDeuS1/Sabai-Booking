@@ -1,6 +1,60 @@
 import { Hotel } from "../models/Hotel.js";
 
 class HotelController {
+  static async createHotel(req, res) {
+    try {
+      const { 
+        hotel_name, 
+        description, 
+        address, 
+        city, 
+        country, 
+        contact_phone, 
+        contact_email, 
+        amenities,
+        image_urls,
+        rooms
+      } = req.body;
+
+      // ตรวจสอบว่าผู้ใช้ล็อกอินแล้วหรือไม่
+      const owner_id = req.cookies.userId;
+      if (!owner_id) {
+        return res.status(401).json({ error: "กรุณาเข้าสู่ระบบก่อนสร้างโรงแรม" });
+      }
+
+      // ตรวจสอบข้อมูลที่จำเป็น
+      if (!hotel_name || !address || !city || !country) {
+        return res.status(400).json({ error: "ข้อมูลไม่ครบถ้วน กรุณากรอกชื่อโรงแรม ที่อยู่ เมือง และประเทศ" });
+      }
+
+      const hotelData = {
+        owner_id: parseInt(owner_id),
+        hotel_name,
+        description: description || '',
+        address,
+        city,
+        country,
+        contact_phone: contact_phone || '',
+        contact_email: contact_email || '',
+        amenities: Array.isArray(amenities) ? amenities.join(', ') : amenities || '',
+        image_urls: image_urls || [],
+        rooms: rooms || []
+      };
+
+      const result = await Hotel.create(hotelData);
+      
+      res.status(201).json({
+        success: true,
+        hotel: result,
+        message: "สร้างโรงแรมสำเร็จ รอการอนุมัติจากผู้ดูแลระบบ"
+      });
+
+    } catch (error) {
+      console.error("Error creating hotel:", error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
   static async getAllHotels(req, res) {
     try {
       const hotels = await Hotel.getAllWithImages();

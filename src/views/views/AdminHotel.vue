@@ -35,7 +35,7 @@ const handleDeleteHotel = () => {
 const handleAddHotel = () => {
   console.log('Handle add hotel clicked')
   // TODO: Add navigation to create hotel page
-  // router.push('/hotel-management/create')
+  router.push('/hotel-management/create')
 }
 
 const handleViewBookings = (hotelId) => {
