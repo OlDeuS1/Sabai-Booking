@@ -147,13 +147,13 @@ const handleEditHotel = (hotelId) => {
               <div v-else-if="hotels.length === 0" class="col-span-4 text-center py-10 text-lg">ไม่พบโรงแรมของคุณ</div>
               <div v-else v-for="hotel in hotels" :key="hotel.hotel_id" 
                    class="p-6 rounded-md shadow-2xl bg-white text-black relative transition-all duration-200"
-                   :class="{ 'ring-4 ring-blue-400 bg-blue-50': isSelectionMode && isHotelSelected(hotel) }">
+                   :class="{ 'ring-4 ring-red-400 bg-red-50': isSelectionMode && isHotelSelected(hotel) }">
                 
                 <!-- Selection Checkbox (แสดงเมื่ออยู่ในโหมดเลือก) -->
                 <div v-if="isSelectionMode" 
                      @click="toggleHotelSelection(hotel)"
                      class="absolute top-4 right-4 w-8 h-8 rounded-full border-2 cursor-pointer flex items-center justify-center transition-colors z-10"
-                     :class="isHotelSelected(hotel) ? 'bg-blue-500 border-blue-500' : 'bg-white border-gray-300 hover:border-blue-400'">
+                     :class="isHotelSelected(hotel) ? 'bg-red-500 border-red-500' : 'bg-white border-gray-300 hover:border-red-400'">
                   <svg v-if="isHotelSelected(hotel)" class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                   </svg>
@@ -170,7 +170,7 @@ const handleEditHotel = (hotelId) => {
                 
                 <!-- แสดงสถานะเลือกแล้ว (แสดงเมื่ออยู่ในโหมดเลือก) -->
                 <div v-if="isSelectionMode" class="flex justify-center mt-2">
-                  <span v-if="isHotelSelected(hotel)" class="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                  <span v-if="isHotelSelected(hotel)" class="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium">
                     ✓ เลือกแล้ว
                   </span>
                   <span v-else class="bg-gray-200 text-gray-600 px-3 py-1 rounded-full text-sm">
