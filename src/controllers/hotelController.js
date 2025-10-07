@@ -137,6 +137,78 @@ class HotelController {
       res.status(500).json({ error: error.message });
     }
   }
+
+  // ดึงข้อมูลโรงแรมตาม ID
+  static async getHotelById(req, res) {
+    try {
+      const hotelId = req.params.hotelId;
+      
+      const hotel = await Hotel.getById(hotelId);
+      if (hotel) {
+        res.json(hotel);
+      } else {
+        res.status(404).json({ error: 'Hotel not found' });
+      }
+    } catch (error) {
+      console.error('Error getting hotel by ID:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  // อัพเดทข้อมูลโรงแรม
+  static async updateHotel(req, res) {
+    try {
+      const hotelId = req.params.hotelId;
+      const { 
+        hotel_name, 
+        description, 
+        address, 
+        city, 
+        country, 
+        contact_phone, 
+        contact_email, 
+        amenities,
+        image_urls,
+        rooms
+      } = req.body;
+
+      // ตรวจสอบว่าผู้ใช้ล็อกอินแล้วหรือไม่
+      const owner_id = req.cookies.userId;
+      if (!owner_id) {
+        return res.status(401).json({ error: "กรุณาเข้าสู่ระบบก่อนแก้ไขโรงแรม" });
+      }
+
+      // ตรวจสอบข้อมูลที่จำเป็น
+      if (!hotel_name || !address || !city || !country) {
+        return res.status(400).json({ error: "ข้อมูลไม่ครบถ้วน กรุณากรอกชื่อโรงแรม ที่อยู่ เมือง และประเทศ" });
+      }
+
+      const hotelData = {
+        hotel_name,
+        description: description || '',
+        address,
+        city,
+        country,
+        contact_phone: contact_phone || '',
+        contact_email: contact_email || '',
+        amenities: Array.isArray(amenities) ? amenities : amenities ? [amenities] : [],
+        image_urls: image_urls || [],
+        rooms: rooms || []
+      };
+
+      const result = await Hotel.update(hotelId, hotelData);
+      
+      res.json({
+        success: true,
+        message: "อัพเดทข้อมูลโรงแรมสำเร็จ",
+        hotel: result
+      });
+
+    } catch (error) {
+      console.error("Error updating hotel:", error);
+      res.status(500).json({ error: error.message });
+    }
+  }
 }
 
 export default HotelController;

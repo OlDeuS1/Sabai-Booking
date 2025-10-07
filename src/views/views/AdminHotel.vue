@@ -101,20 +101,17 @@ const cancelDelete = () => {
 
 const handleAddHotel = () => {
   console.log('Handle add hotel clicked')
-  // TODO: Add navigation to create hotel page
   router.push('/hotel-management/create')
 }
 
 const handleViewBookings = (hotelId) => {
   console.log('Handle view bookings clicked for hotel:', hotelId)
-  // TODO: Add navigation to hotel bookings page
   router.push(`/hotel-management/${hotelId}/bookings`)
 }
 
 const handleEditHotel = (hotelId) => {
   console.log('Handle edit hotel clicked for hotel:', hotelId)
-  // TODO: Add navigation to edit hotel page
-  // router.push(`/hotel/${hotelId}/edit`)
+  router.push(`/hotel-management/${hotelId}/edit`)
 }
 
 </script>

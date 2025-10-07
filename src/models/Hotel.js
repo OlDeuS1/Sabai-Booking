@@ -321,4 +321,172 @@ export class Hotel {
       });
     });
   }
+
+  // ดึงข้อมูลโรงแรมตาม ID
+  static getById(hotelId) {
+    return new Promise((resolve, reject) => {
+      const sql = `
+        SELECT h.hotel_id, h.hotel_name, h.description, h.address, h.city, h.country, 
+               h.contact_phone, h.contact_email, h.status, h.amenities, h.owner_id,
+               AVG(r.rating) AS avg_rating,
+               COUNT(r.rating_id) AS review_count
+        FROM hotels h
+        LEFT JOIN ratings r ON r.hotel_id = h.hotel_id
+        WHERE h.hotel_id = ? AND h.status != 'deleted'
+        GROUP BY h.hotel_id
+      `;
+
+      db.get(sql, [hotelId], (err, hotel) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        if (!hotel) {
+          resolve(null);
+          return;
+        }
+
+        // ดึงรูปภาพของโรงแรม
+        const imgSql = `SELECT image_url FROM hotel_images WHERE hotel_id = ?`;
+        db.all(imgSql, [hotelId], (imgErr, images) => {
+          if (imgErr) {
+            reject(imgErr);
+            return;
+          }
+
+          // ดึงข้อมูลห้องพัก
+          const roomSql = `SELECT * FROM rooms WHERE hotel_id = ?`;
+          db.all(roomSql, [hotelId], (roomErr, rooms) => {
+            if (roomErr) {
+              reject(roomErr);
+              return;
+            }
+
+            const hotelWithDetails = {
+              ...hotel,
+              image_urls: images.map(img => img.image_url),
+              rooms: rooms
+            };
+
+            resolve(hotelWithDetails);
+          });
+        });
+      });
+    });
+  }
+
+  // อัพเดทข้อมูลโรงแรม
+  static update(hotelId, hotelData) {
+    return new Promise((resolve, reject) => {
+      const { 
+        hotel_name, 
+        description, 
+        address, 
+        city, 
+        country, 
+        contact_phone, 
+        contact_email, 
+        amenities,
+        image_urls,
+        rooms
+      } = hotelData;
+
+      // อัพเดทข้อมูลหลักของโรงแรม
+      const updateHotelSQL = `
+        UPDATE hotels 
+        SET hotel_name = ?, description = ?, address = ?, city = ?, country = ?, 
+            contact_phone = ?, contact_email = ?, amenities = ?
+        WHERE hotel_id = ? AND status != 'deleted'
+      `;
+
+      const amenitiesString = Array.isArray(amenities) ? amenities.join(', ') : amenities || '';
+
+      db.run(updateHotelSQL, [
+        hotel_name, description, address, city, country, 
+        contact_phone, contact_email, amenitiesString, hotelId
+      ], function (err) {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        if (this.changes === 0) {
+          reject(new Error('Hotel not found or no changes made'));
+          return;
+        }
+
+        // ลบรูปภาพเก่าและเพิ่มใหม่
+        const deleteImagesSQL = `DELETE FROM hotel_images WHERE hotel_id = ?`;
+        db.run(deleteImagesSQL, [hotelId], (imgErr) => {
+          if (imgErr) {
+            reject(imgErr);
+            return;
+          }
+
+          // เพิ่มรูปภาพใหม่
+          if (image_urls && image_urls.length > 0) {
+            const insertImageSQL = `INSERT INTO hotel_images (hotel_id, image_url) VALUES (?, ?)`;
+            let completedInserts = 0;
+            
+            image_urls.forEach((imageUrl) => {
+              db.run(insertImageSQL, [hotelId, imageUrl], (insertErr) => {
+                if (insertErr) {
+                  reject(insertErr);
+                  return;
+                }
+                
+                completedInserts++;
+                if (completedInserts === image_urls.length) {
+                  // อัพเดทห้องพัก
+                  updateRooms();
+                }
+              });
+            });
+          } else {
+            updateRooms();
+          }
+        });
+
+        function updateRooms() {
+          // ลบห้องพักเก่า
+          const deleteRoomsSQL = `DELETE FROM rooms WHERE hotel_id = ?`;
+          db.run(deleteRoomsSQL, [hotelId], (roomErr) => {
+            if (roomErr) {
+              reject(roomErr);
+              return;
+            }
+
+            // เพิ่มห้องพักใหม่
+            if (rooms && rooms.length > 0) {
+              const insertRoomSQL = `
+                INSERT INTO rooms (hotel_id, room_type, price_per_night, max_guests, beds, quantity) 
+                VALUES (?, ?, ?, ?, ?, ?)
+              `;
+              let completedRoomInserts = 0;
+
+              rooms.forEach((room) => {
+                db.run(insertRoomSQL, [
+                  hotelId, room.room_type, room.price_per_night, 
+                  room.max_guests, room.beds, room.quantity
+                ], (insertRoomErr) => {
+                  if (insertRoomErr) {
+                    reject(insertRoomErr);
+                    return;
+                  }
+                  
+                  completedRoomInserts++;
+                  if (completedRoomInserts === rooms.length) {
+                    resolve({ message: 'Hotel updated successfully' });
+                  }
+                });
+              });
+            } else {
+              resolve({ message: 'Hotel updated successfully' });
+            }
+          });
+        }
+      });
+    });
+  }
 }

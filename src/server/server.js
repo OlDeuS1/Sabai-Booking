@@ -35,6 +35,8 @@ app.post("/api/hotels", HotelController.createHotel);
 app.get("/api/hotel/:hotelId/rooms", HotelController.getHotelRooms);
 app.get("/api/hotels/admin", HotelController.getAllHotelAdminData);
 app.get("/api/hotels/owner/:ownerId", HotelController.getHotelsByOwnerId);
+app.get("/api/hotels/:hotelId", HotelController.getHotelById);
+app.put("/api/hotels/:hotelId", HotelController.updateHotel);
 app.put("/api/hotels/:hotelId/status", HotelController.updateHotelStatus);
 app.delete("/api/hotels/:hotelId", HotelController.deleteHotel);
 

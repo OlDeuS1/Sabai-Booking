@@ -12,6 +12,7 @@ import HistoryBooking_Admin from '../views/HistoryBooking_Admin.vue';
 import axios from 'axios';
 import AdminHotel from '../views/AdminHotel.vue';
 import hotelcreate from '../views/CreateHotel_AdminHotel.vue';
+import EditHotel from '../views/EditHotel_AdminHotel.vue';
 import HotelBookings from '../views/HotelBookingAction.vue';
 
 const routes = [
@@ -48,7 +49,7 @@ const routes = [
   },
   {
     path: "/hotel-management/:hotelId/edit",
-    component: hotelcreate,
+    component: EditHotel,
     name: "EditHotel",
     meta: { requiresAuth: true, roles: ["admin", "hotel"] },
   },

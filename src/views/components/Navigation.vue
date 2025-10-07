@@ -19,8 +19,9 @@ const handleLogoClick = () => {
     // ถ้าเป็น admin ไปหน้า admin
     if (props.userCur.role === 'admin') {
       router.push('/admin')
+    } else if (props.userCur.role === 'hotel') {
+      router.push('/hotel-management')
     } else {
-      // ถ้าเป็น user หรือ hotel ไปหน้า home
       router.push('/')
     }
   } else {

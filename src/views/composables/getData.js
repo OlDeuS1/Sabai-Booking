@@ -204,3 +204,27 @@ export const deleteHotel = async function(hotelId) {
     throw err;
   }
 };
+
+export const getHotelById = async function(hotelId) {
+  try {
+    const res = await axios.get(`http://localhost:3000/api/hotels/${hotelId}`, { 
+      withCredentials: true 
+    });
+    return res.data;
+  } catch (err) {
+    console.error('Error getting hotel by ID:', err);
+    throw err;
+  }
+};
+
+export const updateHotel = async function(hotelId, hotelData) {
+  try {
+    const res = await axios.put(`http://localhost:3000/api/hotels/${hotelId}`, hotelData, { 
+      withCredentials: true 
+    });
+    return res.data;
+  } catch (err) {
+    console.error('Error updating hotel:', err);
+    throw err;
+  }
+};
