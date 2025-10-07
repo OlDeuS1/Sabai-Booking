@@ -95,7 +95,7 @@ onMounted(async () => {
             </div>
 
             <div v-if="!isLoading">
-                <div v-if="bookings.length === 0" class="text-white text-center py-8">
+                <div v-if="bookings.length === 0" class="text-gray-400 text-center py-8">
                     ไม่มีการจองสำหรับโรงแรมนี้
                 </div>
                 <table v-else class="w-full">
