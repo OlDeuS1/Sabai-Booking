@@ -241,7 +241,7 @@ const goBack = () => {
       <!-- Form -->
       <div v-else>
         <div class="header mb-8">
-          <button @click="goBack" class="text-white hover:text-gray-300 mb-4">
+          <button @click="goBack" class="text-white hover:text-gray-300 mb-4 cursor-pointer">
             ← กลับไปหน้าจัดการโรงแรม
           </button>
           <h1 class="text-4xl font-bold text-center">แก้ไขข้อมูลโรงแรม</h1>
@@ -382,7 +382,7 @@ const goBack = () => {
                      class="flex-1 px-3 py-2 bg-white text-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
               <button type="button" 
                       @click="addAmenity" 
-                      class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                      class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer">
                 เพิ่ม
               </button>
             </div>
@@ -394,7 +394,7 @@ const goBack = () => {
                 {{ amenity }}
                 <button type="button" 
                         @click="removeAmenity(index)" 
-                        class="text-blue-600 hover:text-blue-800">
+                        class="text-blue-600 hover:text-blue-800 cursor-pointer">
                   ×
                 </button>
               </span>
@@ -443,7 +443,7 @@ const goBack = () => {
                         @click="addRoomType" 
                         :disabled="!canAddRoom"
                         :class="{ 'opacity-50 cursor-not-allowed': !canAddRoom }"
-                        class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+                        class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 cursor-pointer disabled:cursor-not-allowed">
                   เพิ่ม
                 </button>
               </div>
@@ -474,13 +474,13 @@ const goBack = () => {
           <div class="flex justify-center gap-4">
             <button type="button" 
                     @click="goBack" 
-                    class="px-8 py-3 bg-gray-600 text-white rounded-md hover:bg-gray-700 font-semibold">
+                    class="px-8 py-3 bg-gray-600 text-white rounded-md hover:bg-gray-700 font-semibold cursor-pointer">
               ยกเลิก
             </button>
             <button type="submit" 
                     :disabled="isSubmitting"
                     :class="{ 'opacity-50 cursor-not-allowed': isSubmitting }"
-                    class="px-8 py-3 bg-orange-600 text-white rounded-md hover:bg-orange-700 font-semibold">
+                    class="px-8 py-3 bg-orange-600 text-white rounded-md hover:bg-orange-700 font-semibold cursor-pointer">
               {{ isSubmitting ? 'กำลังอัพเดท...' : 'อัพเดทโรงแรม' }}
             </button>
           </div>

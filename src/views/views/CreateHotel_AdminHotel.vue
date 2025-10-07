@@ -236,21 +236,21 @@ const submitForm = async () => {
                 <div>
                     <label class="block text-white mb-4 bg-[#212121] p-2 w-24 text-center rounded">ชื่อโรงแรม</label>
                     <input v-model="hotelName" type="text" placeholder="ชื่อโรงแรม"
-                        class="w-full px-3 py-2 rounded bg-white text-black focus:outline-none" required>
+                        class="w-full px-3 py-2 rounded bg-white text-black" required>
                 </div>
 
                 <!-- Description -->
                 <div>
                     <label class="block text-white mb-4 bg-[#212121] p-2 w-42 text-center rounded">รายละเอียดโรงแรม</label>
                     <textarea v-model="description" placeholder="รายละเอียดเกี่ยวกับโรงแรม" rows="4"
-                        class="bg-white text-black w-full px-3 py-2 rounded resize-none focus:outline-none"></textarea>
+                        class="bg-white text-black w-full px-3 py-2 rounded resize-none"></textarea>
                 </div>
 
                 <!-- Address -->
                 <div>
                     <label class="block text-white mb-4 bg-[#212121] p-2 w-16 text-center rounded">ที่อยู่</label>
                     <input v-model="address" type="text" placeholder="ที่อยู่โรงแรม"
-                        class="w-full px-3 py-2 rounded bg-white text-black focus:outline-none" required>
+                        class="w-full px-3 py-2 rounded bg-white text-black" required>
                 </div>
 
                 <!-- City and Country -->
@@ -258,12 +258,12 @@ const submitForm = async () => {
                     <div>
                         <label class="block text-white mb-4 bg-[#212121] p-2 w-16 text-center rounded">เมือง</label>
                         <input v-model="city" type="text" placeholder="เมือง"
-                            class="w-full px-3 py-2 rounded bg-white text-black focus:outline-none" required>
+                            class="w-full px-3 py-2 rounded bg-white text-black" required>
                     </div>
                     <div>
                         <label class="block text-white mb-4 bg-[#212121] p-2 w-16 text-center rounded">ประเทศ</label>
                         <input v-model="country" type="text" placeholder="ประเทศ"
-                            class="w-full px-3 py-2 rounded bg-white text-black focus:outline-none" required>
+                            class="w-full px-3 py-2 rounded bg-white text-black" required>
                     </div>
                 </div>
 
@@ -272,12 +272,12 @@ const submitForm = async () => {
                     <div>
                         <label class="block text-white mb-4 bg-[#212121] p-2 w-20 text-center rounded">เบอร์โทร</label>
                         <input v-model="contactPhone" type="tel" placeholder="เบอร์โทรศัพท์"
-                            class="w-full px-3 py-2 rounded bg-white text-black focus:outline-none">
+                            class="w-full px-3 py-2 rounded bg-white text-black">
                     </div>
                     <div>
                         <label class="block text-white mb-4 bg-[#212121] p-2 w-16 text-center rounded">อีเมล</label>
                         <input v-model="contactEmail" type="email" placeholder="อีเมล"
-                            class="w-full px-3 py-2 rounded bg-white text-black focus:outline-none">
+                            class="w-full px-3 py-2 rounded bg-white text-black">
                     </div>
                 </div>
 
@@ -288,12 +288,12 @@ const submitForm = async () => {
                     <div class="flex gap-2 mb-3 bg-white items-center justify-between rounded">
                         <div class="flex-1">
                             <input v-model="newAmenity" type="text" placeholder="พิมพ์สิ่งอำนวยความสะดวก"
-                                class="w-full px-3 py-2 rounded bg-white text-black outline-none"
+                                class="w-full px-3 py-2 rounded bg-white text-black"
                                 @keyup.enter="addAmenity">
                         </div>
                         <div>
                             <button @click="addAmenity" :disabled="!newAmenity.trim()"
-                                class="bg-white text-black text-xl px-2 m-2 rounded border-1 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                                class="bg-white text-black text-xl px-2 m-2 rounded border-1 cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed">
                                 +
                             </button>
                         </div>
@@ -304,7 +304,7 @@ const submitForm = async () => {
                             class="bg-white p-3 rounded flex items-center justify-between">
                             <span>{{ amenity }}</span>
                             <button @click="removeAmenity(index)"
-                                class="text-red-500 text-md px-2 border rounded hover:text-red-700">
+                                class="text-red-500 text-md px-2 border rounded hover:text-red-700 cursor-pointer">
                                 x
                             </button>
                         </div>
@@ -321,12 +321,12 @@ const submitForm = async () => {
                             <div>
                                 <label class="block text-black text-sm mb-1">ประเภทห้อง</label>
                                 <input v-model="newRoom.room_type" type="text" placeholder="เช่น Standard, Deluxe, Suite"
-                                    class="w-full px-3 py-2 border rounded text-black focus:outline-none">
+                                    class="w-full px-3 py-2 border rounded text-black">
                             </div>
                             <div>
                                 <label class="block text-black text-sm mb-1">ราคาต่อคืน (บาท)</label>
                                 <input v-model.number="newRoom.price_per_night" type="number" min="1" placeholder="1000"
-                                    class="w-full px-3 py-2 border rounded text-black focus:outline-none">
+                                    class="w-full px-3 py-2 border rounded text-black">
                             </div>
                         </div>
                         
@@ -334,22 +334,22 @@ const submitForm = async () => {
                             <div>
                                 <label class="block text-black text-sm mb-1">จำนวนผู้เข้าพัก</label>
                                 <input v-model.number="newRoom.max_guests" type="number" min="1" max="10" placeholder="2"
-                                    class="w-full px-3 py-2 border rounded text-black focus:outline-none">
+                                    class="w-full px-3 py-2 border rounded text-black">
                             </div>
                             <div>
                                 <label class="block text-black text-sm mb-1">จำนวนเตียง</label>
                                 <input v-model.number="newRoom.beds" type="number" min="1" max="5" placeholder="1"
-                                    class="w-full px-3 py-2 border rounded text-black focus:outline-none">
+                                    class="w-full px-3 py-2 border rounded text-black">
                             </div>
                             <div>
                                 <label class="block text-black text-sm mb-1">จำนวนห้อง</label>
                                 <input v-model.number="newRoom.quantity" type="number" min="1" placeholder="10"
-                                    class="w-full px-3 py-2 border rounded text-black focus:outline-none">
+                                    class="w-full px-3 py-2 border rounded text-black">
                             </div>
                         </div>
                         
                         <button @click="addRoomType" :disabled="!canAddRoom"
-                            class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                            class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 disabled:bg-gray-400 cursor-pointer disabled:cursor-not-allowed">
                             เพิ่มประเภทห้อง
                         </button>
                     </div>
