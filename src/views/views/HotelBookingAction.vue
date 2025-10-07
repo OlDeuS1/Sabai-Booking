@@ -80,8 +80,8 @@ onMounted(async () => {
 
 <template>
     <div class="min-h-screen bg-[#102B58] p-8">
-        <div class="max-w-8xl px-24 mx-auto">
-            <div class="px-18">
+        <div class="max-w-7xl px-2 mx-auto sm:px-6 lg:px-8">
+            <div class="">
                 <router-link to="/hotel-management" class="inline-flex items-center text-white font-semibold mb-10 cursor-pointer">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
