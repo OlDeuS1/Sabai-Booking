@@ -165,13 +165,13 @@ const deleteHotel = async (hotel) => {
 <template>
     <div class="bg-[#212121] p-32 pt-16">
         <!-- ส่วนของผู้ใช้บริการ/ลูกค้า -->
-        <div class="grid justify-center text-white">
+        <div class="max-w-7xl mx-auto flex flex-col px-2 sm:px-6 lg:px-8 justify-center text-white">
             <div class="flex justify-between mb-4 items-center">
                 <div class="text-2xl font-semibold">รายชื่อผู้ใช้</div>
                 <div class="relative">
                     <form @submit.prevent="updateSearchQuery">
-                        <input type="text" v-model="searchUser" name="" id="" class="rounded-sm p-3 text-sm w-80 h-10 bg-white text-black border-none" placeholder="ค้นหาชื่อผู้ใช้">
-                        <button @click.prevent="updateSearchQuery" type="submit" class="absolute inset-y-1 right-2 flex items-center justify-center w-8 h-8 rounded-full bg-black cursor-pointer">
+                        <input type="text" v-model="searchUser" name="" id="" class="rounded-sm p-3 text-sm w-80 h-10 bg-white text-black border-none" placeholder="ค้นหาชื่อผู้ใช้...">
+                        <button @click.prevent="updateSearchQuery" type="submit" class="absolute inset-y-1 right-2 flex items-center justify-center w-8 h-8 rounded-full bg-black hover:bg-gray-700 transition-all cursor-pointer">
                             <MagnifyingGlassIcon class="w-5 h-5 text-white"/>
                         </button>
                     </form>
@@ -188,30 +188,32 @@ const deleteHotel = async (hotel) => {
                     </tr>
                 </thead>
                 <tbody v-if="userFilter?.length">
-                    <tr class="border border-l-0 border-r-0" v-for="(user, index) in userFilter" :key="index">
+                    <tr class="border-y border-gray-600" v-for="(user, index) in userFilter" :key="index">
                         <td>{{ index + 1 }}</td>
-                        <td class="border">{{ user.first_name }} {{ user.last_name }}</td>
-                        <td class="border">{{ user.email }}</td>
+                        <td>{{ user.first_name }} {{ user.last_name }}</td>
+                        <td>{{ user.email }}</td>
                         <td>{{ user.phone_number }}</td>
                         <td class="text-right">
-                            <button @click="goToUserBookingHistory(user)" class="cursor-pointer bg-[#102B58] text-white p-2 w-30 rounded-sm">ประวัติการจอง</button>
+                            <button @click="goToUserBookingHistory(user)" class="cursor-pointer bg-[#102B58] hover:bg-blue-900 transition-all text-white p-2 w-30 rounded-sm">ประวัติการจอง</button>
                         </td>
                     </tr>
                 </tbody>
                 <tbody v-else>
-                    <tr class="border border-l-0 border-r-0 text-gray-400 text-center" colspan="6">ไม่พบข้อมูลที่ค้นหา</tr>
+                    <tr class="border border-l-0 border-r-0 text-gray-400 text-center">
+                        <td colspan="6">ไม่พบข้อมูลที่ค้นหา</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
 
         <!-- ส่วนของโรงแรม -->
-        <div class="grid justify-center text-white" v-if="!isLoading">
+        <div class="max-w-7xl mx-auto flex flex-col px-2 sm:px-6 lg:px-8 justify-center text-white" v-if="!isLoading">
             <div class="flex justify-between mt-28 mb-4 items-center">
                 <div class="text-2xl font-semibold">รายชื่อโรงแรม</div>
                 <div class="relative">
                     <form @submit.prevent="updateSearchQuery">
-                        <input type="text" v-model="searchHotel" name="" id="" class="rounded-sm p-3 text-sm w-80 h-10 bg-white text-black border-none" placeholder="ค้นหาชื่อโรงแรม">
-                        <button @click.prevent="updateSearchQuery" type="submit" class="absolute inset-y-1 right-2 flex items-center justify-center w-8 h-8 rounded-full bg-black cursor-pointer">
+                        <input type="text" v-model="searchHotel" name="" id="" class="rounded-sm p-3 text-sm w-80 h-10 bg-white text-black border-none" placeholder="ค้นหาชื่อโรงแรม...">
+                        <button @click.prevent="updateSearchQuery" type="submit" class="absolute inset-y-1 right-2 flex items-center justify-center w-8 h-8 rounded-full bg-black hover:bg-gray-700 transition-all cursor-pointer">
                             <MagnifyingGlassIcon class="w-5 h-5 text-white"/>
                         </button>
                     </form>
@@ -228,24 +230,24 @@ const deleteHotel = async (hotel) => {
                     </tr>
                 </thead>
                 <tbody v-if="hotelFiler?.length">
-                    <tr class="border border-l-0 border-r-0" v-for="(hotel, index) in hotelFiler" :key="index">
+                    <tr class="border-y border-gray-500" v-for="(hotel, index) in hotelFiler" :key="index">
                         <td>{{ index + 1 }}</td>
-                        <td class="border">
+                        <td>
                             <div class="text-lg mb-1">{{ hotel.hotel_name }}</div>
                             <div class="text-sm opacity-50">{{ hotel.owner_first_name }} {{ hotel.owner_last_name }}</div>
                         </td>
-                        <td class="border">{{ hotel.address }}</td>
+                        <td>{{ hotel.address }}</td>
                         <td>
                             <ul v-if="hotel.rooms && hotel.rooms.length > 0">
                                 <li v-for="room in hotel.rooms" :key="room.room_id">
                                     ห้องพัก {{ room.max_guests }} คน {{ room.beds }} เตียง ({{ room.room_type }})
                                 </li>
                             </ul>
-                            <div v-else class="text-gray-400 italic">ไม่มีข้อมูลห้องพัก</div>
+                            <div v-else class="text-gray-500">ไม่มีข้อมูลห้องพัก</div>
                         </td>
                         <td class="text-right">
                             <div v-if="hotel.status === 'approved'">
-                                <button @click="deleteHotel(hotel)" class="cursor-pointer bg-[#FF0000] text-white p-2 w-30 rounded-sm">ลบ</button>
+                                <button @click="deleteHotel(hotel)" class="cursor-pointer bg-[#FF0000] text-white p-2 w-30 rounded-sm hover:bg-red-800 transition-colors">ลบ</button>
                             </div>
                             <div v-else-if="hotel.status === 'pending'" class="flex gap-3 justify-end">
                                 <button @click="approveHotel(hotel)" class="cursor-pointer bg-[#00D35F] text-white px-5 py-2 rounded-sm hover:bg-green-600 transition-colors">
@@ -262,7 +264,9 @@ const deleteHotel = async (hotel) => {
                     </tr>
                 </tbody>
                 <tbody v-else>
-                    <tr class="border border-l-0 border-r-0 text-gray-400 text-center" colspan="6">ไม่พบข้อมูลที่ค้นหา</tr>
+                    <tr class="border border-l-0 border-r-0 text-gray-400 text-center">
+                        <td colspan="6">ไม่พบข้อมูลที่ค้นหา</td>
+                    </tr>
                 </tbody>
             </table>
         </div>

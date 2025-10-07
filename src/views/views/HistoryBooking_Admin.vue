@@ -26,12 +26,12 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="bg-[#212121] p-32 pt-16">
-        <div class="grid justify-center text-white">
+    <div class="bg-[#212121] pt-16 pb-32">
+        <div class="max-w-7xl mx-auto flex flex-col px-2 sm:px-6 lg:px-8 justify-center text-white">
             <div class="flex mb-10">
                 <router-link to="/admin" class="flex items-center">
                         <div><ChevronLeftIcon class="w-6 h-6"/></div>
-                        <div class="text-white text-xl">กลับไปยังหน้าการจัดการ</div>
+                        <div class="text-white text-xl hover:text-gray-300 transition-all">กลับไปยังหน้าการจัดการ</div>
                 </router-link>
             </div>
             <div class="text-3xl mb-10">
@@ -51,20 +51,20 @@ onMounted(async () => {
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-if="isLoading">
-                        <td colspan="6" class="text-center">กำลังโหลดข้อมูล...</td>
+                    <tr v-if="isLoading" class="border-y border-gray-500">
+                        <td colspan="7" class="text-center text-gray-400" >กำลังโหลดข้อมูล...</td>
                     </tr>
-                    <tr v-else-if="userBookings.length === 0">
-                        <td colspan="6" class="text-center">ไม่มีประวัติการจอง</td>
+                    <tr v-else-if="userBookings.length === 0" class="border-y border-gray-500">
+                        <td colspan="7" class="text-center text-gray-400">ไม่มีประวัติการจอง</td>
                     </tr>
-                    <tr v-else class="border border-l-0 border-r-0" v-for="(booking, index) in userBookings" :key="booking.id">
+                    <tr v-else class="border-y border-gray-500" v-for="(booking, index) in userBookings" :key="booking.id">
                         <td>{{ index + 1 }}</td>
-                        <td class="border">{{ booking.hotel_name || 'ไม่ระบุ' }}</td>
-                        <td class="border">{{ booking.room_type || 'ไม่ระบุ' }}</td>
+                        <td>{{ booking.hotel_name || 'ไม่ระบุ' }}</td>
+                        <td>{{ booking.room_type || 'ไม่ระบุ' }}</td>
                         <td>{{ booking.check_in_date || 'ไม่ระบุ' }}</td>
-                        <td class="border">{{ booking.check_out_date || 'ไม่ระบุ' }}</td>
-                        <td class="border">{{ booking.total_price ? booking.total_price.toLocaleString() : '0' }} บาท</td>
-                        <td class="border">{{ booking.booking_status || 'ไม่ระบุ' }}</td>
+                        <td>{{ booking.check_out_date || 'ไม่ระบุ' }}</td>
+                        <td>{{ booking.total_price ? booking.total_price.toLocaleString() : '0' }} บาท</td>
+                        <td>{{ booking.booking_status || 'ไม่ระบุ' }}</td>
                     </tr>
                 </tbody>
             </table>
@@ -74,12 +74,10 @@ onMounted(async () => {
 
 <style scoped>
     th{
-        padding: 4px;
         text-align: left;
-        padding-left: 24px;
-        padding-bottom: 16px;
+        padding: 1rem 2rem;
     }
     td{
-        padding: 36px;
+        padding: 2.5rem 2rem;
     }
 </style>
