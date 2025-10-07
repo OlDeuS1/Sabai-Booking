@@ -165,7 +165,7 @@ const handleEditHotel = (hotelId) => {
                 <!-- ปุ่มปกติ (แสดงเมื่อไม่ได้อยู่ในโหมดเลือก) -->
                 <div v-if="!isSelectionMode" class="flex justify-end gap-2">
                   <button @click="handleViewBookings(hotel.hotel_id)" class="text-white bg-[#102B58] text-[14px] font-semibold p-2.5 cursor-pointer rounded-sm hover:bg-blue-900 transition-colors">ดูการจอง</button>
-                  <button @click="handleEditHotel(hotel.hotel_id)" class="text-white bg-[#102B58] text-[14px] font-semibold p-2.5 cursor-pointer rounded-sm hover:bg-blue-900 transition-colors">แก้ไขรายละเอียด</button>
+                  <button @click="handleEditHotel(hotel.hotel_id)" class="text-[#102B58] bg-white border text-[14px] font-semibold p-2.5 cursor-pointer rounded-sm hover:bg-gray-300 transition-colors">แก้ไขรายละเอียด</button>
                 </div>
                 
                 <!-- แสดงสถานะเลือกแล้ว (แสดงเมื่ออยู่ในโหมดเลือก) -->

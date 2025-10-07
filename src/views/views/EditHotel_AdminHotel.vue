@@ -480,7 +480,7 @@ const goBack = () => {
             <button type="submit" 
                     :disabled="isSubmitting"
                     :class="{ 'opacity-50 cursor-not-allowed': isSubmitting }"
-                    class="px-8 py-3 bg-orange-600 text-white rounded-md hover:bg-orange-700 font-semibold cursor-pointer">
+                    class="px-8 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 font-semibold cursor-pointer">
               {{ isSubmitting ? 'กำลังอัพเดท...' : 'อัพเดทโรงแรม' }}
             </button>
           </div>

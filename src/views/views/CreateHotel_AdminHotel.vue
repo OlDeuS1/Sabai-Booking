@@ -181,209 +181,270 @@ const submitForm = async () => {
         isSubmitting.value = false
     }
 }
+
+const goBack = () => {
+    router.push('/hotel-management')
+}
 </script>
 
 <template>
-    <div class="bg-[#102B58] p-4">
-        <div class="flex items-center justify-between max-w-4xl mx-auto mb-8 mt-8">
-            <RouterLink to="/hotel-management" class="flex items-center text-white hover:text-green-400 transition-colors">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7">
-                    </path>
-                </svg>
-                <span class="text-lg ml-2">กลับไปยังการจัดการโรงแรม</span>
-            </RouterLink>
-            <h1 class="text-white text-2xl font-semibold">เพิ่มโรงแรม</h1>
+  <div class="create-hotel bg-[#102B58] text-white min-h-screen">
+    <div class="create-hotel-container max-w-4xl mx-auto px-8 py-8">
+      <!-- Form -->
+      <div>
+        <div class="header mb-8">
+          <button @click="goBack" class="text-white hover:text-gray-300 mb-4 cursor-pointer">
+            ← กลับไปหน้าจัดการโรงแรม
+          </button>
+          <h1 class="text-4xl font-bold text-center">เพิ่มโรงแรมใหม่</h1>
+          <p class="text-gray-300 text-center mt-2">กรอกข้อมูลโรงแรมใหม่</p>
         </div>
 
-        <div class="max-w-4xl mx-auto">
-            <div class="lg:col-span-2 space-y-8 mb-8">
-                <div class="relative bg-gray-200 rounded-lg h-96 flex items-center justify-center">
-                    <img v-if="images.main" :src="images.main" alt="Main image"
-                        class="w-full h-full object-cover rounded-lg shadow-lg z-10 absolute">
-                    <div class="text-center">
-                        <button class="bg-green-500 text-white px-4 py-2 rounded cursor-pointer absolute z-20 -translate-y-1/2 -translate-x-1/2"
-                            @click="triggerFileInput('main')">เพิ่มรูปภาพ</button>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="relative bg-gray-200 rounded-lg h-48 flex items-center justify-center">
-                        <img v-if="images.sub1" :src="images.sub1" alt="Sub image 1"
-                            class="w-full h-full object-cover rounded-lg shadow-md z-10 absolute">
-                        <button class="bg-green-500 text-white px-3 py-2 text-sm rounded cursor-pointer absolute z-20"
-                            @click="triggerFileInput('sub1')">เพิ่มรูปภาพ</button>
-                    </div>
-
-                    <div class="relative bg-gray-200 rounded-lg h-48 flex items-center justify-center">
-                        <img v-if="images.sub2" :src="images.sub2" alt="Sub image 2"
-                            class="w-full h-full object-cover rounded-lg shadow-md z-10 absolute">
-                        <button class="bg-green-500 text-white px-3 py-2 text-sm rounded cursor-pointer absolute z-20"
-                            @click="triggerFileInput('sub2')">เพิ่มรูปภาพ</button>
-                    </div>
-                </div>
+        <form @submit.prevent="submitForm" class="space-y-8">
+          <!-- Basic Information -->
+          <div class="bg-white/10 rounded-lg p-6">
+            <h2 class="text-2xl font-semibold mb-4">ข้อมูลพื้นฐาน</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium mb-2">ชื่อโรงแรม *</label>
+                <input v-model="hotelName" 
+                       type="text" 
+                       placeholder="เช่น โรงแรมสบายรีสอร์ท"
+                       class="w-full px-3 py-2 bg-white text-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       required>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium mb-2">เมือง *</label>
+                <input v-model="city" 
+                       type="text" 
+                       placeholder="เช่น เชียงใหม่, กรุงเทพฯ, ภูเก็ต"
+                       class="w-full px-3 py-2 bg-white text-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       required>
+              </div>
             </div>
 
-            <input ref="mainFileInput" type="file" accept="image/*" class="hidden"
-                @change="handleImageUpload('main', $event)">
-            <input ref="sub1FileInput" type="file" accept="image/*" class="hidden"
-                @change="handleImageUpload('sub1', $event)">
-            <input ref="sub2FileInput" type="file" accept="image/*" class="hidden"
-                @change="handleImageUpload('sub2', $event)">
-
-            <div class="space-y-6">
-                <!-- Hotel Name -->
-                <div>
-                    <label class="block text-white mb-4 bg-[#212121] p-2 w-24 text-center rounded">ชื่อโรงแรม</label>
-                    <input v-model="hotelName" type="text" placeholder="ชื่อโรงแรม"
-                        class="w-full px-3 py-2 rounded bg-white text-black" required>
-                </div>
-
-                <!-- Description -->
-                <div>
-                    <label class="block text-white mb-4 bg-[#212121] p-2 w-42 text-center rounded">รายละเอียดโรงแรม</label>
-                    <textarea v-model="description" placeholder="รายละเอียดเกี่ยวกับโรงแรม" rows="4"
-                        class="bg-white text-black w-full px-3 py-2 rounded resize-none"></textarea>
-                </div>
-
-                <!-- Address -->
-                <div>
-                    <label class="block text-white mb-4 bg-[#212121] p-2 w-16 text-center rounded">ที่อยู่</label>
-                    <input v-model="address" type="text" placeholder="ที่อยู่โรงแรม"
-                        class="w-full px-3 py-2 rounded bg-white text-black" required>
-                </div>
-
-                <!-- City and Country -->
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-white mb-4 bg-[#212121] p-2 w-16 text-center rounded">เมือง</label>
-                        <input v-model="city" type="text" placeholder="เมือง"
-                            class="w-full px-3 py-2 rounded bg-white text-black" required>
-                    </div>
-                    <div>
-                        <label class="block text-white mb-4 bg-[#212121] p-2 w-16 text-center rounded">ประเทศ</label>
-                        <input v-model="country" type="text" placeholder="ประเทศ"
-                            class="w-full px-3 py-2 rounded bg-white text-black" required>
-                    </div>
-                </div>
-
-                <!-- Contact Information -->
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-white mb-4 bg-[#212121] p-2 w-20 text-center rounded">เบอร์โทร</label>
-                        <input v-model="contactPhone" type="tel" placeholder="เบอร์โทรศัพท์"
-                            class="w-full px-3 py-2 rounded bg-white text-black">
-                    </div>
-                    <div>
-                        <label class="block text-white mb-4 bg-[#212121] p-2 w-16 text-center rounded">อีเมล</label>
-                        <input v-model="contactEmail" type="email" placeholder="อีเมล"
-                            class="w-full px-3 py-2 rounded bg-white text-black">
-                    </div>
-                </div>
-
-                <div>
-                    <label
-                        class="block text-white mb-4 bg-[#212121] p-2 w-42 text-center rounded">สิ่งอำนวยความสะดวก</label>
-
-                    <div class="flex gap-2 mb-3 bg-white items-center justify-between rounded">
-                        <div class="flex-1">
-                            <input v-model="newAmenity" type="text" placeholder="พิมพ์สิ่งอำนวยความสะดวก"
-                                class="w-full px-3 py-2 rounded bg-white text-black"
-                                @keyup.enter="addAmenity">
-                        </div>
-                        <div>
-                            <button @click="addAmenity" :disabled="!newAmenity.trim()"
-                                class="bg-white text-black text-xl px-2 m-2 rounded border-1 cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed">
-                                +
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="space-y-2">
-                        <div v-for="(amenity, index) in amenities" :key="index"
-                            class="bg-white p-3 rounded flex items-center justify-between">
-                            <span>{{ amenity }}</span>
-                            <button @click="removeAmenity(index)"
-                                class="text-red-500 text-md px-2 border rounded hover:text-red-700 cursor-pointer">
-                                x
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Room Types -->
-                <div>
-                    <label class="block text-white mb-4 bg-[#212121] p-2 w-32 text-center rounded">ประเภทห้องพัก</label>
-                    
-                    <!-- Room Type Form -->
-                    <div class="bg-white p-4 rounded mb-4">
-                        <div class="grid grid-cols-2 gap-4 mb-3">
-                            <div>
-                                <label class="block text-black text-sm mb-1">ประเภทห้อง</label>
-                                <input v-model="newRoom.room_type" type="text" placeholder="เช่น Standard, Deluxe, Suite"
-                                    class="w-full px-3 py-2 border rounded text-black">
-                            </div>
-                            <div>
-                                <label class="block text-black text-sm mb-1">ราคาต่อคืน (บาท)</label>
-                                <input v-model.number="newRoom.price_per_night" type="number" min="1" placeholder="1000"
-                                    class="w-full px-3 py-2 border rounded text-black">
-                            </div>
-                        </div>
-                        
-                        <div class="grid grid-cols-3 gap-4 mb-3">
-                            <div>
-                                <label class="block text-black text-sm mb-1">จำนวนผู้เข้าพัก</label>
-                                <input v-model.number="newRoom.max_guests" type="number" min="1" max="10" placeholder="2"
-                                    class="w-full px-3 py-2 border rounded text-black">
-                            </div>
-                            <div>
-                                <label class="block text-black text-sm mb-1">จำนวนเตียง</label>
-                                <input v-model.number="newRoom.beds" type="number" min="1" max="5" placeholder="1"
-                                    class="w-full px-3 py-2 border rounded text-black">
-                            </div>
-                            <div>
-                                <label class="block text-black text-sm mb-1">จำนวนห้อง</label>
-                                <input v-model.number="newRoom.quantity" type="number" min="1" placeholder="10"
-                                    class="w-full px-3 py-2 border rounded text-black">
-                            </div>
-                        </div>
-                        
-                        <button @click="addRoomType" :disabled="!canAddRoom"
-                            class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 disabled:bg-gray-400 cursor-pointer disabled:cursor-not-allowed">
-                            เพิ่มประเภทห้อง
-                        </button>
-                    </div>
-
-                    <!-- Room Types List -->
-                    <div class="space-y-2" v-if="roomTypes.length > 0">
-                        <div v-for="(room, index) in roomTypes" :key="index"
-                            class="bg-white p-3 rounded flex items-center justify-between">
-                            <div class="text-black">
-                                <span class="font-semibold">{{ room.room_type }}</span> - 
-                                {{ room.price_per_night.toLocaleString() }} บาท/คืน | 
-                                {{ room.max_guests }} คน | 
-                                {{ room.beds }} เตียง | 
-                                {{ room.quantity }} ห้อง
-                            </div>
-                            <button @click="removeRoomType(index)"
-                                class="text-red-500 text-md px-2 border rounded hover:text-red-700">
-                                ลบ
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex justify-end pt-4 gap-4">
-                    <RouterLink to="/hotel-management" 
-                        class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600 transition-colors">
-                        ยกเลิก
-                    </RouterLink>
-                    <button @click="submitForm" :disabled="isSubmitting"
-                        class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors">
-                        {{ isSubmitting ? 'กำลังบันทึก...' : 'บันทึกข้อมูล' }}
-                    </button>
-                </div>
+            <div class="mt-4">
+              <label class="block text-sm font-medium mb-2">คำอธิบายโรงแรม</label>
+              <textarea v-model="description" 
+                        rows="3" 
+                        placeholder="อธิบายเกี่ยวกับโรงแรม เช่น สิ่งอำนวยความสะดวก ห้องพัก วิวทิวทัศน์ ความพิเศษ..."
+                        class="w-full px-3 py-2 bg-white text-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+              </textarea>
             </div>
-        </div>
+
+            <div class="mt-4">
+              <label class="block text-sm font-medium mb-2">ที่อยู่โรงแรม *</label>
+              <textarea v-model="address" 
+                        rows="2" 
+                        placeholder="เช่น 123 ถ.นิมมานเหมินท์ ต.สุเทพ อ.เมือง จ.เชียงใหม่ 50200"
+                        class="w-full px-3 py-2 bg-white text-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required>
+              </textarea>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+              <div>
+                <label class="block text-sm font-medium mb-2">ประเทศ</label>
+                <input v-model="country" 
+                       type="text" 
+                       placeholder="เช่น ไทย"
+                       class="w-full px-3 py-2 bg-white text-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium mb-2">เบอร์โทรติดต่อ</label>
+                <input v-model="contactPhone" 
+                       type="tel" 
+                       placeholder="เช่น 053-123456 หรือ 081-234-5678"
+                       class="w-full px-3 py-2 bg-white text-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium mb-2">อีเมลติดต่อ</label>
+                <input v-model="contactEmail" 
+                       type="email" 
+                       placeholder="เช่น info@hotelname.com"
+                       class="w-full px-3 py-2 bg-white text-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+              </div>
+            </div>
+          </div>
+
+          <!-- Images Section -->
+          <div class="bg-white/10 rounded-lg p-6">
+            <h2 class="text-2xl font-semibold mb-4">รูปภาพโรงแรม</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <!-- Main Image -->
+              <div>
+                <label class="block text-sm font-medium mb-2">รูปภาพหลัก</label>
+                <div @click="triggerFileInput('main')" 
+                     class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-blue-400 min-h-[200px] flex items-center justify-center">
+                  <div v-if="!images.main" class="text-gray-400">
+                    คลิกเพื่อเลือกรูปภาพหลัก
+                  </div>
+                  <img v-else :src="images.main" alt="Main" class="max-h-40 max-w-full object-cover rounded">
+                </div>
+                <input ref="mainFileInput" 
+                       type="file" 
+                       accept="image/*" 
+                       @change="handleImageUpload('main', $event)" 
+                       class="hidden">
+              </div>
+
+              <!-- Sub Image 1 -->
+              <div>
+                <label class="block text-sm font-medium mb-2">รูปภาพที่ 2</label>
+                <div @click="triggerFileInput('sub1')" 
+                     class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-blue-400 min-h-[200px] flex items-center justify-center">
+                  <div v-if="!images.sub1" class="text-gray-400">
+                    คลิกเพื่อเลือกรูปภาพที่ 2
+                  </div>
+                  <img v-else :src="images.sub1" alt="Sub 1" class="max-h-40 max-w-full object-cover rounded">
+                </div>
+                <input ref="sub1FileInput" 
+                       type="file" 
+                       accept="image/*" 
+                       @change="handleImageUpload('sub1', $event)" 
+                       class="hidden">
+              </div>
+
+              <!-- Sub Image 2 -->
+              <div>
+                <label class="block text-sm font-medium mb-2">รูปภาพที่ 3</label>
+                <div @click="triggerFileInput('sub2')" 
+                     class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-blue-400 min-h-[200px] flex items-center justify-center">
+                  <div v-if="!images.sub2" class="text-gray-400">
+                    คลิกเพื่อเลือกรูปภาพที่ 3
+                  </div>
+                  <img v-else :src="images.sub2" alt="Sub 2" class="max-h-40 max-w-full object-cover rounded">
+                </div>
+                <input ref="sub2FileInput" 
+                       type="file" 
+                       accept="image/*" 
+                       @change="handleImageUpload('sub2', $event)" 
+                       class="hidden">
+              </div>
+            </div>
+          </div>
+
+          <!-- Amenities Section -->
+          <div class="bg-white/10 rounded-lg p-6">
+            <h2 class="text-2xl font-semibold mb-4">สิ่งอำนวยความสะดวก</h2>
+            
+            <div class="flex gap-2 mb-4">
+              <input v-model="newAmenity" 
+                     @keyup.enter="addAmenity"
+                     type="text" 
+                     placeholder="เพิ่มสิ่งอำนวยความสะดวก" 
+                     class="flex-1 px-3 py-2 bg-white text-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <button type="button" 
+                      @click="addAmenity" 
+                      class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer">
+                เพิ่ม
+              </button>
+            </div>
+
+            <div class="flex flex-wrap gap-2">
+              <span v-for="(amenity, index) in amenities" 
+                    :key="index" 
+                    class="inline-flex items-center gap-1 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
+                {{ amenity }}
+                <button type="button" 
+                        @click="removeAmenity(index)" 
+                        class="text-blue-600 hover:text-blue-800 cursor-pointer">
+                  ×
+                </button>
+              </span>
+            </div>
+          </div>
+
+          <!-- Room Types Section -->
+          <div class="bg-white/10 rounded-lg p-6">
+            <h2 class="text-2xl font-semibold mb-4">ประเภทห้องพัก</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
+              <div>
+                <input v-model="newRoom.room_type" 
+                       type="text" 
+                       placeholder="ประเภทห้อง" 
+                       class="w-full px-3 py-2 bg-white text-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+              </div>
+              <div>
+                <input v-model.number="newRoom.price_per_night" 
+                       type="number" 
+                       placeholder="ราคา/คืน" 
+                       min="0" 
+                       class="w-full px-3 py-2 bg-white text-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+              </div>
+              <div>
+                <input v-model.number="newRoom.max_guests" 
+                       type="number" 
+                       placeholder="จำนวนคน" 
+                       min="1" 
+                       class="w-full px-3 py-2 bg-white text-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+              </div>
+              <div>
+                <input v-model.number="newRoom.beds" 
+                       type="number" 
+                       placeholder="จำนวนเตียง" 
+                       min="1" 
+                       class="w-full px-3 py-2 bg-white text-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+              </div>
+              <div class="flex gap-2">
+                <input v-model.number="newRoom.quantity" 
+                       type="number" 
+                       placeholder="จำนวนห้อง" 
+                       min="1" 
+                       class="w-full px-3 py-2 bg-white text-black rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button type="button" 
+                        @click="addRoomType" 
+                        :disabled="!canAddRoom"
+                        :class="{ 'opacity-50 cursor-not-allowed': !canAddRoom }"
+                        class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 cursor-pointer disabled:cursor-not-allowed">
+                  เพิ่ม
+                </button>
+              </div>
+            </div>
+
+            <!-- Room Types List -->
+            <div v-if="roomTypes.length > 0" class="space-y-2">
+              <div v-for="(room, index) in roomTypes" 
+                   :key="index" 
+                   class="flex items-center justify-between bg-white/20 p-3 rounded-md">
+                <div class="flex-1">
+                  <span class="font-medium">{{ room.room_type }}</span> - 
+                  <span>{{ room.price_per_night.toLocaleString() }} บาท/คืน</span> - 
+                  <span>{{ room.max_guests }} คน</span> - 
+                  <span>{{ room.beds }} เตียง</span> - 
+                  <span>{{ room.quantity }} ห้อง</span>
+                </div>
+                <button type="button" 
+                        @click="removeRoomType(index)" 
+                        class="text-red-400 hover:text-red-300 ml-2">
+                  ลบ
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="flex justify-center gap-4">
+            <button type="button" 
+                    @click="goBack" 
+                    class="px-8 py-3 bg-gray-600 text-white rounded-md hover:bg-gray-700 font-semibold cursor-pointer">
+              ยกเลิก
+            </button>
+            <button type="submit" 
+                    :disabled="isSubmitting"
+                    :class="{ 'opacity-50 cursor-not-allowed': isSubmitting }"
+                    class="px-8 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 font-semibold cursor-pointer">
+              {{ isSubmitting ? 'กำลังบันทึก...' : 'บันทึกข้อมูล' }}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
+  </div>
 </template>
