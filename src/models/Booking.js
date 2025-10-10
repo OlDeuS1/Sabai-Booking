@@ -121,24 +121,54 @@ export class Booking {
   static cancelExpiredBookings() {
     return new Promise((resolve, reject) => {
       const currentTime = new Date().toISOString();
-      const sql = `
-        UPDATE bookings 
-        SET booking_status = 'cancelled' 
+      
+      // ดึงรายการที่จะถูกยกเลิกก่อน (สำหรับ logging)
+      const selectSql = `
+        SELECT booking_id, user_id, hotel_id, total_price, expires_at,
+               EXTRACT(EPOCH FROM (? - expires_at)) / 60 as minutes_expired
+        FROM bookings 
         WHERE booking_status = 'pending' 
         AND expires_at < ? 
         AND expires_at IS NOT NULL
       `;
-
-      db.run(sql, [currentTime], function (err) {
+      
+      db.all(selectSql, [currentTime, currentTime], (err, expiredBookings) => {
         if (err) {
+          console.error('Error fetching expired bookings:', err);
           reject(err);
-        } else {
-          // แสดงข้อความเฉพาะเมื่อมีการยกเลิกจริงๆ
-          if (this.changes > 0) {
-            console.log(`Auto-cancelled ${this.changes} expired bookings`);
-          }
-          resolve(this.changes);
+          return;
         }
+        
+        if (expiredBookings.length > 0) {
+          console.log(`Found ${expiredBookings.length} expired bookings to cancel:`, 
+            expiredBookings.map(b => ({
+              booking_id: b.booking_id,
+              expired_minutes_ago: Math.round(b.minutes_expired),
+              total_price: b.total_price
+            }))
+          );
+        }
+        
+        // ทำการยกเลิกการจอง
+        const updateSql = `
+          UPDATE bookings 
+          SET booking_status = 'cancelled' 
+          WHERE booking_status = 'pending' 
+          AND expires_at < ? 
+          AND expires_at IS NOT NULL
+        `;
+
+        db.run(updateSql, [currentTime], function (err) {
+          if (err) {
+            console.error('Error cancelling expired bookings:', err);
+            reject(err);
+          } else {
+            if (this.changes > 0) {
+              console.log(`✅ Auto-cancelled ${this.changes} expired bookings at ${new Date().toLocaleString()}`);
+            }
+            resolve(this.changes);
+          }
+        });
       });
     });
   }
@@ -146,19 +176,60 @@ export class Booking {
   // ฟังก์ชันดึงข้อมูล booking ที่กำลังจะหมดอายุ
   static getPendingBookingsWithExpiry() {
     return new Promise((resolve, reject) => {
+      const currentTime = new Date().toISOString();
       const sql = `
-        SELECT booking_id, expires_at, booking_status
+        SELECT booking_id, user_id, hotel_id, total_price, expires_at, booking_status,
+               EXTRACT(EPOCH FROM (expires_at - ?)) / 60 as minutes_remaining
         FROM bookings 
         WHERE booking_status = 'pending' 
         AND expires_at IS NOT NULL
+        AND expires_at > ?
         ORDER BY expires_at ASC
       `;
 
-      db.all(sql, [], (err, rows) => {
+      db.all(sql, [currentTime, currentTime], (err, rows) => {
         if (err) {
           reject(err);
         } else {
-          resolve(rows);
+          // เพิ่มข้อมูลเวลาที่เหลือในรูปแบบที่อ่านง่าย
+          const bookingsWithTime = rows.map(booking => ({
+            ...booking,
+            minutes_remaining: Math.max(0, Math.round(booking.minutes_remaining)),
+            expires_at_local: new Date(booking.expires_at).toLocaleString(),
+            is_urgent: booking.minutes_remaining < 5 // น้อยกว่า 5 นาที
+          }));
+          
+          resolve(bookingsWithTime);
+        }
+      });
+    });
+  }
+
+  // ฟังก์ชันตรวจสอบการจองที่ใกล้หมดอายุ (น้อยกว่า 5 นาที)
+  static getUrgentBookings() {
+    return new Promise((resolve, reject) => {
+      const currentTime = new Date().toISOString();
+      const fiveMinutesLater = new Date(Date.now() + 5 * 60 * 1000).toISOString();
+      
+      const sql = `
+        SELECT booking_id, user_id, hotel_id, total_price, expires_at,
+               EXTRACT(EPOCH FROM (expires_at - ?)) / 60 as minutes_remaining
+        FROM bookings 
+        WHERE booking_status = 'pending' 
+        AND expires_at IS NOT NULL
+        AND expires_at > ?
+        AND expires_at < ?
+        ORDER BY expires_at ASC
+      `;
+
+      db.all(sql, [currentTime, currentTime, fiveMinutesLater], (err, rows) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(rows.map(booking => ({
+            ...booking,
+            minutes_remaining: Math.max(0, Math.round(booking.minutes_remaining))
+          })));
         }
       });
     });

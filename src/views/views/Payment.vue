@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { usePreviousRoute } from '../composables/usePrevRoute'
 import { getBookingById, updateBookingStatus, createPayment } from '../composables/getData'
@@ -53,8 +53,28 @@ const fetchBookingData = async () => {
     const booking = await getBookingById(bookingId)
     bookingData.value = booking
     
+    console.log('Booking data received:', booking)
+    
     // ตั้งค่าเบอร์ PromptPay จากเจ้าของโรงแรม
-    promptPayPhone.value = booking.owner_phone || booking.contact_phone || '0875513773' // fallback เบอร์
+    let phone = booking.owner_phone || booking.contact_phone || '0875513773' // fallback เบอร์
+    
+    // ฟอร์แมตเบอร์โทรให้ถูกต้องสำหรับ PromptPay
+    if (phone) {
+      // ลบเครื่องหมายขีด ช่องว่าง และอักขระพิเศษ
+      phone = phone.replace(/[-\s\(\)]/g, '')
+      // ถ้าเบอร์เริ่มต้นด้วย +66 ให้แปลงเป็น 0
+      if (phone.startsWith('+66')) {
+        phone = '0' + phone.substring(3)
+      }
+      // ถ้าเบอร์เริ่มต้นด้วย 66 ให้แปลงเป็น 0
+      else if (phone.startsWith('66') && phone.length === 11) {
+        phone = '0' + phone.substring(2)
+      }
+    }
+    
+    promptPayPhone.value = phone
+    
+    console.log('PromptPay phone set to:', promptPayPhone.value)
   } catch (err) {
     console.error('Error fetching booking:', err)
     error.value = 'ไม่สามารถโหลดข้อมูลการจองได้'
@@ -66,13 +86,46 @@ const fetchBookingData = async () => {
 // สร้าง QR Code
 const generateQRCode = async () => {
   try {
-    if (!bookingData.value || !promptPayPhone.value) return
+    if (!bookingData.value) {
+      console.log('No booking data available')
+      return
+    }
     
-    const payload = generatePayload(promptPayPhone.value, { amount: bookingData.value.total_price })
-    const qrCodeDataURL = await QRCode.toDataURL(payload)
+    if (!promptPayPhone.value) {
+      console.log('No phone number available')
+      // ใช้เบอร์ fallback
+      promptPayPhone.value = '0875513773'
+    }
+    
+    // แปลง amount เป็น number และตรวจสอบว่าเป็นตัวเลข
+    let amount = parseFloat(bookingData.value.total_price)
+    if (isNaN(amount) || amount <= 0) {
+      console.error('Invalid amount:', bookingData.value.total_price)
+      // ใช้ยอดทดสอบ
+      amount = 100.00
+    }
+    
+    console.log('Generating QR code with:', {
+      phone: promptPayPhone.value,
+      amount: amount
+    })
+    
+    const payload = generatePayload(promptPayPhone.value, { amount: amount })
+    console.log('Generated payload length:', payload.length)
+    
+    const qrCodeDataURL = await QRCode.toDataURL(payload, {
+      width: 256,
+      margin: 2,
+      color: {
+        dark: '#000000',
+        light: '#FFFFFF'
+      }
+    })
+    console.log('Generated QR code successfully, data URL length:', qrCodeDataURL.length)
     qrCodeImage.value = qrCodeDataURL
   } catch (error) {
     console.error('Error generating QR code:', error)
+    error.value = 'ไม่สามารถสร้าง QR Code ได้: ' + error.message
   }
 }
 
@@ -109,9 +162,44 @@ const confirmPayment = async () => {
   }
 }
 
+// Watch for changes in booking data and phone number
+watch([bookingData, promptPayPhone], async ([newBookingData, newPhone]) => {
+  if (newBookingData && newPhone) {
+    console.log('Watch triggered - generating QR code')
+    await generateQRCode()
+  }
+})
+
+// สร้าง QR Code ด้วยข้อมูลทดสอบ (สำหรับ debug)
+const generateTestQR = async () => {
+  try {
+    console.log('Generating test QR code...')
+    const testPhone = '0875513773'
+    const testAmount = 100.50
+    
+    const payload = generatePayload(testPhone, { amount: testAmount })
+    const qrCodeDataURL = await QRCode.toDataURL(payload, {
+      width: 256,
+      margin: 2
+    })
+    qrCodeImage.value = qrCodeDataURL
+    promptPayPhone.value = testPhone
+    console.log('Test QR code generated successfully')
+  } catch (error) {
+    console.error('Error generating test QR:', error)
+  }
+}
+
 onMounted(async () => {
+  console.log('Payment component mounted')
+  
+  // ลองสร้าง QR ทดสอบก่อน
+  await generateTestQR()
+  
+  // แล้วค่อยโหลดข้อมูลจริง
   await fetchBookingData()
   if (bookingData.value) {
+    console.log('Generating QR code with real data')
     await generateQRCode()
   }
 })
@@ -142,13 +230,28 @@ onMounted(async () => {
                 <div v-if="qrCodeImage" class="qr-container bg-white p-4 rounded-lg shadow-lg">
                   <img :src="qrCodeImage" alt="PromptPay QR Code" class="w-64 h-64" />
                 </div>
-                <div v-else class="flex items-center justify-center w-64 h-64 bg-gray-100 rounded-lg">
+                <div v-else-if="isLoading" class="flex items-center justify-center w-64 h-64 bg-gray-100 rounded-lg">
                   <span class="text-gray-500">กำลังสร้าง QR Code...</span>
+                </div>
+                <div v-else class="flex flex-col items-center justify-center w-64 h-64 bg-red-50 border border-red-200 rounded-lg">
+                  <span class="text-red-500 text-sm text-center mb-2">ไม่สามารถสร้าง QR Code ได้</span>
+                  <div class="flex gap-2">
+                    <button @click="generateQRCode" class="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600">
+                      ลองใหม่
+                    </button>
+                    <button @click="generateTestQR" class="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600">
+                      ทดสอบ QR
+                    </button>
+                  </div>
                 </div>
                 <p class="text-sm text-gray-600 mt-2 text-center">
                   สแกนด้วยแอป Banking หรือ PromptPay<br>
                   <span class="text-xs text-gray-500">ชำระเงินไปที่: {{ promptPayPhone }}</span>
                 </p>
+                <!-- Debug info (remove in production) -->
+                <div v-if="true" class="mt-2 p-2 bg-gray-100 rounded text-xs">
+                  Debug: Phone={{ promptPayPhone }}, Amount={{ bookingData?.total_price }}, HasQR={{ !!qrCodeImage }}
+                </div>
               </div>
               <div class="payment__detail">
                 <ul class="flex flex-col gap-2 rounded-[1.2rem] shadow-lg px-8 py-6 mb-6">

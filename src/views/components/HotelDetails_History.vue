@@ -3,11 +3,10 @@ const Calendar = `/src/views/assets/icons/calendar.png`
 const Amount = `/src/views/assets/icons/amount-room.png`
 const Price = `/src/views/assets/icons/price.png`
 const ImageTest = `/src/views/assets/images/test.png`
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { createRating, getRatingByBookingId } from '../composables/getData.js';
 import { ElMessage } from 'element-plus';
-import dayjs from 'dayjs';
 
 const props = defineProps({
     booking: {
@@ -17,6 +16,11 @@ const props = defineProps({
 });
 
 const booking = ref({ ...props.booking });
+
+// Watch for props changes
+watch(() => props.booking, (newBooking) => {
+    booking.value = { ...newBooking }
+}, { deep: true })
 
 const ThaiMonth = [
     'มกราคม',
@@ -36,14 +40,14 @@ const ThaiMonth = [
 const checkIn = new Date(booking.value.check_in_date)
 const checkOut = new Date(booking.value.check_out_date)
 
-const checkInDay = dayjs(checkIn).date()
-const checkOutDay = dayjs(checkOut).date()
+const checkInDay = checkIn.getDate()
+const checkOutDay = checkOut.getDate()
 
-const checkInMonth = ThaiMonth[dayjs(checkIn).month()]
-const checkOutMonth = ThaiMonth[dayjs(checkOut).month()]
+const checkInMonth = ThaiMonth[checkIn.getMonth()]
+const checkOutMonth = ThaiMonth[checkOut.getMonth()]
 
-const checkInYear = dayjs(checkIn).year() + 543
-const checkOutYear = dayjs(checkOut).year() + 543
+const checkInYear = checkIn.getFullYear() + 543
+const checkOutYear = checkOut.getFullYear() + 543
 
 const rating = ref(0)
 const dialogVisible = ref(false)
@@ -51,6 +55,7 @@ const router = useRouter()
 const currentTime = ref(new Date())
 const isSubmittingRating = ref(false)
 const hasExistingRating = ref(false)
+const isNavigatingToPayment = ref(false)
 let timeInterval = null
 
 // คำนวณเวลาที่เหลือสำหรับการชำระเงิน
@@ -59,29 +64,61 @@ const timeRemaining = computed(() => {
         return null
     }
     
-    const expireTime = new Date(booking.value.expires_at)
-    const now = currentTime.value
-    const diff = expireTime.getTime() - now.getTime()
+    // แสดงเวลา 15 นาที แบบเดิม (นับถอยหลัง)
+    const totalTime = 15 * 60 * 1000; // 15 นาทีในหน่วย milliseconds
+    const createdTime = new Date(booking.value.created_at || Date.now()).getTime()
+    const now = currentTime.value.getTime()
+    const elapsed = now - createdTime
+    const remaining = totalTime - elapsed
     
-    if (diff <= 0) {
+    if (remaining <= 0) {
         return { expired: true }
     }
     
-    const minutes = Math.floor(diff / (1000 * 60))
-    const seconds = Math.floor((diff % (1000 * 60)) / 1000)
+    const minutes = Math.floor(remaining / (1000 * 60))
+    const seconds = Math.floor((remaining % (1000 * 60)) / 1000)
     
     return {
         expired: false,
         minutes,
         seconds,
-        total: diff
+        total: remaining
     }
 })
 
 // ฟังก์ชันไปหน้าชำระเงิน
-const goToPayment = () => {
-    router.push(`/payment/${booking.value.booking_id}`)
+const goToPayment = async () => {
+    isNavigatingToPayment.value = true
+    try {
+        await router.push(`/payment/${booking.value.booking_id}`)
+    } catch (error) {
+        console.error('Navigation error:', error)
+        ElMessage.error('ไม่สามารถไปหน้าชำระเงินได้')
+    } finally {
+        isNavigatingToPayment.value = false
+    }
 }
+
+// ฟังก์ชันแปลงสถานะเป็นภาษาไทย
+const getStatusText = (status) => {
+    const statusMap = {
+        'pending': 'รอชำระเงิน',
+        'confirmed': 'ยืนยันแล้ว',
+        'completed': 'เสร็จสิ้น',
+        'cancelled': 'ยกเลิก'
+    }
+    return statusMap[status] || status
+}
+
+// ฟังก์ชันจัดรูปแบบราคา
+const formatPrice = (price) => {
+    return parseFloat(price).toLocaleString('th-TH', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+    })
+}
+
+
 
 // ฟังก์ชันส่ง rating โดยตรงเมื่อกดดาว
 const submitRatingDirect = async (ratingValue) => {
@@ -170,6 +207,10 @@ const checkExistingRating = async () => {
 
 // อัพเดทเวลาทุกวินาที
 onMounted(() => {
+    // ตั้งเวลาเริ่มต้น
+    currentTime.value = new Date()
+    
+    // สร้าง interval สำหรับอัพเดทเวลา
     timeInterval = setInterval(() => {
         currentTime.value = new Date()
     }, 1000)
@@ -209,7 +250,7 @@ onUnmounted(() => {
                 <!-- จำนวนเงิน -->
                 <div class="inline-flex gap-1.5">
                     <img :src="Price" alt="price" class="w-6 h-6">
-                    <span class="">{{ booking.total_price }}</span>
+                    <span class="font-semibold text-orange-600">{{ formatPrice(booking.total_price) }} บาท</span>
                 </div>
             </div>
             <div class="flex items-end mr-4 gap-3">
@@ -240,8 +281,15 @@ onUnmounted(() => {
                         <div v-if="timeRemaining.expired" class="text-red-500 font-semibold">
                             หมดเวลาชำระเงิน
                         </div>
-                        <div v-else class="text-orange-600 font-semibold">
-                            เวลาที่เหลือ: {{ timeRemaining.minutes }}:{{ String(timeRemaining.seconds).padStart(2, '0') }}
+                        <div v-else :class="[
+                            'font-semibold',
+                            timeRemaining.minutes < 5 ? 'text-red-500' : 'text-orange-600'
+                        ]">
+                            <div class="text-xs text-gray-600">เวลาที่เหลือในการชำระ</div>
+                            <div class="text-lg">{{ timeRemaining.minutes }}:{{ String(timeRemaining.seconds).padStart(2, '0') }}</div>
+                            <div v-if="timeRemaining.minutes < 5" class="text-xs text-red-500 animate-pulse">
+                                ⚠️ กรุณาชำระเงินโดยเร็ว!
+                            </div>
                         </div>
                     </div>
                     <!-- ปุ่มชำระเงิน -->
@@ -250,8 +298,11 @@ onUnmounted(() => {
                         style="padding: 1rem;" 
                         type="warning" 
                         @click="goToPayment" 
+                        :loading="isNavigatingToPayment"
+                        :disabled="isNavigatingToPayment"
                         size="small">
-                        ชำระเงิน
+                        <span v-if="!isNavigatingToPayment">ชำระเงิน</span>
+                        <span v-else>กำลังไป...</span>
                     </el-button>
                 </div>
 
@@ -265,7 +316,7 @@ onUnmounted(() => {
                         'bg-red-500': booking.booking_status === 'cancelled',
                         'bg-blue-500': booking.booking_status === 'confirmed'
                     }">
-                    {{ booking.booking_status }}
+                    {{ getStatusText(booking.booking_status) }}
                 </div>
             </div>
         </div>
