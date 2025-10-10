@@ -6,7 +6,7 @@ export class Hotel {
       const sql = `
         SELECT h.hotel_id, h.hotel_name, h.description, h.address, h.city, h.country, h.contact_phone, h.contact_email,
                h.status, h.amenities,
-               AVG(r.rating) AS avg_rating,
+               ROUND(AVG(r.rating), 2) AS avg_rating, -- เปลี่ยนตรงนี้
                COUNT(r.rating_id) AS review_count
         FROM hotels h
         LEFT JOIN ratings r ON r.hotel_id = h.hotel_id
@@ -143,7 +143,7 @@ export class Hotel {
       const sql = `
         SELECT h.hotel_id, h.hotel_name, h.description, h.address, h.city, h.country, 
                h.contact_phone, h.contact_email, h.status, h.amenities, h.owner_id,
-               AVG(r.rating) AS avg_rating,
+               ROUND(AVG(r.rating), 2) AS avg_rating, -- เปลี่ยนตรงนี้
                COUNT(r.rating_id) AS review_count
         FROM hotels h
         LEFT JOIN ratings r ON r.hotel_id = h.hotel_id
@@ -325,7 +325,7 @@ export class Hotel {
       const sql = `
         SELECT h.hotel_id, h.hotel_name, h.description, h.address, h.city, h.country, 
                h.contact_phone, h.contact_email, h.status, h.amenities, h.owner_id,
-               AVG(r.rating) AS avg_rating,
+               ROUND(AVG(r.rating), 2) AS avg_rating, -- เปลี่ยนตรงนี้
                COUNT(r.rating_id) AS review_count
         FROM hotels h
         LEFT JOIN ratings r ON r.hotel_id = h.hotel_id
