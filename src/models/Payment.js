@@ -1,8 +1,8 @@
 import db from "../server/db/db.js";
 
 export class Payment {
-  static create(paymentData) {
-    return new Promise((resolve, reject) => {
+  static async create(paymentData) {
+    try {
       const {
         booking_id,
         amount,
@@ -12,67 +12,59 @@ export class Payment {
 
       const sql = `
         INSERT INTO payments (booking_id, amount, payment_method, payment_status)
-        VALUES (?, ?, ?, ?)
+        VALUES ($1, $2, $3, $4)
         RETURNING payment_id, payment_date
       `;
 
-      db.get(
+      const result = await db.query(
         sql,
-        [booking_id, amount, payment_method, payment_status],
-        function (err, row) {
-          if (err) {
-            reject(err);
-          } else {
-            resolve({
-              payment_id: row.payment_id,
-              booking_id,
-              amount,
-              payment_method,
-              payment_status,
-              payment_date: row.payment_date
-            });
-          }
-        }
+        [booking_id, amount, payment_method, payment_status]
       );
-    });
+      
+      const row = result.rows[0];
+      return {
+        payment_id: row.payment_id,
+        booking_id,
+        amount,
+        payment_method,
+        payment_status,
+        payment_date: row.payment_date
+      };
+    } catch (err) {
+      throw err;
+    }
   }
 
-  static findByBookingId(bookingId) {
-    return new Promise((resolve, reject) => {
+  static async findByBookingId(bookingId) {
+    try {
       const sql = `
-        SELECT * FROM payments WHERE booking_id = ?
+        SELECT * FROM payments WHERE booking_id = $1
       `;
       
-      db.get(sql, [bookingId], (err, row) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(row);
-        }
-      });
-    });
+      const result = await db.query(sql, [bookingId]);
+      return result.rows[0] || null;
+    } catch (err) {
+      throw err;
+    }
   }
 
-  static updateStatus(paymentId, status) {
-    return new Promise((resolve, reject) => {
+  static async updateStatus(paymentId, status) {
+    try {
       const sql = `
         UPDATE payments 
-        SET payment_status = ?, payment_date = CURRENT_TIMESTAMP 
-        WHERE payment_id = ?
+        SET payment_status = $1, payment_date = CURRENT_TIMESTAMP 
+        WHERE payment_id = $2
       `;
       
-      db.run(sql, [status, paymentId], function (err) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve({ payment_id: paymentId, payment_status: status });
-        }
-      });
-    });
+      const result = await db.query(sql, [status, paymentId]);
+      return { payment_id: paymentId, payment_status: status };
+    } catch (err) {
+      throw err;
+    }
   }
 
-  static getAll() {
-    return new Promise((resolve, reject) => {
+  static async getAll() {
+    try {
       const sql = `
         SELECT p.*, b.user_id, h.hotel_name, u.first_name, u.last_name
         FROM payments p
@@ -82,13 +74,10 @@ export class Payment {
         ORDER BY p.payment_date DESC
       `;
       
-      db.all(sql, [], (err, rows) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(rows);
-        }
-      });
-    });
+      const result = await db.query(sql);
+      return result.rows;
+    } catch (err) {
+      throw err;
+    }
   }
 }

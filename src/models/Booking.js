@@ -1,8 +1,8 @@
 import db from "../server/db/db.js";
 
 export class Booking {
-  static create(bookingData) {
-    return new Promise((resolve, reject) => {
+  static async create(bookingData) {
+    try {
       const {
         user_id,
         room_id,
@@ -19,33 +19,31 @@ export class Booking {
 
       const sql = `
         INSERT INTO bookings (user_id, room_id, hotel_id, check_in_date, check_out_date, num_guests, total_price, booking_status, expires_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         RETURNING booking_id
       `;
 
-      db.get(
+      const result = await db.query(
         sql,
-        [user_id, room_id, hotel_id, check_in_date, check_out_date, num_guests, total_price, booking_status, expires_at],
-        function (err, row) {
-          if (err) {
-            reject(err);
-          } else {
-            resolve({
-              booking_id: row.booking_id,
-              user_id,
-              room_id,
-              hotel_id,
-              check_in_date,
-              check_out_date,
-              num_guests,
-              total_price,
-              booking_status,
-              expires_at
-            });
-          }
-        }
+        [user_id, room_id, hotel_id, check_in_date, check_out_date, num_guests, total_price, booking_status, expires_at]
       );
-    });
+      
+      const row = result.rows[0];
+      return {
+        booking_id: row.booking_id,
+        user_id,
+        room_id,
+        hotel_id,
+        check_in_date,
+        check_out_date,
+        num_guests,
+        total_price,
+        booking_status,
+        expires_at
+      };
+    } catch (err) {
+      throw err;
+    }
   }
 
   static findById(bookingId) {
@@ -174,65 +172,60 @@ export class Booking {
   }
 
   // ฟังก์ชันดึงข้อมูล booking ที่กำลังจะหมดอายุ
-  static getPendingBookingsWithExpiry() {
-    return new Promise((resolve, reject) => {
+  static async getPendingBookingsWithExpiry() {
+    try {
       const currentTime = new Date().toISOString();
       const sql = `
         SELECT booking_id, user_id, hotel_id, total_price, expires_at, booking_status,
-               EXTRACT(EPOCH FROM (expires_at - ?)) / 60 as minutes_remaining
+               EXTRACT(EPOCH FROM (expires_at - $1)) / 60 as minutes_remaining
         FROM bookings 
         WHERE booking_status = 'pending' 
         AND expires_at IS NOT NULL
-        AND expires_at > ?
+        AND expires_at > $2
         ORDER BY expires_at ASC
       `;
 
-      db.all(sql, [currentTime, currentTime], (err, rows) => {
-        if (err) {
-          reject(err);
-        } else {
-          // เพิ่มข้อมูลเวลาที่เหลือในรูปแบบที่อ่านง่าย
-          const bookingsWithTime = rows.map(booking => ({
-            ...booking,
-            minutes_remaining: Math.max(0, Math.round(booking.minutes_remaining)),
-            expires_at_local: new Date(booking.expires_at).toLocaleString(),
-            is_urgent: booking.minutes_remaining < 5 // น้อยกว่า 5 นาที
-          }));
-          
-          resolve(bookingsWithTime);
-        }
-      });
-    });
+      const result = await db.query(sql, [currentTime, currentTime]);
+      
+      // เพิ่มข้อมูลเวลาที่เหลือในรูปแบบที่อ่านง่าย
+      const bookingsWithTime = result.rows.map(booking => ({
+        ...booking,
+        minutes_remaining: Math.max(0, Math.round(booking.minutes_remaining)),
+        expires_at_local: new Date(booking.expires_at).toLocaleString(),
+        is_urgent: booking.minutes_remaining < 5 // น้อยกว่า 5 นาที
+      }));
+      
+      return bookingsWithTime;
+    } catch (err) {
+      throw err;
+    }
   }
 
   // ฟังก์ชันตรวจสอบการจองที่ใกล้หมดอายุ (น้อยกว่า 5 นาที)
-  static getUrgentBookings() {
-    return new Promise((resolve, reject) => {
+  static async getUrgentBookings() {
+    try {
       const currentTime = new Date().toISOString();
       const fiveMinutesLater = new Date(Date.now() + 5 * 60 * 1000).toISOString();
       
       const sql = `
         SELECT booking_id, user_id, hotel_id, total_price, expires_at,
-               EXTRACT(EPOCH FROM (expires_at - ?)) / 60 as minutes_remaining
+               EXTRACT(EPOCH FROM (expires_at - $1)) / 60 as minutes_remaining
         FROM bookings 
         WHERE booking_status = 'pending' 
         AND expires_at IS NOT NULL
-        AND expires_at > ?
-        AND expires_at < ?
+        AND expires_at > $2
+        AND expires_at < $3
         ORDER BY expires_at ASC
       `;
 
-      db.all(sql, [currentTime, currentTime, fiveMinutesLater], (err, rows) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(rows.map(booking => ({
-            ...booking,
-            minutes_remaining: Math.max(0, Math.round(booking.minutes_remaining))
-          })));
-        }
-      });
-    });
+      const result = await db.query(sql, [currentTime, currentTime, fiveMinutesLater]);
+      return result.rows.map(booking => ({
+        ...booking,
+        minutes_remaining: Math.max(0, Math.round(booking.minutes_remaining))
+      }));
+    } catch (err) {
+      throw err;
+    }
   }
 
   // ฟังก์ชันอัพเดท booking ที่หมดวันที่ checkout เป็น completed

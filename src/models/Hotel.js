@@ -126,14 +126,14 @@ export class Hotel {
   // อัพเดทสถานะโรงแรม
   static updateStatus(hotelId, status) {
     return new Promise((resolve, reject) => {
-      const sql = `UPDATE hotels SET status = ? WHERE hotel_id = ?`;
-      db.run(sql, [status, hotelId], function (err) {
-        if (err) {
+      const sql = `UPDATE hotels SET status = $1 WHERE hotel_id = $2`;
+      db.query(sql, [status, hotelId])
+        .then(result => {
+          resolve(result.rowCount > 0);
+        })
+        .catch(err => {
           reject(err);
-        } else {
-          resolve(this.changes > 0);
-        }
-      });
+        });
     });
   }
 
@@ -193,8 +193,8 @@ export class Hotel {
   }
 
   // สร้างโรงแรมใหม่
-  static create(hotelData) {
-    return new Promise((resolve, reject) => {
+  static async create(hotelData) {
+    try {
       const {
         owner_id,
         hotel_name,
@@ -212,110 +212,56 @@ export class Hotel {
       // สร้างโรงแรมก่อน
       const hotelSQL = `
         INSERT INTO hotels (owner_id, hotel_name, description, address, city, country, contact_phone, contact_email, amenities, status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'pending')
         RETURNING hotel_id
       `;
 
-      db.get(
+      const hotelResult = await db.query(
         hotelSQL,
-        [owner_id, hotel_name, description, address, city, country, contact_phone, contact_email, amenities],
-        function (err, row) {
-          if (err) {
-            reject(err);
-            return;
-          }
-
-          const hotelId = row.hotel_id;
-
-          // เพิ่มรูปภาพ
-          if (image_urls && image_urls.length > 0) {
-            const imagePromises = image_urls.map((imageUrl) => {
-              return new Promise((resolveImg, rejectImg) => {
-                const imgSQL = `INSERT INTO hotel_images (hotel_id, image_url) VALUES (?, ?)`;
-                db.run(imgSQL, [hotelId, imageUrl], (imgErr) => {
-                  if (imgErr) rejectImg(imgErr);
-                  else resolveImg();
-                });
-              });
-            });
-
-            Promise.all(imagePromises)
-              .then(() => {
-                // เพิ่มห้องพัก
-                if (rooms && rooms.length > 0) {
-                  const roomPromises = rooms.map((room) => {
-                    return new Promise((resolveRoom, rejectRoom) => {
-                      const roomSQL = `
-                        INSERT INTO rooms (hotel_id, room_type, price_per_night, max_guests, beds, quantity)
-                        VALUES (?, ?, ?, ?, ?, ?)
-                      `;
-                      db.run(
-                        roomSQL,
-                        [hotelId, room.room_type, room.price_per_night, room.max_guests, room.beds, room.quantity],
-                        (roomErr) => {
-                          if (roomErr) rejectRoom(roomErr);
-                          else resolveRoom();
-                        }
-                      );
-                    });
-                  });
-
-                  Promise.all(roomPromises)
-                    .then(() => {
-                      resolve({ hotel_id: hotelId, hotel_name });
-                    })
-                    .catch(reject);
-                } else {
-                  resolve({ hotel_id: hotelId, hotel_name });
-                }
-              })
-              .catch(reject);
-          } else {
-            // ไม่มีรูปภาพ แต่มีห้องพัก
-            if (rooms && rooms.length > 0) {
-              const roomPromises = rooms.map((room) => {
-                return new Promise((resolveRoom, rejectRoom) => {
-                  const roomSQL = `
-                    INSERT INTO rooms (hotel_id, room_type, price_per_night, max_guests, beds, quantity)
-                    VALUES (?, ?, ?, ?, ?, ?)
-                  `;
-                  db.run(
-                    roomSQL,
-                    [hotelId, room.room_type, room.price_per_night, room.max_guests, room.beds, room.quantity],
-                    (roomErr) => {
-                      if (roomErr) rejectRoom(roomErr);
-                      else resolveRoom();
-                    }
-                  );
-                });
-              });
-
-              Promise.all(roomPromises)
-                .then(() => {
-                  resolve({ hotel_id: hotelId, hotel_name });
-                })
-                .catch(reject);
-            } else {
-              resolve({ hotel_id: hotelId, hotel_name });
-            }
-          }
-        }
+        [owner_id, hotel_name, description, address, city, country, contact_phone, contact_email, amenities]
       );
-    });
+
+      const hotelId = hotelResult.rows[0].hotel_id;
+
+      // เพิ่มรูปภาพ
+      if (image_urls && image_urls.length > 0) {
+        const imagePromises = image_urls.map(async (imageUrl) => {
+          const imgSQL = `INSERT INTO hotel_images (hotel_id, image_url) VALUES ($1, $2)`;
+          await db.query(imgSQL, [hotelId, imageUrl]);
+        });
+        await Promise.all(imagePromises);
+      }
+
+      // เพิ่มห้องพัก
+      if (rooms && rooms.length > 0) {
+        const roomPromises = rooms.map(async (room) => {
+          const roomSQL = `
+            INSERT INTO rooms (hotel_id, room_type, price_per_night, max_guests, beds, quantity)
+            VALUES ($1, $2, $3, $4, $5, $6)
+          `;
+          await db.query(roomSQL, [hotelId, room.room_type, room.price_per_night, room.max_guests, room.beds, room.quantity]);
+        });
+        await Promise.all(roomPromises);
+      }
+
+      return { hotel_id: hotelId, hotel_name };
+    } catch (err) {
+      throw err;
+    }
   }
 
   // ลบโรงแรม (Soft Delete - เปลี่ยน status เป็น deleted)
   static delete(hotelId) {
     return new Promise((resolve, reject) => {
       // เปลี่ยน status เป็น 'deleted' แทนการลบจริง
-      const updateStatusSQL = `UPDATE hotels SET status = 'deleted' WHERE hotel_id = ?`;
-      db.run(updateStatusSQL, [hotelId], function (err) {
-        if (err) {
+      const updateStatusSQL = `UPDATE hotels SET status = 'deleted' WHERE hotel_id = $1`;
+      db.query(updateStatusSQL, [hotelId])
+        .then(result => {
+          resolve(result.rowCount > 0);
+        })
+        .catch(err => {
           reject(err);
-        } else {
-          resolve(this.changes > 0);
-        }
-      });
+        });
     });
   }
 
@@ -374,8 +320,8 @@ export class Hotel {
   }
 
   // อัพเดทข้อมูลโรงแรม
-  static update(hotelId, hotelData) {
-    return new Promise((resolve, reject) => {
+  static async update(hotelId, hotelData) {
+    try {
       const { 
         hotel_name, 
         description, 
@@ -392,98 +338,57 @@ export class Hotel {
       // อัพเดทข้อมูลหลักของโรงแรม
       const updateHotelSQL = `
         UPDATE hotels 
-        SET hotel_name = ?, description = ?, address = ?, city = ?, country = ?, 
-            contact_phone = ?, contact_email = ?, amenities = ?
-        WHERE hotel_id = ? AND status != 'deleted'
+        SET hotel_name = $1, description = $2, address = $3, city = $4, country = $5, 
+            contact_phone = $6, contact_email = $7, amenities = $8
+        WHERE hotel_id = $9 AND status != 'deleted'
       `;
 
       const amenitiesString = Array.isArray(amenities) ? amenities.join(', ') : amenities || '';
 
-      db.run(updateHotelSQL, [
+      const hotelResult = await db.query(updateHotelSQL, [
         hotel_name, description, address, city, country, 
         contact_phone, contact_email, amenitiesString, hotelId
-      ], function (err) {
-        if (err) {
-          reject(err);
-          return;
-        }
+      ]);
 
-        if (this.changes === 0) {
-          reject(new Error('Hotel not found or no changes made'));
-          return;
-        }
+      if (hotelResult.rowCount === 0) {
+        throw new Error('Hotel not found or no changes made');
+      }
 
-        // ลบรูปภาพเก่าและเพิ่มใหม่
-        const deleteImagesSQL = `DELETE FROM hotel_images WHERE hotel_id = ?`;
-        db.run(deleteImagesSQL, [hotelId], (imgErr) => {
-          if (imgErr) {
-            reject(imgErr);
-            return;
-          }
+      // ลบรูปภาพเก่าและเพิ่มใหม่
+      const deleteImagesSQL = `DELETE FROM hotel_images WHERE hotel_id = $1`;
+      await db.query(deleteImagesSQL, [hotelId]);
 
-          // เพิ่มรูปภาพใหม่
-          if (image_urls && image_urls.length > 0) {
-            const insertImageSQL = `INSERT INTO hotel_images (hotel_id, image_url) VALUES (?, ?)`;
-            let completedInserts = 0;
-            
-            image_urls.forEach((imageUrl) => {
-              db.run(insertImageSQL, [hotelId, imageUrl], (insertErr) => {
-                if (insertErr) {
-                  reject(insertErr);
-                  return;
-                }
-                
-                completedInserts++;
-                if (completedInserts === image_urls.length) {
-                  // อัพเดทห้องพัก
-                  updateRooms();
-                }
-              });
-            });
-          } else {
-            updateRooms();
-          }
-        });
+      // เพิ่มรูปภาพใหม่
+      if (image_urls && image_urls.length > 0) {
+        const insertImageSQL = `INSERT INTO hotel_images (hotel_id, image_url) VALUES ($1, $2)`;
+        const imagePromises = image_urls.map(imageUrl => 
+          db.query(insertImageSQL, [hotelId, imageUrl])
+        );
+        await Promise.all(imagePromises);
+      }
 
-        function updateRooms() {
-          // ลบห้องพักเก่า
-          const deleteRoomsSQL = `DELETE FROM rooms WHERE hotel_id = ?`;
-          db.run(deleteRoomsSQL, [hotelId], (roomErr) => {
-            if (roomErr) {
-              reject(roomErr);
-              return;
-            }
+      // ลบห้องพักเก่า
+      const deleteRoomsSQL = `DELETE FROM rooms WHERE hotel_id = $1`;
+      await db.query(deleteRoomsSQL, [hotelId]);
 
-            // เพิ่มห้องพักใหม่
-            if (rooms && rooms.length > 0) {
-              const insertRoomSQL = `
-                INSERT INTO rooms (hotel_id, room_type, price_per_night, max_guests, beds, quantity) 
-                VALUES (?, ?, ?, ?, ?, ?)
-              `;
-              let completedRoomInserts = 0;
+      // เพิ่มห้องพักใหม่
+      if (rooms && rooms.length > 0) {
+        const insertRoomSQL = `
+          INSERT INTO rooms (hotel_id, room_type, price_per_night, max_guests, beds, quantity) 
+          VALUES ($1, $2, $3, $4, $5, $6)
+        `;
+        const roomPromises = rooms.map(room => 
+          db.query(insertRoomSQL, [
+            hotelId, room.room_type, room.price_per_night, 
+            room.max_guests, room.beds, room.quantity
+          ])
+        );
+        await Promise.all(roomPromises);
+      }
 
-              rooms.forEach((room) => {
-                db.run(insertRoomSQL, [
-                  hotelId, room.room_type, room.price_per_night, 
-                  room.max_guests, room.beds, room.quantity
-                ], (insertRoomErr) => {
-                  if (insertRoomErr) {
-                    reject(insertRoomErr);
-                    return;
-                  }
-                  
-                  completedRoomInserts++;
-                  if (completedRoomInserts === rooms.length) {
-                    resolve({ message: 'Hotel updated successfully' });
-                  }
-                });
-              });
-            } else {
-              resolve({ message: 'Hotel updated successfully' });
-            }
-          });
-        }
-      });
-    });
+      return { message: 'Hotel updated successfully' };
+    } catch (err) {
+      throw err;
+    }
   }
 }

@@ -1,65 +1,62 @@
 import db from "../server/db/db.js";
 
 export class User {
-  static getAll() {
-    return new Promise((resolve, reject) => {
-      db.all("SELECT * FROM users", [], (err, rows) => {
-        if (err) reject(err);
-        else resolve(rows);
-      });
-    });
+  static async getAll() {
+    try {
+      const result = await db.query("SELECT * FROM users");
+      return result.rows;
+    } catch (err) {
+      throw err;
+    }
   }
 
-  static getNormalUsers() {
-    return new Promise((resolve, reject) => {
-      db.all("SELECT * FROM users WHERE role = 'user'", [], (err, rows) => {
-        if (err) reject(err);
-        else resolve(rows);
-      });
-    });
+  static async getNormalUsers() {
+    try {
+      const result = await db.query("SELECT * FROM users WHERE role = 'user'");
+      return result.rows;
+    } catch (err) {
+      throw err;
+    }
   }
 
-  static findByEmail(email) {
-    return new Promise((resolve, reject) => {
-      db.get("SELECT * FROM users WHERE email = ?", [email], (err, row) => {
-        if (err) reject(err);
-        else resolve(row);
-      });
-    });
+  static async findByEmail(email) {
+    try {
+      const result = await db.query("SELECT * FROM users WHERE email = $1", [email]);
+      return result.rows[0] || null;
+    } catch (err) {
+      throw err;
+    }
   }
 
-  static findById(userId) {
-    return new Promise((resolve, reject) => {
-      db.get("SELECT * FROM users WHERE user_id = ?", [userId], (err, row) => {
-        if (err) reject(err);
-        else resolve(row);
-      });
-    });
+  static async findById(userId) {
+    try {
+      const result = await db.query("SELECT * FROM users WHERE user_id = $1", [userId]);
+      return result.rows[0] || null;
+    } catch (err) {
+      throw err;
+    }
   }
 
-  static findByEmailAndPassword(email, password_hash) {
-    return new Promise((resolve, reject) => {
-      db.get(
-        "SELECT * FROM users WHERE email = ? AND password_hash = ?",
-        [email, password_hash],
-        (err, row) => {
-          if (err) {
-            console.error("Error in findByEmailAndPassword:", err);
-            reject(err);
-          } else {
-            console.log(
-              "Database lookup result:",
-              row ? "User found" : "User not found"
-            );
-            resolve(row);
-          }
-        }
+  static async findByEmailAndPassword(email, password_hash) {
+    try {
+      const result = await db.query(
+        "SELECT * FROM users WHERE email = $1 AND password_hash = $2",
+        [email, password_hash]
       );
-    });
+      const user = result.rows[0] || null;
+      console.log(
+        "Database lookup result:",
+        user ? "User found" : "User not found"
+      );
+      return user;
+    } catch (err) {
+      console.error("Error in findByEmailAndPassword:", err);
+      throw err;
+    }
   }
 
-  static create(userData) {
-    return new Promise((resolve, reject) => {
+  static async create(userData) {
+    try {
       const {
         email,
         password_hash,
@@ -69,29 +66,29 @@ export class User {
         role,
       } = userData;
       const sql = `INSERT INTO users (email, password_hash, first_name, last_name, phone_number, role) 
-                   VALUES (?, ?, ?, ?, ?, ?) 
+                   VALUES ($1, $2, $3, $4, $5, $6) 
                    RETURNING user_id, created_at`;
-      db.get(
+      const result = await db.query(
         sql,
-        [email, password_hash, first_name, last_name, phone_number, role],
-        function (err, row) {
-          if (err) reject(err);
-          else resolve({
-            user_id: row.user_id,
-            email,
-            first_name,
-            last_name,
-            phone_number,
-            role,
-            created_at: row.created_at
-          });
-        }
+        [email, password_hash, first_name, last_name, phone_number, role]
       );
-    });
+      const row = result.rows[0];
+      return {
+        user_id: row.user_id,
+        email,
+        first_name,
+        last_name,
+        phone_number,
+        role,
+        created_at: row.created_at
+      };
+    } catch (err) {
+      throw err;
+    }
   }
 
-  static getBookings(userId) {
-    return new Promise((resolve, reject) => {
+  static async getBookings(userId) {
+    try {
       const sql = `
         SELECT b.booking_id, b.check_in_date, b.check_out_date, b.num_guests, b.total_price, b.booking_status,
                b.created_at, b.expires_at, h.hotel_id, h.hotel_name, r.room_id, r.room_type,
@@ -99,13 +96,13 @@ export class User {
         FROM bookings b
         JOIN hotels h ON b.hotel_id = h.hotel_id
         JOIN rooms r ON b.room_id = r.room_id
-        WHERE b.user_id = ? AND b.booking_status != 'cancelled'
+        WHERE b.user_id = $1 AND b.booking_status != 'cancelled'
         ORDER BY b.created_at DESC
       `;
-      db.all(sql, [userId], (err, rows) => {
-        if (err) reject(err);
-        else resolve(rows);
-      });
-    });
+      const result = await db.query(sql, [userId]);
+      return result.rows;
+    } catch (err) {
+      throw err;
+    }
   }
 }
