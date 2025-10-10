@@ -14,20 +14,35 @@ const searchUser = ref(route.query.user ?? '');
 const searchHotel = ref(route.query.hotel ??'');
 
 onMounted(async () => {
-  hotelData.value = await getHotelAdminData();
-  userData.value = await getNormalUsers();
-  
-  // Fetch room data for each hotel
-  const hotelPromises = hotelData.value.map(async (hotel) => {
-    const rooms = await getHotelRoomData(hotel.hotel_id);
-    return {
-      ...hotel,
-      rooms: rooms || []
-    };
-  });
-  
-  hotelsWithRooms.value = await Promise.all(hotelPromises);
-  isLoading.value = false;
+  try {
+    console.log('Loading hotel admin data...');
+    hotelData.value = await getHotelAdminData();
+    console.log('Hotel data loaded:', hotelData.value);
+    
+    userData.value = await getNormalUsers();
+    console.log('User data loaded:', userData.value);
+    
+    // Fetch room data for each hotel
+    if (hotelData.value && hotelData.value.length > 0) {
+      const hotelPromises = hotelData.value.map(async (hotel) => {
+        const rooms = await getHotelRoomData(hotel.hotel_id);
+        return {
+          ...hotel,
+          rooms: rooms || []
+        };
+      });
+      
+      hotelsWithRooms.value = await Promise.all(hotelPromises);
+    } else {
+      hotelsWithRooms.value = [];
+    }
+    console.log('Hotels with rooms:', hotelsWithRooms.value);
+  } catch (error) {
+    console.error('Error loading admin data:', error);
+    alert('เกิดข้อผิดพลาดในการโหลดข้อมูล: ' + error.message);
+  } finally {
+    isLoading.value = false;
+  }
 });
 
 const goToUserBookingHistory = (user) => {

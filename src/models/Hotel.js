@@ -59,16 +59,12 @@ export class Hotel {
     return new Promise((resolve, reject) => {
       const sql = `
         SELECT h.hotel_id, h.hotel_name, h.description, h.address, h.city, h.country, 
-               h.contact_phone, h.contact_email, h.status, h.amenities,
+               h.contact_phone, h.contact_email, h.status, h.amenities, h.created_at,
                u.user_id as owner_id, u.first_name as owner_first_name, u.last_name as owner_last_name, 
-               u.email as owner_email, u.phone_number as owner_phone,
-               AVG(r.rating) AS avg_rating,
-               COUNT(r.rating_id) AS review_count
+               u.email as owner_email, u.phone_number as owner_phone
         FROM hotels h
         JOIN users u ON h.owner_id = u.user_id
-        LEFT JOIN ratings r ON r.hotel_id = h.hotel_id
         WHERE h.status != 'deleted'
-        GROUP BY h.hotel_id
         ORDER BY h.hotel_id DESC
       `;
 
@@ -217,18 +213,19 @@ export class Hotel {
       const hotelSQL = `
         INSERT INTO hotels (owner_id, hotel_name, description, address, city, country, contact_phone, contact_email, amenities, status)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
+        RETURNING hotel_id
       `;
 
-      db.run(
+      db.get(
         hotelSQL,
         [owner_id, hotel_name, description, address, city, country, contact_phone, contact_email, amenities],
-        function (err) {
+        function (err, row) {
           if (err) {
             reject(err);
             return;
           }
 
-          const hotelId = this.lastID;
+          const hotelId = row.hotel_id;
 
           // เพิ่มรูปภาพ
           if (image_urls && image_urls.length > 0) {

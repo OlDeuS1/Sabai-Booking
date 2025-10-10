@@ -29,19 +29,20 @@ export class Rating {
         const insertSql = `
           INSERT INTO ratings (booking_id, user_id, hotel_id, rating)
           VALUES (?, ?, ?, ?)
+          RETURNING rating_id, created_at
         `;
 
-        db.run(insertSql, [booking_id, user_id, hotel_id, rating], function (err) {
+        db.get(insertSql, [booking_id, user_id, hotel_id, rating], function (err, row) {
           if (err) {
             reject(err);
           } else {
             resolve({
-              rating_id: this.lastID,
+              rating_id: row.rating_id,
               booking_id,
               user_id,
               hotel_id,
               rating,
-              created_at: new Date().toISOString()
+              created_at: row.created_at
             });
           }
         });

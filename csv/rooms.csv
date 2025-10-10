@@ -1,0 +1,12 @@
+room_id,hotel_id,room_type,price_per_night,max_guests,beds,quantity
+1,1,Deluxe,2500.0,2,1,10
+2,1,Suite,4000.0,4,2,5
+3,1,Executive,6000.0,4,2,3
+4,2,Standard,1200.0,2,1,15
+5,2,Family,2000.0,4,2,8
+8,4,Standard,1800.0,2,1,20
+9,4,Family Suite,3200.0,5,3,10
+10,9,Deluxe Sea View,3500.0,2,1,10
+12,10,test,1000.0,1,1,1
+16,3,Sea View,3500.0,2,1,12
+17,3,Villa,7000.0,6,3,6

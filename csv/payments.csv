@@ -1,0 +1,10 @@
+payment_id,booking_id,amount,payment_method,payment_status,payment_date
+1,1,7500.0,Credit Card,completed,2025-09-13 11:44:39
+2,2,2400.0,Bank Transfer,pending,2025-09-13 11:44:39
+3,3,17500.0,PayPal,completed,2025-09-13 11:44:39
+4,4,12800.0,Credit Card,completed,2025-09-13 11:44:39
+5,11,6400.0,PromptPay,completed,2025-09-23 18:17:16
+6,12,3600.0,PromptPay,completed,2025-09-24 07:17:24
+7,5,2400.0,PromptPay,completed,2025-09-24 07:30:18
+8,16,3200.0,PromptPay,completed,2025-09-25 13:26:43
+9,18,2000.0,PromptPay,completed,2025-10-06 14:11:53

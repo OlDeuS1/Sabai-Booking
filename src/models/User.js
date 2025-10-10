@@ -68,12 +68,23 @@ export class User {
         phone_number,
         role,
       } = userData;
-      db.run(
-        `INSERT INTO users (email, password_hash, first_name, last_name, phone_number, role) VALUES (?, ?, ?, ?, ?, ?)`,
+      const sql = `INSERT INTO users (email, password_hash, first_name, last_name, phone_number, role) 
+                   VALUES (?, ?, ?, ?, ?, ?) 
+                   RETURNING user_id, created_at`;
+      db.get(
+        sql,
         [email, password_hash, first_name, last_name, phone_number, role],
-        function (err) {
+        function (err, row) {
           if (err) reject(err);
-          else resolve(this);
+          else resolve({
+            user_id: row.user_id,
+            email,
+            first_name,
+            last_name,
+            phone_number,
+            role,
+            created_at: row.created_at
+          });
         }
       );
     });

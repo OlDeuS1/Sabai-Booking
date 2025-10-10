@@ -1,0 +1,11 @@
+hotel_id,owner_id,hotel_name,description,address,city,country,contact_phone,contact_email,status,created_at,amenities
+1,1,Sabai Hotel,โรงแรมใจกลางกรุงเทพ ใกล้ BTS,123 ถนนสุขุมวิท,กรุงเทพ,ไทย,021234567,contact@sabaihotel.com,approved,2025-09-10 07:35:30,"WiFi, สระว่ายน้ำ"
+2,1,Chill Resort,รีสอร์ทบรรยากาศดี เหมาะสำหรับครอบครัว,456 ถนนพระราม 9,กรุงเทพ,ไทย,022345678,info@chillresort.com,approved,2025-09-10 07:35:30,"ฟิตเนส, อาหารเช้า"
+3,3,Sabai Hotel2,โรงแรมใจกลางกรุงเทพ ใกล้ BTS,123 ถนนสุขุมวิท,กรุงเทพ,ไทย,021234567,contact@sabaihotel.com,approved,2025-09-10 07:39:41,"WiFi, สระว่ายน้ำ, test"
+4,3,Chill Resort,รีสอร์ทบรรยากาศดี เหมาะสำหรับครอบครัว,456 ถนนพระราม 9,กรุงเทพ,ไทย,022345678,info@chillresort.com,approved,2025-09-10 07:39:41,"ฟิตเนส, อาหารเช้า"
+5,3,Bangkok Grand Hotel,Luxury hotel in Bangkok,123 Sukhumvit Rd,กรุงเทพ,ไทย,021234567,contact@bangkokgrand.com,approved,2025-09-13 11:44:39,"Pool, Spa, WiFi, Fitness Center"
+6,3,Chiang Mai Cozy Inn,Affordable stay in Chiang Mai,456 Nimmanhaemin Rd,เชียงใหม่,ไทย,053765432,info@cmcozy.com,approved,2025-09-13 11:44:39,"Free Parking, WiFi"
+7,3,Phuket Paradise Resort,Beachfront resort with sea view rooms,789 Patong Beach Rd,ภูเก็ต,ไทย,076222333,hello@phuketparadise.com,approved,2025-09-13 11:44:39,"Beach Access, Pool, Bar, WiFi"
+8,3,Hua Hin Family Hotel,Family-friendly hotel near the beach,101 Hua Hin Rd,หัวหิน,ไทย,032999888,contact@huahinfamily.com,pending,2025-09-13 11:44:39,"Playground, Pool, Restaurant, WiFi"
+9,2,Sea View Resort,w9XKzcPst8PUwbfQ4MXKx8Kn0sE=,MTIzILa5uarSwsvStCC60qfhyrk=,qsW62MPV,5LfC,038-123456,seaview@resort.com,rejected,2025-09-26 09:35:39,ysPQx+jSwrnp0ywgv9S14LnKLCDKu9I=
+10,3,test,test,test,กรุงเทพ,ไทย,0812345678,test@gmail.com,deleted,2025-10-06 14:03:07,test

@@ -20,17 +20,18 @@ export class Booking {
       const sql = `
         INSERT INTO bookings (user_id, room_id, hotel_id, check_in_date, check_out_date, num_guests, total_price, booking_status, expires_at)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        RETURNING booking_id
       `;
 
-      db.run(
+      db.get(
         sql,
         [user_id, room_id, hotel_id, check_in_date, check_out_date, num_guests, total_price, booking_status, expires_at],
-        function (err) {
+        function (err, row) {
           if (err) {
             reject(err);
           } else {
             resolve({
-              booking_id: this.lastID,
+              booking_id: row.booking_id,
               user_id,
               room_id,
               hotel_id,

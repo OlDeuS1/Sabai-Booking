@@ -13,22 +13,23 @@ export class Payment {
       const sql = `
         INSERT INTO payments (booking_id, amount, payment_method, payment_status)
         VALUES (?, ?, ?, ?)
+        RETURNING payment_id, payment_date
       `;
 
-      db.run(
+      db.get(
         sql,
         [booking_id, amount, payment_method, payment_status],
-        function (err) {
+        function (err, row) {
           if (err) {
             reject(err);
           } else {
             resolve({
-              payment_id: this.lastID,
+              payment_id: row.payment_id,
               booking_id,
               amount,
               payment_method,
               payment_status,
-              payment_date: new Date().toISOString()
+              payment_date: row.payment_date
             });
           }
         }

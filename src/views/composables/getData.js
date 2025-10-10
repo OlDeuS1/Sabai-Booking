@@ -20,10 +20,15 @@ export const getHotelData = async function(){
 
 export const getHotelAdminData = async function () {
   try {
+    console.log('Fetching hotel admin data...');
     const res = await axios.get("http://localhost:3000/api/hotels/admin");
+    console.log('Hotel admin data response:', res.data);
     return res.data;
   } catch (err) {
-    alert(`eror : ${err.message}`);
+    console.error('Error fetching hotel admin data:', err);
+    console.error('Error response:', err.response?.data);
+    alert(`Error fetching hotel data: ${err.response?.data?.error || err.message}`);
+    return [];
   }
 };
 
