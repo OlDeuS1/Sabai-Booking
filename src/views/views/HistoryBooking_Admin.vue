@@ -2,9 +2,11 @@
 import { ChevronLeftIcon } from '@heroicons/vue/24/outline'
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { useFormat } from '../composables/useFormat'
 import { getUserBookingHistory } from '../composables/getData'
 
 const route = useRoute()
+const { formatDate } = useFormat()
 const userBookings = ref([])
 const userName = ref('')
 const isLoading = ref(true)
@@ -61,8 +63,8 @@ onMounted(async () => {
                         <td>{{ index + 1 }}</td>
                         <td>{{ booking.hotel_name || 'ไม่ระบุ' }}</td>
                         <td>{{ booking.room_type || 'ไม่ระบุ' }}</td>
-                        <td>{{ booking.check_in_date || 'ไม่ระบุ' }}</td>
-                        <td>{{ booking.check_out_date || 'ไม่ระบุ' }}</td>
+                        <td>{{ formatDate(booking.check_in_date) || 'ไม่ระบุ' }}</td>
+                        <td>{{ formatDate(booking.check_out_date) || 'ไม่ระบุ' }}</td>
                         <td>{{ booking.total_price ? booking.total_price.toLocaleString() : '0' }} บาท</td>
                         <td>{{ booking.booking_status || 'ไม่ระบุ' }}</td>
                     </tr>
