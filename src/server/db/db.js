@@ -10,7 +10,7 @@ const pool = new Pool({
   port: process.env.DB_PORT || 5432,
   database: process.env.DB_NAME || 'sabai_db',
   user: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD || 'nick2803',
+  password: process.env.DB_PASSWORD || '12345',
   max: 20, // จำนวน connection สูงสุดใน pool
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
@@ -26,6 +26,12 @@ class DatabaseAdapter {
     const convertedSql = sql.replace(/\?/g, () => `$${paramIndex++}`);
     return { sql: convertedSql, params };
   }
+
+  // Core promise-based query (compatible with both $1 and ? placeholders)
+  query(sql, params = []) {
+    const { sql: convertedSql, params: convertedParams } = this._convertQuery(sql, params);
+    return pool.query(convertedSql, convertedParams);
+  }
   
   // สำหรับ query ที่ return หลาย rows (เหมือน db.all)
   all(sql, params = [], callback) {
@@ -33,24 +39,9 @@ class DatabaseAdapter {
       callback = params;
       params = [];
     }
-    
-    const { sql: convertedSql, params: convertedParams } = this._convertQuery(sql, params);
-    
-    pool.connect()
-      .then(client => {
-        return client.query(convertedSql, convertedParams)
-          .then(result => {
-            client.release();
-            callback(null, result.rows);
-          })
-          .catch(err => {
-            client.release();
-            callback(err);
-          });
-      })
-      .catch(err => {
-        callback(err);
-      });
+    this.query(sql, params)
+      .then(result => callback(null, result.rows))
+      .catch(err => callback(err));
   }
 
   // สำหรับ query ที่ return row เดียว (เหมือน db.get)
@@ -59,24 +50,9 @@ class DatabaseAdapter {
       callback = params;
       params = [];
     }
-    
-    const { sql: convertedSql, params: convertedParams } = this._convertQuery(sql, params);
-    
-    pool.connect()
-      .then(client => {
-        return client.query(convertedSql, convertedParams)
-          .then(result => {
-            client.release();
-            callback(null, result.rows[0] || null);
-          })
-          .catch(err => {
-            client.release();
-            callback(err);
-          });
-      })
-      .catch(err => {
-        callback(err);
-      });
+    this.query(sql, params)
+      .then(result => callback(null, result.rows[0] || null))
+      .catch(err => callback(err));
   }
 
   // สำหรับ INSERT, UPDATE, DELETE (เหมือน db.run)
@@ -85,29 +61,18 @@ class DatabaseAdapter {
       callback = params;
       params = [];
     }
-    
-    const { sql: convertedSql, params: convertedParams } = this._convertQuery(sql, params);
-    
-    pool.connect()
-      .then(client => {
-        return client.query(convertedSql, convertedParams)
-          .then(result => {
-            client.release();
-            // เลียนแบบ SQLite callback context
-            const context = {
-              changes: result.rowCount,
-              lastID: result.rows.length > 0 && result.rows[0].id ? result.rows[0].id : null
-            };
-            callback.call(context, null);
-          })
-          .catch(err => {
-            client.release();
-            callback(err);
-          });
+    this.query(sql, params)
+      .then(result => {
+        // เลียนแบบ SQLite callback context
+        const context = {
+          changes: result.rowCount,
+          lastID: result.rows && result.rows.length > 0 && (result.rows[0].id || result.rows[0].last_insert_rowid)
+            ? (result.rows[0].id || result.rows[0].last_insert_rowid)
+            : null
+        };
+        callback.call(context, null);
       })
-      .catch(err => {
-        callback(err);
-      });
+      .catch(err => callback(err));
   }
 
   // Method สำหรับปิด connection pool
