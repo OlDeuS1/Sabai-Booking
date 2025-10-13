@@ -1,4 +1,4 @@
-import db from "../server/db/db.js";
+import db, { pool } from "../server/db/db.js";
 
 export class Hotel {
   static getAllWithImages() {
@@ -335,55 +335,92 @@ export class Hotel {
         rooms
       } = hotelData;
 
-      // อัพเดทข้อมูลหลักของโรงแรม
-      const updateHotelSQL = `
-        UPDATE hotels 
-        SET hotel_name = $1, description = $2, address = $3, city = $4, country = $5, 
-            contact_phone = $6, contact_email = $7, amenities = $8
-        WHERE hotel_id = $9 AND status != 'deleted'
-      `;
+      // ใช้ Transaction เพื่อความถูกต้องของข้อมูลทั้งหมด
+      const client = await pool.connect();
+      try {
+        await client.query('BEGIN');
 
-      const amenitiesString = Array.isArray(amenities) ? amenities.join(', ') : amenities || '';
-
-      const hotelResult = await db.query(updateHotelSQL, [
-        hotel_name, description, address, city, country, 
-        contact_phone, contact_email, amenitiesString, hotelId
-      ]);
-
-      if (hotelResult.rowCount === 0) {
-        throw new Error('Hotel not found or no changes made');
-      }
-
-      // ลบรูปภาพเก่าและเพิ่มใหม่
-      const deleteImagesSQL = `DELETE FROM hotel_images WHERE hotel_id = $1`;
-      await db.query(deleteImagesSQL, [hotelId]);
-
-      // เพิ่มรูปภาพใหม่
-      if (image_urls && image_urls.length > 0) {
-        const insertImageSQL = `INSERT INTO hotel_images (hotel_id, image_url) VALUES ($1, $2)`;
-        const imagePromises = image_urls.map(imageUrl => 
-          db.query(insertImageSQL, [hotelId, imageUrl])
-        );
-        await Promise.all(imagePromises);
-      }
-
-      // ลบห้องพักเก่า
-      const deleteRoomsSQL = `DELETE FROM rooms WHERE hotel_id = $1`;
-      await db.query(deleteRoomsSQL, [hotelId]);
-
-      // เพิ่มห้องพักใหม่
-      if (rooms && rooms.length > 0) {
-        const insertRoomSQL = `
-          INSERT INTO rooms (hotel_id, room_type, price_per_night, max_guests, beds, quantity) 
-          VALUES ($1, $2, $3, $4, $5, $6)
+        // อัพเดทข้อมูลหลักของโรงแรม
+        const updateHotelSQL = `
+          UPDATE hotels 
+          SET hotel_name = $1, description = $2, address = $3, city = $4, country = $5, 
+              contact_phone = $6, contact_email = $7, amenities = $8
+          WHERE hotel_id = $9 AND status != 'deleted'
         `;
-        const roomPromises = rooms.map(room => 
-          db.query(insertRoomSQL, [
-            hotelId, room.room_type, room.price_per_night, 
-            room.max_guests, room.beds, room.quantity
-          ])
+
+        const amenitiesString = Array.isArray(amenities) ? amenities.join(', ') : (amenities || '');
+
+        const hotelResult = await client.query(updateHotelSQL, [
+          hotel_name, description, address, city, country, 
+          contact_phone, contact_email, amenitiesString, hotelId
+        ]);
+
+        if (hotelResult.rowCount === 0) {
+          throw new Error('Hotel not found or no changes made');
+        }
+
+        // จัดการรูปภาพ: ลบทั้งหมดแล้วเพิ่มใหม่ (ง่ายและปลอดภัยเพราะไม่ติด FK อื่น)
+        await client.query(`DELETE FROM hotel_images WHERE hotel_id = $1`, [hotelId]);
+        if (image_urls && image_urls.length > 0) {
+          const insertImageSQL = `INSERT INTO hotel_images (hotel_id, image_url) VALUES ($1, $2)`;
+          for (const imageUrl of image_urls) {
+            await client.query(insertImageSQL, [hotelId, imageUrl]);
+          }
+        }
+
+        // จัดการห้องพักแบบ upsert โดยใช้ room_id ถ้ามี และหลีกเลี่ยงการลบห้องที่มีการจองอยู่
+        // 1) ดึงรายการห้องเดิมทั้งหมดของโรงแรม
+        const existingRoomsRes = await client.query(
+          `SELECT room_id FROM rooms WHERE hotel_id = $1`,
+          [hotelId]
         );
-        await Promise.all(roomPromises);
+        const existingRoomIds = new Set(existingRoomsRes.rows.map(r => r.room_id));
+
+        // 2) เตรียมชุด room_id ที่ยังคงอยู่หลังอัพเดท
+        const keepRoomIds = new Set();
+
+        if (rooms && rooms.length > 0) {
+          for (const room of rooms) {
+            const { room_id, room_type, price_per_night, max_guests, beds, quantity } = room;
+
+            if (room_id && existingRoomIds.has(room_id)) {
+              // อัพเดทห้องเดิม
+              await client.query(
+                `UPDATE rooms SET room_type = $1, price_per_night = $2, max_guests = $3, beds = $4, quantity = $5 WHERE room_id = $6 AND hotel_id = $7`,
+                [room_type, price_per_night, max_guests, beds, quantity, room_id, hotelId]
+              );
+              keepRoomIds.add(room_id);
+            } else {
+              // เพิ่มห้องใหม่
+              const insertRes = await client.query(
+                `INSERT INTO rooms (hotel_id, room_type, price_per_night, max_guests, beds, quantity) VALUES ($1, $2, $3, $4, $5, $6) RETURNING room_id`,
+                [hotelId, room_type, price_per_night, max_guests, beds, quantity]
+              );
+              keepRoomIds.add(insertRes.rows[0].room_id);
+            }
+          }
+        }
+
+        // 3) ลบห้องที่ไม่มีในรายการใหม่ โดยลบเฉพาะห้องที่ไม่มีการจองที่ยังไม่จบ
+        for (const oldRoomId of existingRoomIds) {
+          if (!keepRoomIds.has(oldRoomId)) {
+            // ตรวจสอบการอ้างอิงจาก bookings ที่ยัง active (pending/confirmed)
+            const refRes = await client.query(
+              `SELECT COUNT(*)::int AS cnt FROM bookings WHERE room_id = $1 AND booking_status IN ('pending','confirmed')`,
+              [oldRoomId]
+            );
+            if (refRes.rows[0].cnt === 0) {
+              await client.query(`DELETE FROM rooms WHERE room_id = $1`, [oldRoomId]);
+            } // ถ้ามีการจองอยู่ ให้คงไว้และไม่ลบ เพื่อเลี่ยง FK error
+          }
+        }
+
+        await client.query('COMMIT');
+      } catch (txErr) {
+        await client.query('ROLLBACK');
+        throw txErr;
+      } finally {
+        client.release();
       }
 
       return { message: 'Hotel updated successfully' };
