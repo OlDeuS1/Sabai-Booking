@@ -2,11 +2,13 @@
 import { getHotelData, getHotelRoomData, createBooking } from '../composables/getData';
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useFormat } from '../composables/useFormat';
 
 const HotelData = ref([])
 const RoomData = ref([])
 const route = useRoute()
 const router = useRouter()
+const { formatDate } = useFormat();
 
 onMounted(async () => {
     HotelData.value = await getHotelData()
@@ -59,8 +61,8 @@ const processBooking = async function(){
         const bookingData = {
             room_id: room_option.value,
             hotel_id: route.params.id,
-            check_in_date: new Date(selectData.value.checkInOutDate[0]).toISOString().split('T')[0],
-            check_out_date: new Date(selectData.value.checkInOutDate[1]).toISOString().split('T')[0],
+            check_in_date: formatDate(selectData.value.checkInOutDate[0]),
+            check_out_date: formatDate(selectData.value.checkInOutDate[1]),
             num_guests: selectData.value.numPeople,
             num_rooms: selectData.value.numRoom
         };

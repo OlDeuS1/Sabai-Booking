@@ -3,9 +3,11 @@ import SearchCompo from '../components/searchCompo.vue';
 import ListHotel from '../components/ListHotel.vue';
 import { onMounted, ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { useFormat } from '../composables/useFormat';
 import { getHotelData } from '../composables/getData';
 
 const router = useRouter();
+const { formatDate } = useFormat();
 const hotelData = ref([]);
 const isLoading = ref(true)
 
@@ -41,8 +43,8 @@ const searchData = function(payload) {
     }
 
   if (payload.checkInOutDate && payload.checkInOutDate[0] && payload.checkInOutDate[1]) {
-    query.checkIn = new Date(payload.checkInOutDate[0]).toISOString().split('T')[0];
-    query.checkOut = new Date(payload.checkInOutDate[1]).toISOString().split('T')[0];
+    query.checkIn = formatDate(payload.checkInOutDate[0]);
+    query.checkOut = formatDate(payload.checkInOutDate[1]);
   }
 
   router.push({
