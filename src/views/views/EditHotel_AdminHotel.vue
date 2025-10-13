@@ -15,6 +15,7 @@ const images = ref({
 
 // Hotel basic info
 const hotelName = ref('')
+const showHotelName = ref('')
 const description = ref('')
 const address = ref('')
 const city = ref('')
@@ -54,6 +55,7 @@ onMounted(async () => {
       hotel.value = foundHotel
       // เติมข้อมูลลงในฟอร์ม
       hotelName.value = foundHotel.hotel_name || ''
+      showHotelName.value = foundHotel.hotel_name || '...'
       description.value = foundHotel.description || ''
       address.value = foundHotel.address || ''
       city.value = foundHotel.city || ''
@@ -245,7 +247,7 @@ const goBack = () => {
             ← กลับไปหน้าจัดการโรงแรม
           </button>
           <h1 class="text-4xl font-bold text-center">แก้ไขข้อมูลโรงแรม</h1>
-          <p class="text-gray-300 text-center mt-2">แก้ไขข้อมูลโรงแรม "{{ hotelName }}"</p>
+          <p class="text-gray-300 text-center mt-2">แก้ไขข้อมูลโรงแรม "{{ showHotelName }}"</p>
         </div>
 
         <form @submit.prevent="submitForm" class="space-y-8">
