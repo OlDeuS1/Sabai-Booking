@@ -92,12 +92,16 @@ CREATE TABLE IF NOT EXISTS ratings (
     booking_id INTEGER NOT NULL,
     hotel_id INTEGER NOT NULL,
     user_id INTEGER NOT NULL,
-    rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    -- allow half-star ratings, e.g., 3.5
+    rating NUMERIC(2,1) NOT NULL CHECK (rating >= 1 AND rating <= 5),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (booking_id) REFERENCES bookings(booking_id),
     FOREIGN KEY (hotel_id) REFERENCES hotels(hotel_id),
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
+
+-- NOTE (migration for existing DB):
+-- ALTER TABLE ratings ALTER COLUMN rating TYPE NUMERIC(2,1) USING rating::NUMERIC(2,1);
 
 -- สร้าง Index เพื่อเพิ่มประสิทธิภาพ
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
