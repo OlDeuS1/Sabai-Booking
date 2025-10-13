@@ -19,7 +19,7 @@ onMounted(async () => {
     const user = await getUserCur()
     if (user && user.user_id) {
       const res = await getHotelByOwnerId(user.user_id)
-      hotels.value = res || []
+      hotels.value = res.filter(hotel => hotel.status !== 'rejected') || []
       console.log('Hotels:', hotels.value)
     }
   } catch (e) {
@@ -118,7 +118,7 @@ const handleEditHotel = (hotelId) => {
 
 <template>
   <div class="admin__hotel bg-[#102B58] text-white">
-      <div class="admin__hotel-container max-w-7xl mx-auto px-[32px] py-[8px] flex flex-col h-screen sticky top-0 left-0">
+      <div class="admin__hotel-container max-w-7xl mx-auto px-[32px] flex flex-col pt-8 pb-40 sticky top-0 left-0">
           <div class="admin__hotel-header flex justify-between items-center">
             <h1 class="text-4xl font-semibold text-left mt-12 mb-12">My Hotel</h1>
             <div class="admin__hotel-button flex justify-center items-center gap-6">
