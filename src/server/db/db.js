@@ -14,6 +14,9 @@ const pool = new Pool({
   max: 20, // จำนวน connection สูงสุดใน pool
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
+  ssl: {
+    rejectUnauthorized: false
+  },
 });
 
 // Helper class เพื่อให้ใช้งานใกล้เคียงกับ SQLite API
