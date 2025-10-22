@@ -1,8 +1,12 @@
 import axios from "axios";
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+
 export const getUserCur = async function(){
   try {
-    const res = await axios.get('http://localhost:3000/api/current-user', { withCredentials: true })
+    const res = await axios.get(`${API_BASE}/api/current-user`, {
+      withCredentials: true,
+    });
     return res.data;
   } catch(err) {
     alert(`eror : ${err.message}`);
@@ -11,7 +15,7 @@ export const getUserCur = async function(){
 
 export const getHotelData = async function(){
   try {
-    const res = await axios.get('http://localhost:3000/api/hotels')
+    const res = await axios.get(`${API_BASE}/api/hotels`)
     return res.data;
   } catch(err) {
     alert(`eror : ${err.message}`);
@@ -21,7 +25,7 @@ export const getHotelData = async function(){
 export const getHotelAdminData = async function () {
   try {
     console.log('Fetching hotel admin data...');
-    const res = await axios.get("http://localhost:3000/api/hotels/admin");
+    const res = await axios.get(`${API_BASE}/api/hotels/admin`);
     console.log('Hotel admin data response:', res.data);
     return res.data;
   } catch (err) {
@@ -34,7 +38,7 @@ export const getHotelAdminData = async function () {
 
 export const getHotelByOwnerId = async function (ownerId) {
   try {
-    const res = await axios.get(`http://localhost:3000/api/hotels/owner/${ownerId}`, { 
+    const res = await axios.get(`${API_BASE}/api/hotels/owner/${ownerId}`, { 
       withCredentials: true 
     });
     return res.data;
@@ -46,7 +50,7 @@ export const getHotelByOwnerId = async function (ownerId) {
 
 export const getHotelRoomData = async function(hotelId){
   try {
-    const res = await axios.get(`http://localhost:3000/api/hotel/${hotelId}/rooms`)
+    const res = await axios.get(`${API_BASE}/api/hotel/${hotelId}/rooms`)
     return res.data;
   } catch(err) {
     alert(`eror : ${err.message}`);
@@ -55,7 +59,7 @@ export const getHotelRoomData = async function(hotelId){
 
 export const getUserBookingHistory = async function(userId){
   try {
-    const res = await axios.get(`http://localhost:3000/api/user/${userId}/bookings`)
+    const res = await axios.get(`${API_BASE}/api/user/${userId}/bookings`)
     return res.data;
   } catch(err) {
     alert(`eror : ${err.message}`);
@@ -65,7 +69,7 @@ export const getUserBookingHistory = async function(userId){
 export const getNormalUsers = async function () {
   try {
     const res = await axios.get(
-      `http://localhost:3000/api/user/normal`
+      `${API_BASE}/api/user/normal`
     );
     return res.data;
   } catch (err) {
@@ -75,7 +79,7 @@ export const getNormalUsers = async function () {
 
 export const createBooking = async function(bookingData) {
   try {
-    const res = await axios.post('http://localhost:3000/api/bookings', bookingData, { 
+    const res = await axios.post('${API_BASE}/api/bookings', bookingData, { 
       withCredentials: true 
     });
     return res.data;
@@ -87,7 +91,7 @@ export const createBooking = async function(bookingData) {
 
 export const getBookingById = async function(bookingId) {
   try {
-    const res = await axios.get(`http://localhost:3000/api/booking/${bookingId}`, { 
+    const res = await axios.get(`${API_BASE}/api/booking/${bookingId}`, { 
       withCredentials: true 
     });
     return res.data;
@@ -99,7 +103,7 @@ export const getBookingById = async function(bookingId) {
 
 export const updateBookingStatus = async function(bookingId, status) {
   try {
-    const res = await axios.put(`http://localhost:3000/api/booking/${bookingId}/status`, 
+    const res = await axios.put(`${API_BASE}/api/booking/${bookingId}/status`, 
       { status }, 
       { withCredentials: true }
     );
@@ -112,7 +116,7 @@ export const updateBookingStatus = async function(bookingId, status) {
 
 export const createPayment = async function(paymentData) {
   try {
-    const res = await axios.post('http://localhost:3000/api/payments', paymentData, { 
+    const res = await axios.post('${API_BASE}/api/payments', paymentData, { 
       withCredentials: true 
     });
     return res.data;
@@ -125,7 +129,7 @@ export const createPayment = async function(paymentData) {
 // Rating API functions
 export const createRating = async function(ratingData) {
   try {
-    const res = await axios.post('http://localhost:3000/api/ratings', ratingData, { 
+    const res = await axios.post('${API_BASE}/api/ratings', ratingData, { 
       withCredentials: true 
     });
     return res.data;
@@ -137,7 +141,7 @@ export const createRating = async function(ratingData) {
 
 export const getRatingByBookingId = async function(bookingId) {
   try {
-    const res = await axios.get(`http://localhost:3000/api/rating/booking/${bookingId}`, { 
+    const res = await axios.get(`${API_BASE}/api/rating/booking/${bookingId}`, { 
       withCredentials: true 
     });
     return res.data;
@@ -152,7 +156,7 @@ export const getRatingByBookingId = async function(bookingId) {
 
 export const getHotelRatings = async function(hotelId) {
   try {
-    const res = await axios.get(`http://localhost:3000/api/ratings/hotel/${hotelId}`, { 
+    const res = await axios.get(`${API_BASE}/api/ratings/hotel/${hotelId}`, { 
       withCredentials: true 
     });
     return res.data;
@@ -164,7 +168,7 @@ export const getHotelRatings = async function(hotelId) {
 
 export const getHotelAverageRating = async function(hotelId) {
   try {
-    const res = await axios.get(`http://localhost:3000/api/hotel/${hotelId}/average-rating`, { 
+    const res = await axios.get(`${API_BASE}/api/hotel/${hotelId}/average-rating`, { 
       withCredentials: true 
     });
     return res.data;
@@ -176,7 +180,7 @@ export const getHotelAverageRating = async function(hotelId) {
 
 export const getHotelBookings = async function(hotelId) {
   try {
-    const res = await axios.get(`http://localhost:3000/api/hotel/${hotelId}/bookings`, { 
+    const res = await axios.get(`${API_BASE}/api/hotel/${hotelId}/bookings`, { 
       withCredentials: true 
     });
     return res.data;
@@ -188,7 +192,7 @@ export const getHotelBookings = async function(hotelId) {
 
 export const createHotel = async function(hotelData) {
   try {
-    const res = await axios.post('http://localhost:3000/api/hotels', hotelData, { 
+    const res = await axios.post('${API_BASE}/api/hotels', hotelData, { 
       withCredentials: true 
     });
     return res.data;
@@ -200,7 +204,7 @@ export const createHotel = async function(hotelData) {
 
 export const deleteHotel = async function(hotelId) {
   try {
-    const res = await axios.delete(`http://localhost:3000/api/hotels/${hotelId}`, { 
+    const res = await axios.delete(`${API_BASE}/api/hotels/${hotelId}`, { 
       withCredentials: true 
     });
     return res.data;
@@ -212,7 +216,7 @@ export const deleteHotel = async function(hotelId) {
 
 export const getHotelById = async function(hotelId) {
   try {
-    const res = await axios.get(`http://localhost:3000/api/hotels/${hotelId}`, { 
+    const res = await axios.get(`${API_BASE}/api/hotels/${hotelId}`, { 
       withCredentials: true 
     });
     return res.data;
@@ -224,7 +228,7 @@ export const getHotelById = async function(hotelId) {
 
 export const updateHotel = async function(hotelId, hotelData) {
   try {
-    const res = await axios.put(`http://localhost:3000/api/hotels/${hotelId}`, hotelData, { 
+    const res = await axios.put(`${API_BASE}/api/hotels/${hotelId}`, hotelData, { 
       withCredentials: true 
     });
     return res.data;

@@ -78,14 +78,19 @@ class UserController {
 
       console.log("User found:", { user_id: user.user_id, role: user.role });
 
-      // ตั้งค่า cookie ให้ถูกต้อง
-      res.cookie("userId", user.user_id, {
+      // ตั้งค่า cookie ให้ถูกต้องตาม env
+      const isProd = process.env.NODE_ENV === 'production';
+      const cookieOptions = {
         httpOnly: true,
-        sameSite: "Lax", // ปรับตามความเหมาะสม
-        // secure: true, // เปิดใช้เมื่อใช้ HTTPS
+        sameSite: isProd ? 'None' : 'Lax',
+        secure: isProd,
         maxAge: 24 * 60 * 60 * 1000, // 1 วัน
-      });
+      };
+      if (isProd && process.env.COOKIE_DOMAIN) {
+        cookieOptions.domain = process.env.COOKIE_DOMAIN; // เช่น .example.com
+      }
 
+      res.cookie("userId", user.user_id, cookieOptions);
       res.json(user);
     } catch (error) {
       console.error("Login error:", error);
@@ -95,7 +100,16 @@ class UserController {
 
   static async logout(req, res) {
     try {
-      res.clearCookie("userId");
+      const isProd = process.env.NODE_ENV === 'production';
+      const clearOpts = {
+        httpOnly: true,
+        sameSite: isProd ? 'None' : 'Lax',
+        secure: isProd,
+      };
+      if (isProd && process.env.COOKIE_DOMAIN) {
+        clearOpts.domain = process.env.COOKIE_DOMAIN;
+      }
+      res.clearCookie("userId", clearOpts);
       res.json({ message: "ออกจากระบบเรียบร้อยแล้ว" });
     } catch (error) {
       console.error(error);
