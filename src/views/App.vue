@@ -4,6 +4,7 @@ import Footer from './components/Footer.vue';
 import { useRoute } from 'vue-router';
 import { computed, onMounted, ref, watch } from 'vue';
 import axios from 'axios';
+import { API_BASE } from './composables/getData';
 
 const route = useRoute();
 
@@ -15,7 +16,7 @@ const userCur = ref(null);
 
 const fetchUserCurrent = async () => {
   try {
-    const resUserCur = await axios.get(`http://localhost:3000/api/current-user`, { withCredentials: true });
+    const resUserCur = await axios.get(`${API_BASE}/api/current-user`, { withCredentials: true });
     userCur.value = resUserCur.data;
   } catch (error) {
     console.error('Error fetching user:', error);

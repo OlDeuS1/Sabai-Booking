@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+export const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
 export const getUserCur = async function(){
   try {
@@ -79,7 +79,7 @@ export const getNormalUsers = async function () {
 
 export const createBooking = async function(bookingData) {
   try {
-    const res = await axios.post('${API_BASE}/api/bookings', bookingData, { 
+    const res = await axios.post(`${API_BASE}/api/bookings`, bookingData, { 
       withCredentials: true 
     });
     return res.data;
@@ -116,7 +116,7 @@ export const updateBookingStatus = async function(bookingId, status) {
 
 export const createPayment = async function(paymentData) {
   try {
-    const res = await axios.post('${API_BASE}/api/payments', paymentData, { 
+    const res = await axios.post(`${API_BASE}/api/payments`, paymentData, { 
       withCredentials: true 
     });
     return res.data;
@@ -129,7 +129,7 @@ export const createPayment = async function(paymentData) {
 // Rating API functions
 export const createRating = async function(ratingData) {
   try {
-    const res = await axios.post('${API_BASE}/api/ratings', ratingData, { 
+    const res = await axios.post(`${API_BASE}/api/ratings`, ratingData, { 
       withCredentials: true 
     });
     return res.data;
@@ -192,7 +192,7 @@ export const getHotelBookings = async function(hotelId) {
 
 export const createHotel = async function(hotelData) {
   try {
-    const res = await axios.post('${API_BASE}/api/hotels', hotelData, { 
+    const res = await axios.post(`${API_BASE}/api/hotels`, hotelData, { 
       withCredentials: true 
     });
     return res.data;

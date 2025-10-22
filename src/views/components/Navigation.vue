@@ -3,6 +3,7 @@ import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuIt
 import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/vue/24/outline'
 import { UserFilled } from '@element-plus/icons-vue'
 import axios from 'axios'
+import { API_BASE } from '../composables/getData'
 import { useRouter } from 'vue-router'
 
 const props = defineProps({
@@ -32,7 +33,7 @@ const handleLogoClick = () => {
 
 const handleLogout = async () => {
   try {
-    await axios.post('http://localhost:3000/api/users/logout', {}, { withCredentials: true })
+  await axios.post(`${API_BASE}/api/users/logout`, {}, { withCredentials: true })
     // ตรวจสอบว่าอยู่ที่หน้า home อยู่แล้วหรือไม่
     if (router.currentRoute.value.path === '/') {
       // ถ้าอยู่หน้า home อยู่แล้ว ให้ refresh เพื่ออัปเดต UI
@@ -51,7 +52,7 @@ const handleLogout = async () => {
 </script>
 
 <template>
-  <Disclosure as="nav" class="border-b relative bg-white after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-white/10" v-slot="{ open }">
+  <Disclosure as="nav" class="border-b relative bg-white after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-white/10">
     <div class="mx-auto max-w-7xl px-2 py-2 sm:px-6 lg:px-8">
       <div class="relative flex h-16 items-center justify-between">
         <div class="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">

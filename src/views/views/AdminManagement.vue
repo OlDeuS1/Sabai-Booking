@@ -3,6 +3,7 @@ import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline'
 import { onMounted, ref, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { getHotelAdminData, getHotelRoomData, getNormalUsers } from '../composables/getData';
+import { API_BASE } from '../composables/getData';
 
 const route = useRoute();
 const router = useRouter();
@@ -84,7 +85,7 @@ const hotelFiler = computed(() => {
 // ฟังก์ชันอนุมัติโรงแรม
 const approveHotel = async (hotel) => {
     try {
-        const response = await fetch(`http://localhost:3000/api/hotels/${hotel.hotel_id}/status`, {
+        const response = await fetch(`${API_BASE}/api/hotels/${hotel.hotel_id}/status`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -115,7 +116,7 @@ const approveHotel = async (hotel) => {
 const rejectHotel = async (hotel) => {
     if (confirm(`คุณแน่ใจหรือไม่ที่จะปฏิเสธโรงแรม "${hotel.hotel_name}"?`)) {
         try {
-            const response = await fetch(`http://localhost:3000/api/hotels/${hotel.hotel_id}/status`, {
+            const response = await fetch(`${API_BASE}/api/hotels/${hotel.hotel_id}/status`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -147,7 +148,7 @@ const rejectHotel = async (hotel) => {
 const deleteHotel = async (hotel) => {
     if (confirm(`คุณแน่ใจหรือไม่ที่จะปิดใช้งานโรงแรม "${hotel.hotel_name}"? โรงแรมจะไม่ปรากฏในระบบ แต่ข้อมูลประวัติจะยังคงอยู่`)) {
         try {
-            const response = await fetch(`http://localhost:3000/api/hotels/${hotel.hotel_id}/status`, {
+            const response = await fetch(`${API_BASE}/api/hotels/${hotel.hotel_id}/status`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

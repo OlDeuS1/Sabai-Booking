@@ -142,6 +142,24 @@ For production deployment:
 3. Run database migrations
 4. Build and deploy the application
 
+### Frontend Environment Variables
+
+The Vue frontend (Vite) reads environment variables from root-level `.env.*` files. Ensure the API base URL is set using the Vite prefix:
+
+```
+# .env.production
+VITE_API_BASE_URL=http://18.212.243.118
+```
+
+In development, you can override via `.env.local`:
+
+```
+# .env.local (not committed)
+VITE_API_BASE_URL=http://localhost:3000
+```
+
+All client API calls resolve against this base URL.
+
 ## 📝 License
 
 This project is licensed under the MIT License.

@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import ButtonSubmit from '../components/ButtonSubmit.vue';
 import FormInput from '../components/FormInput.vue';
 import { useRouter } from 'vue-router';
+import { API_BASE } from '../composables/getData';
 
 const router = useRouter();
 
@@ -15,7 +16,7 @@ async function handleLogin() {
   error.value = '';
   console.log('Attempting login with:', { email: email.value, password: password.value });
   try {
-    const res = await fetch('http://localhost:3000/api/login', {
+    const res = await fetch(`${API_BASE}/api/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: email.value, password: password.value }),

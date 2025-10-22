@@ -10,6 +10,7 @@ import History from '../views/History.vue';
 import Admin from '../views/AdminManagement.vue';
 import HistoryBooking_Admin from '../views/HistoryBooking_Admin.vue';
 import axios from 'axios';
+import { API_BASE } from '../composables/getData';
 import AdminHotel from '../views/AdminHotel.vue';
 import hotelcreate from '../views/CreateHotel_AdminHotel.vue';
 import EditHotel from '../views/EditHotel_AdminHotel.vue';
@@ -81,7 +82,7 @@ router.beforeEach(async (to, from, next) => {
   if (to.matched.some(record => record.meta.requiresAuth)) {
     try {
       // เรียก API เพื่อตรวจสอบผู้ใช้ปัจจุบัน
-      const response = await axios.get('http://localhost:3000/api/current-user', {
+      const response = await axios.get(`${API_BASE}/api/current-user`, {
         withCredentials: true
       });
       

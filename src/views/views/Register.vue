@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import ButtonSubmit from '../components/ButtonSubmit.vue';
 import FormInput from '../components/FormInput.vue';
+import { API_BASE } from '../composables/getData';
 
 const router = useRouter();
 
@@ -31,7 +32,7 @@ async function handleRegister() {
   }
   let role = selectRole.value === 'โรงแรม' ? 'hotel' : 'user';
   try {
-    const res = await fetch('http://localhost:3000/api/register', {
+    const res = await fetch(`${API_BASE}/api/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -53,7 +54,7 @@ async function handleRegister() {
       
       // Auto login after successful registration
       try {
-        const loginRes = await fetch('http://localhost:3000/api/login', {
+        const loginRes = await fetch(`${API_BASE}/api/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
