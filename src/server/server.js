@@ -6,6 +6,7 @@ import HotelController from "../controllers/hotelController.js";
 import BookingController from "../controllers/bookingController.js";
 import PaymentController from "../controllers/paymentController.js";
 import RatingController from "../controllers/ratingController.js";
+import UploadController from "../controllers/uploadController.js";
 import { checkLogin } from "../middleware/auth.js";
 import { Booking } from "../models/Booking.js";
 
@@ -110,6 +111,10 @@ app.get("/api/rating/booking/:bookingId", RatingController.getRatingByBookingId)
 app.get("/api/ratings/hotel/:hotelId", RatingController.getRatingsByHotelId);
 app.get("/api/hotel/:hotelId/average-rating", RatingController.getHotelAverageRating);
 app.get("/api/ratings", RatingController.getAllRatings);
+
+// Upload Routes (S3 presigned URLs)
+app.get("/api/uploads/s3-url", UploadController.getS3UploadUrl);
+app.delete("/api/uploads/s3", UploadController.deleteS3Object);
 
 // Auto-cancel expired bookings ทุก 30 วินาที และ auto-complete checkout ทุก 1 นาที
 let intervalCount = 0;

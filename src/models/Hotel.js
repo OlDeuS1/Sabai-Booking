@@ -1,5 +1,15 @@
 import db, { pool } from "../server/db/db.js";
 
+// Helper: convert stored image key (or legacy full URL) to a public S3 URL
+function toS3Url(str) {
+  if (!str) return str;
+  if (/^https?:\/\//i.test(str)) return str; // already a URL (legacy data)
+  const bucket = process.env.S3_BUCKET_NAME || process.env.AWS_S3_BUCKET;
+  const region = process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION || 'ap-southeast-1';
+  if (!bucket) return str; // fallback to raw string if bucket not configured
+  return `https://${bucket}.s3.${region}.amazonaws.com/${str}`;
+}
+
 export class Hotel {
   static getAllWithImages() {
     return new Promise((resolve, reject) => {
@@ -46,7 +56,7 @@ export class Hotel {
 
           const hotelsWithImages = hotels.map((hotel) => ({
             ...hotel,
-            image_urls: imagesByHotel[hotel.hotel_id] || [],
+            image_urls: (imagesByHotel[hotel.hotel_id] || []).map(toS3Url),
           }));
 
           resolve(hotelsWithImages);
@@ -99,7 +109,7 @@ export class Hotel {
 
           const hotelsWithImages = hotels.map((hotel) => ({
             ...hotel,
-            image_urls: imagesByHotel[hotel.hotel_id] || [],
+            image_urls: (imagesByHotel[hotel.hotel_id] || []).map(toS3Url),
           }));
 
           resolve(hotelsWithImages);
@@ -183,7 +193,7 @@ export class Hotel {
 
           const hotelsWithImages = hotels.map((hotel) => ({
             ...hotel,
-            image_urls: imagesByHotel[hotel.hotel_id] || [],
+            image_urls: (imagesByHotel[hotel.hotel_id] || []).map(toS3Url),
           }));
 
           resolve(hotelsWithImages);
@@ -308,7 +318,7 @@ export class Hotel {
 
             const hotelWithDetails = {
               ...hotel,
-              image_urls: images.map(img => img.image_url),
+              image_urls: images.map(img => toS3Url(img.image_url)),
               rooms: rooms
             };
 
