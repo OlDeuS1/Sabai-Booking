@@ -23,7 +23,7 @@ class UploadController {
       const ext = (path.extname(String(fileName || "")).toLowerCase().replace(".", "")) || "jpg";
       const random = crypto.randomUUID();
   // Keep all app images under the `images/` prefix to match how URLs are consumed elsewhere
-  const keyPrefix = hotelId ? `images/hotels/${hotelId}` : "images/hotels";
+  const keyPrefix = hotelId ? `images/hotels/` : "images/hotels";
   const key = `${keyPrefix}/${random}.${ext}`;
 
       const putParams = {
