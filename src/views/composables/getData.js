@@ -237,3 +237,30 @@ export const updateHotel = async function(hotelId, hotelData) {
     throw err;
   }
 };
+
+// S3 Upload helpers
+export const getS3UploadUrl = async function(fileName, contentType, hotelId) {
+  try {
+    const res = await axios.get(`${API_BASE}/api/uploads/s3-url`, {
+      params: { fileName, contentType, hotelId },
+      withCredentials: true,
+    });
+    return res.data; // { url, key, publicUrl }
+  } catch (err) {
+    console.error('Error getting S3 upload URL:', err);
+    throw err;
+  }
+};
+
+export const deleteS3Object = async function(key) {
+  try {
+    const res = await axios.delete(`${API_BASE}/api/uploads/s3`, {
+      params: { key },
+      withCredentials: true,
+    });
+    return res.data; // { ok: true }
+  } catch (err) {
+    console.error('Error deleting S3 object:', err);
+    throw err;
+  }
+};

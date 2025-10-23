@@ -1,14 +1,15 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { createHotel } from '../composables/getData.js'
+import { createHotel, getS3UploadUrl } from '../composables/getData.js'
 
 const router = useRouter()
 
+// Selected images: each entry will be { file: File, preview: string }
 const images = ref({
-    main: null,
-    sub1: null,
-    sub2: null
+  main: null,
+  sub1: null,
+  sub2: null
 })
 
 // Hotel basic info
@@ -66,14 +67,12 @@ const triggerFileInput = (type) => {
 }
 
 const handleImageUpload = (type, event) => {
-    const file = event.target.files[0]
-    if (file) {
-        const reader = new FileReader()
-        reader.onload = (e) => {
-            images.value[type] = e.target.result
-        }
-        reader.readAsDataURL(file)
-    }
+  const file = event.target.files[0]
+  if (file) {
+    // Keep a local preview and the File for upload
+    const preview = URL.createObjectURL(file)
+    images.value[type] = { file, preview }
+  }
 }
 
 const addAmenity = () => {
@@ -146,12 +145,25 @@ const submitForm = async () => {
 
     isSubmitting.value = true
 
-    try {
-        // เตรียมข้อมูลรูปภาพ
-        const imageUrls = []
-        if (images.value.main) imageUrls.push(images.value.main)
-        if (images.value.sub1) imageUrls.push(images.value.sub1)
-        if (images.value.sub2) imageUrls.push(images.value.sub2)
+  try {
+    // Upload selected images to S3 and collect returned keys
+    const imageUrls = [] // will store S3 keys
+    const slots = ['main','sub1','sub2']
+    for (const slot of slots) {
+      const item = images.value[slot]
+      if (!item?.file) continue
+      const file = item.file
+      // Request a presigned URL
+            const { url, key, publicUrl } = await getS3UploadUrl(file.name, file.type)
+      // Upload the file to S3 using the presigned URL
+      await fetch(url, {
+        method: 'PUT',
+        headers: { 'Content-Type': file.type || 'application/octet-stream' },
+        body: file,
+      })
+            // Store full public URL for compatibility with current backend URL builder
+            imageUrls.push(publicUrl)
+    }
 
         const hotelData = {
             hotel_name: hotelName.value.trim(),
@@ -167,7 +179,7 @@ const submitForm = async () => {
             rooms: roomTypes.value
         }
 
-        console.log('Submitting hotel data:', hotelData)
+  console.log('Submitting hotel data:', hotelData)
 
         const result = await createHotel(hotelData)
         
@@ -284,7 +296,7 @@ const goBack = () => {
                   <div v-if="!images.main" class="text-gray-400">
                     คลิกเพื่อเลือกรูปภาพหลัก
                   </div>
-                  <img v-else :src="images.main" alt="Main" class="max-h-40 max-w-full object-cover rounded">
+                  <img v-else :src="images.main && images.main.preview" alt="Main" class="max-h-40 max-w-full object-cover rounded">
                 </div>
                 <input ref="mainFileInput" 
                        type="file" 
@@ -301,7 +313,7 @@ const goBack = () => {
                   <div v-if="!images.sub1" class="text-gray-400">
                     คลิกเพื่อเลือกรูปภาพที่ 2
                   </div>
-                  <img v-else :src="images.sub1" alt="Sub 1" class="max-h-40 max-w-full object-cover rounded">
+                  <img v-else :src="images.sub1 && images.sub1.preview" alt="Sub 1" class="max-h-40 max-w-full object-cover rounded">
                 </div>
                 <input ref="sub1FileInput" 
                        type="file" 
@@ -318,7 +330,7 @@ const goBack = () => {
                   <div v-if="!images.sub2" class="text-gray-400">
                     คลิกเพื่อเลือกรูปภาพที่ 3
                   </div>
-                  <img v-else :src="images.sub2" alt="Sub 2" class="max-h-40 max-w-full object-cover rounded">
+                  <img v-else :src="images.sub2 && images.sub2.preview" alt="Sub 2" class="max-h-40 max-w-full object-cover rounded">
                 </div>
                 <input ref="sub2FileInput" 
                        type="file" 
