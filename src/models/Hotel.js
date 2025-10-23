@@ -4,6 +4,7 @@ import db, { pool } from "../server/db/db.js";
 function toS3Url(str) {
   if (!str) return str;
   if (/^https?:\/\//i.test(str)) return str; // already a URL (legacy data)
+  if (/^data:/i.test(str)) return str; // data URI, return as-is (avoid wrong S3 prefix)
   const bucket = process.env.S3_BUCKET_NAME || process.env.AWS_S3_BUCKET;
   const region = process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION || 'ap-southeast-1';
   if (!bucket) return str; // fallback to raw string if bucket not configured

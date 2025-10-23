@@ -7,8 +7,8 @@ import path from "node:path";
 function buildPublicUrl(key) {
   if (!key) return key;
   // Virtual-hosted–style URL
-  // https://sabai-booking-app-serista.s3.us-east-1.amazonaws.com/images/hero-background.png
-  return `https://${BUCKET}.s3.${REGION}.amazonaws.com/images/${key}`;
+  // https://<bucket>.s3.<region>.amazonaws.com/<key>
+  return `https://${BUCKET}.s3.${REGION}.amazonaws.com/${key}`;
 }
 
 class UploadController {
@@ -22,8 +22,9 @@ class UploadController {
 
       const ext = (path.extname(String(fileName || "")).toLowerCase().replace(".", "")) || "jpg";
       const random = crypto.randomUUID();
-      const keyPrefix = hotelId ? `hotels/${hotelId}` : "hotels";
-      const key = `${keyPrefix}/${random}.${ext}`;
+  // Keep all app images under the `images/` prefix to match how URLs are consumed elsewhere
+  const keyPrefix = hotelId ? `images/hotels/${hotelId}` : "images/hotels";
+  const key = `${keyPrefix}/${random}.${ext}`;
 
       const putParams = {
         Bucket: BUCKET,
@@ -39,7 +40,7 @@ class UploadController {
       const command = new PutObjectCommand(putParams);
       const url = await getSignedUrl(s3, command, { expiresIn: 60 });
 
-      res.json({ url, key, publicUrl: buildPublicUrl(key) });
+  res.json({ url, key, publicUrl: buildPublicUrl(key) });
     } catch (err) {
       console.error("Error creating presigned URL:", err);
       res.status(500).json({ error: "Failed to create S3 upload URL", detail: err.message });

@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { getHotelById, updateHotel } from '../composables/getData.js'
+import { getHotelById, updateHotel, getS3UploadUrl } from '../composables/getData.js'
 
 const router = useRouter()
 const route = useRoute()
@@ -115,14 +115,11 @@ const triggerFileInput = (type) => {
 }
 
 const handleImageUpload = (type, event) => {
-    const file = event.target.files[0]
-    if (file) {
-        const reader = new FileReader()
-        reader.onload = (e) => {
-            images.value[type] = e.target.result
-        }
-        reader.readAsDataURL(file)
-    }
+  const file = event.target.files[0]
+  if (file) {
+    const preview = URL.createObjectURL(file)
+    images.value[type] = { file, preview }
+  }
 }
 
 const addAmenity = () => {
@@ -196,8 +193,26 @@ const submitForm = async () => {
     isSubmitting.value = true
 
     try {
-        // เตรียมข้อมูลรูปภาพ
-        const imageUrls = Object.values(images.value).filter(img => img !== null)
+        // เตรียมและอัพโหลดรูปภาพที่เลือกใหม่ (ถ้าเป็นไฟล์)
+        const slots = ['main','sub1','sub2']
+        const imageUrls = []
+        for (const slot of slots) {
+          const item = images.value[slot]
+          if (!item) continue
+          // ถ้าเป็นไฟล์ใหม่ -> อัพโหลด S3, ถ้าเป็น URL เดิม ให้ใช้เหมือนเดิม
+          if (typeof item === 'object' && item.file) {
+            const file = item.file
+            const { url, key, publicUrl } = await getS3UploadUrl(file.name, file.type, hotelId)
+            await fetch(url, {
+              method: 'PUT',
+              headers: { 'Content-Type': file.type || 'application/octet-stream' },
+              body: file,
+            })
+            imageUrls.push(publicUrl)
+          } else if (typeof item === 'string') {
+            imageUrls.push(item)
+          }
+        }
 
         const hotelData = {
             hotel_name: hotelName.value.trim(),
@@ -327,7 +342,7 @@ const goBack = () => {
                   <div v-if="!images.main" class="text-gray-400">
                     คลิกเพื่อเลือกรูปภาพหลัก
                   </div>
-                  <img v-else :src="images.main" alt="Main" class="max-h-40 max-w-full object-cover rounded">
+                  <img v-else :src="typeof images.main === 'string' ? images.main : (images.main && images.main.preview)" alt="Main" class="max-h-40 max-w-full object-cover rounded">
                 </div>
                 <input ref="mainFileInput" 
                        type="file" 
@@ -344,7 +359,7 @@ const goBack = () => {
                   <div v-if="!images.sub1" class="text-gray-400">
                     คลิกเพื่อเลือกรูปภาพที่ 2
                   </div>
-                  <img v-else :src="images.sub1" alt="Sub 1" class="max-h-40 max-w-full object-cover rounded">
+                  <img v-else :src="typeof images.sub1 === 'string' ? images.sub1 : (images.sub1 && images.sub1.preview)" alt="Sub 1" class="max-h-40 max-w-full object-cover rounded">
                 </div>
                 <input ref="sub1FileInput" 
                        type="file" 
@@ -361,7 +376,7 @@ const goBack = () => {
                   <div v-if="!images.sub2" class="text-gray-400">
                     คลิกเพื่อเลือกรูปภาพที่ 3
                   </div>
-                  <img v-else :src="images.sub2" alt="Sub 2" class="max-h-40 max-w-full object-cover rounded">
+                  <img v-else :src="typeof images.sub2 === 'string' ? images.sub2 : (images.sub2 && images.sub2.preview)" alt="Sub 2" class="max-h-40 max-w-full object-cover rounded">
                 </div>
                 <input ref="sub2FileInput" 
                        type="file" 
