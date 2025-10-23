@@ -15,6 +15,7 @@ class UploadController {
   static async getS3UploadUrl(req, res) {
     try {
       const { fileName, contentType, hotelId } = req.query;
+      console.log(BUCKET, REGION);
       if (!BUCKET) {
         return res.status(500).json({ error: "S3 bucket is not configured" });
       }
