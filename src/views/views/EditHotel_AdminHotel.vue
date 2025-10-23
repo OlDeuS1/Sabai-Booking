@@ -202,10 +202,13 @@ const submitForm = async () => {
           // ถ้าเป็นไฟล์ใหม่ -> อัพโหลด S3, ถ้าเป็น URL เดิม ให้ใช้เหมือนเดิม
           if (typeof item === 'object' && item.file) {
             const file = item.file
-            const { url, key, publicUrl } = await getS3UploadUrl(file.name, file.type, hotelId)
+            const { url, key, publicUrl, requiresAclHeader } = await getS3UploadUrl(file.name, file.type, hotelId)
             await fetch(url, {
               method: 'PUT',
-              headers: { 'Content-Type': file.type || 'application/octet-stream' },
+              headers: {
+                'Content-Type': file.type || 'application/octet-stream',
+                ...(requiresAclHeader ? { 'x-amz-acl': 'public-read' } : {}),
+              },
               body: file,
             })
             imageUrls.push(publicUrl)

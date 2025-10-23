@@ -154,11 +154,14 @@ const submitForm = async () => {
       if (!item?.file) continue
       const file = item.file
       // Request a presigned URL
-            const { url, key, publicUrl } = await getS3UploadUrl(file.name, file.type)
+            const { url, key, publicUrl, requiresAclHeader } = await getS3UploadUrl(file.name, file.type)
       // Upload the file to S3 using the presigned URL
       await fetch(url, {
         method: 'PUT',
-        headers: { 'Content-Type': file.type || 'application/octet-stream' },
+        headers: {
+          'Content-Type': file.type || 'application/octet-stream',
+          ...(requiresAclHeader ? { 'x-amz-acl': 'public-read' } : {}),
+        },
         body: file,
       })
             // Store full public URL for compatibility with current backend URL builder

@@ -20,11 +20,12 @@ class UploadController {
         return res.status(500).json({ error: "S3 bucket is not configured" });
       }
 
-      const ext = (path.extname(String(fileName || "")).toLowerCase().replace(".", "")) || "jpg";
-      const random = crypto.randomUUID();
-  // Keep all app images under the `images/` prefix to match how URLs are consumed elsewhere
-  const keyPrefix = hotelId ? `images/hotels/` : "images/hotels";
-  const key = `${keyPrefix}/${random}.${ext}`;
+    const ext = (path.extname(String(fileName || "")).toLowerCase().replace(".", "")) || "jpg";
+    const random = crypto.randomUUID();
+    // Keep all app images under the `images/` prefix to match how URLs are consumed elsewhere
+    // Include hotelId segment when provided, and avoid trailing slashes to prevent `//` in keys
+    const keyPrefix = hotelId ? `images/hotels/${hotelId}` : "images/hotels";
+    const key = `${keyPrefix}/${random}.${ext}`;
 
       const putParams = {
         Bucket: BUCKET,
@@ -33,14 +34,15 @@ class UploadController {
       };
 
       // Optional ACL when you want public objects and the IAM policy allows it
-      if ((process.env.S3_UPLOAD_ACL || "").toLowerCase() === "public-read") {
+      const includeAcl = (process.env.S3_UPLOAD_ACL || "").toLowerCase() === "public-read";
+      if (includeAcl) {
         putParams.ACL = "public-read";
       }
 
       const command = new PutObjectCommand(putParams);
       const url = await getSignedUrl(s3, command, { expiresIn: 60 });
 
-  res.json({ url, key, publicUrl: buildPublicUrl(key) });
+    res.json({ url, key, publicUrl: buildPublicUrl(key), requiresAclHeader: includeAcl });
     } catch (err) {
       console.error("Error creating presigned URL:", err);
       res.status(500).json({ error: "Failed to create S3 upload URL", detail: err.message });
