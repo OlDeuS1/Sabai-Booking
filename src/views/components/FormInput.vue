@@ -18,7 +18,7 @@ const props = defineProps({
 
 const emit = defineEmits(['updateModelValue']);
 
-const iconValue = `/src/views/assets/icons/${props.inputName}.svg`;
+const iconValue = `http://sabai-booking-app-serista.s3-website-us-east-1.amazonaws.com/icons/${props.inputName}.svg`;
 
 </script>
 
