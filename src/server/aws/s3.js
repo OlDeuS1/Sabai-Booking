@@ -12,6 +12,6 @@ const s3 = new S3Client({
   credentials: accessKeyId && secretAccessKey ? { accessKeyId, secretAccessKey } : undefined,
 });
 
-export const S3_BUCKET_NAME = process.env.S3_BUCKET_NAME || process.env.AWS_S3_BUCKET || "";
+export const S3_BUCKET_NAME = process.env.S3_BUCKET_NAME;
 export const S3_REGION = region;
 export default s3;
