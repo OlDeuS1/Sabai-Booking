@@ -7,7 +7,8 @@ import path from "node:path";
 function buildPublicUrl(key) {
   if (!key) return key;
   // Virtual-hosted–style URL
-  return `https://${BUCKET}.s3.${REGION}.amazonaws.com/${key}`;
+  // https://sabai-booking-app-serista.s3.us-east-1.amazonaws.com/images/hero-background.png
+  return `https://${BUCKET}.s3.${REGION}.amazonaws.com/images/${key}`;
 }
 
 class UploadController {

@@ -7,7 +7,8 @@ function toS3Url(str) {
   const bucket = process.env.S3_BUCKET_NAME || process.env.AWS_S3_BUCKET;
   const region = process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION || 'ap-southeast-1';
   if (!bucket) return str; // fallback to raw string if bucket not configured
-  return `https://${bucket}.s3.${region}.amazonaws.com/${str}`;
+  // https://sabai-booking-app-serista.s3.us-east-1.amazonaws.com/images/hero-background.png
+  return `https://${bucket}.s3.${region}.amazonaws.com/images/${str}`;
 }
 
 export class Hotel {

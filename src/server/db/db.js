@@ -4,9 +4,6 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-// กำหนด SSL ตามสภาพแวดล้อม (ปิดสำหรับเครื่องที่ไม่รองรับ SSL)
-const enableSsl = (process.env.PGSSL || process.env.DB_SSL || "").toString().toLowerCase() === "true";
-
 // สร้าง connection pool สำหรับ PostgreSQL
 const pool = new Pool({
   host: process.env.DB_HOST || 'localhost',
@@ -17,7 +14,9 @@ const pool = new Pool({
   max: 20, // จำนวน connection สูงสุดใน pool
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
-  ssl: enableSsl ? { rejectUnauthorized: false } : false,
+  ssl: {
+    rejectUnauthorized: false
+  },
 });
 
 // Helper class เพื่อให้ใช้งานใกล้เคียงกับ SQLite API
