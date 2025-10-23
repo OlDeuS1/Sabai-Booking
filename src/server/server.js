@@ -17,7 +17,9 @@ app.use(cors({
   origin: (process.env.FRONTEND_ORIGIN || 'http://localhost:5050').split(','),
   credentials: true
 }));
-app.use(express.json());
+// Increase body size limits to avoid 413 when clients send base64 images or large payloads
+app.use(express.json({ limit: '25mb' }));
+app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 app.use(cookieParser());
 
 // User Routes
