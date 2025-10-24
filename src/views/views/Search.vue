@@ -65,7 +65,7 @@ const searchHotel = function(payload) {
 </script>
 
 <template>
-  <div class="search relative">
+  <div class="search relative min-h-screen">
     <div class="search__container max-w-7xl mx-auto px-[32px] py-[8px] flex flex-col items-center">
       <SearchCompo 
         v-if="allHotels" 

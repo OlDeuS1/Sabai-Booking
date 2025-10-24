@@ -56,7 +56,7 @@ const searchData = function(payload) {
 </script>
 
 <template>
-  <div class="home relative">
+  <div class="home relative min-h-screen">
     <div class="home__container max-w-7xl mx-auto px-[32px] py-[8px] flex flex-col items-center">
       <div class="bg-[url(https://sabai-booking-app-serista.s3.us-east-1.amazonaws.com/images/hero-background.png)] w-full h-[20rem] bg-center bg-no-repeat bg-cover absolute top-0 left-0 -z-10 brightness-[65%]"></div>
       <div class="hero-bg h-[20rem] w-full text-white relative">

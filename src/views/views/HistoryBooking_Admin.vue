@@ -28,7 +28,7 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="bg-[#212121] pt-16 pb-32">
+    <div class="bg-[#212121] pt-16 pb-32 min-h-screen">
         <div class="max-w-7xl mx-auto flex flex-col px-2 sm:px-6 lg:px-8 justify-center text-white">
             <div class="flex mb-10">
                 <router-link to="/admin" class="flex items-center">

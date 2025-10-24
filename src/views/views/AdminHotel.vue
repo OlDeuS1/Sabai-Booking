@@ -117,7 +117,7 @@ const handleEditHotel = (hotelId) => {
 </script>
 
 <template>
-  <div class="admin__hotel bg-[#102B58] text-white">
+  <div class="admin__hotel bg-[#102B58] text-white min-h-screen">
       <div class="admin__hotel-container max-w-7xl mx-auto px-[32px] flex flex-col pt-8 pb-40 sticky top-0 left-0">
           <div class="admin__hotel-header flex justify-between items-center">
             <h1 class="text-4xl font-semibold text-left mt-12 mb-12">My Hotel</h1>

@@ -104,7 +104,7 @@ async function handleRegister() {
 </script>
 
 <template>
-  <div class="register bg-white mt-8 flex justify-center items-center text-blue-950">
+  <div class="register bg-white mt-8 flex justify-center items-center text-blue-950 min-h-screen">
     <div class="register__form w-sm mx-auto border-gray-200 border-2 rounded-md shadow-xl px-6 py-8">
       <RouterLink to="/" class="inline-flex mb-5 items-center text-gray-400 hover:text-gray-500">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">

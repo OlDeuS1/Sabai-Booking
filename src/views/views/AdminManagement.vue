@@ -179,7 +179,7 @@ const deleteHotel = async (hotel) => {
 </script>
 
 <template>
-    <div class="bg-[#212121] p-32 pt-16">
+    <div class="bg-[#212121] p-32 pt-16 min-h-screen">
         <!-- ส่วนของผู้ใช้บริการ/ลูกค้า -->
         <div class="max-w-7xl mx-auto flex flex-col px-2 sm:px-6 lg:px-8 justify-center text-white">
             <div class="flex justify-between mb-4 items-center">
