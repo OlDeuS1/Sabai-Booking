@@ -28,7 +28,7 @@ const props = defineProps({
                 </div> 
                 <!-- สถานที่ตั้ง -->
                 <div class="mt-4 mb-4 inline-flex gap-1.5">
-                    <img :src="MapPin" alt="pin-location" class="w-6 h-6">
+                    <img src="https://sabai-booking-app-serista.s3.us-east-1.amazonaws.com/icons/map-pin.png" alt="pin-location" class="w-6 h-6">
                     <span class="">{{ props.hotelData.description }}</span>
                 </div>
                 <!-- สิ่งอำนวยความสะดวก -->

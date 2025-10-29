@@ -237,7 +237,7 @@ onUnmounted(() => {
                 </div> 
                 <!-- วันที่จองเข้า - ออก -->
                 <div class="inline-flex gap-1.5">
-                    <img :src="Calendar" alt="calendar" class="w-6 h-6">
+                    <img src="https://sabai-booking-app-serista.s3.us-east-1.amazonaws.com/icons/calendar.png" alt="calendar" class="w-6 h-6">
                     <span class="">{{ checkInDay }} {{ checkInMonth }} {{ checkInYear }} - {{ checkOutDay }} {{ checkOutMonth }} {{ checkOutYear }}</span>
                 </div>
                 <!-- จำนวนห้องที่พัก/คืน -->
@@ -249,7 +249,7 @@ onUnmounted(() => {
                 </div>
                 <!-- จำนวนเงิน -->
                 <div class="inline-flex gap-1.5">
-                    <img :src="Price" alt="price" class="w-6 h-6">
+                    <img src="https://sabai-booking-app-serista.s3.us-east-1.amazonaws.com/icons/price.png" alt="price" class="w-6 h-6">
                     <span class="font-semibold text-orange-600">{{ formatPrice(booking.total_price) }} บาท</span>
                 </div>
             </div>
